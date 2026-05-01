@@ -1,0 +1,36 @@
+const { Router } = require('express');
+const { 
+  listVendors, 
+  updateVendorStatus, 
+  getDashboardStats, 
+  getRevenueAnalytics,
+  getPlatformPerformance,
+  getRecentActivity,
+  listAllOrders, 
+  updateOrderStatus,
+  listUsers,
+  listInventory
+} = require('./admin.controller');
+const { protect, restrictTo } = require('../../middleware/auth');
+const validate = require('../../middleware/validate');
+const { statusSchema } = require('../vendors/vendors.validation');
+
+const router = Router();
+router.use(protect, restrictTo('ADMIN'));
+
+router.get('/analytics/overview',      getDashboardStats);
+router.get('/analytics/revenue',       getRevenueAnalytics);
+router.get('/analytics/performance',   getPlatformPerformance);
+router.get('/analytics/activity',      getRecentActivity);
+
+router.get('/vendors',               listVendors);
+router.put('/vendors/:id/status',    validate(statusSchema), updateVendorStatus);
+
+router.get('/users',                 listUsers);
+
+router.get('/orders',                listAllOrders);
+router.put('/orders/:id/status',     updateOrderStatus);
+
+router.get('/inventory',             listInventory);
+
+module.exports = router;

@@ -1,0 +1,418 @@
+# ============================================================
+# Druxx Health Store — API Test File
+# How to use: Click "Send Request" above any request
+# ============================================================
+
+@baseUrl = http://localhost:5001/api/v1
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjcyMWFhYjBhLTg0MzMtNDkyMi04MGVlLTEzMmZjZTY5NWZiMiIsInJvbGUiOiJWRU5ET1IiLCJpYXQiOjE3NzU1Mzg2ODUsImV4cCI6MTc3NTYyNTA4NX0.4dOprGrzJ5dySod-JRf-uKDxAXx5J7GbiX35Uq8ctmM
+
+# ============================================================
+# 🏥 HEALTH CHECK
+# ============================================================
+
+### Health Check
+GET http://localhost:5001/health
+
+
+# ============================================================
+# 🔐 AUTH
+# ============================================================
+
+### 1. Register as Customer
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "John Customer",
+  "email": "john@example.com",
+  "password": "password123",
+  "role": "CUSTOMER"
+}
+
+###
+
+### 2. Register as Vendor
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Vendor Shop",
+  "email": "vendor@example.com",
+  "password": "password123",
+  "role": "VENDOR"
+}
+
+###
+
+### 3. Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+###
+
+### 4. Get My Profile  ← paste your token above in @token
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+###
+
+### 5. Refresh Token
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "PASTE_REFRESH_TOKEN_HERE"
+}
+
+###
+
+### 6. Logout
+POST {{baseUrl}}/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "PASTE_REFRESH_TOKEN_HERE"
+}
+
+
+# ============================================================
+# 👤 MY PROFILE & ADDRESSES
+# ============================================================
+
+### 7. Get Profile
+GET {{baseUrl}}/users/profile
+Authorization: Bearer {{token}}
+
+###
+
+### 8. Update Profile
+PUT {{baseUrl}}/users/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "John Updated",
+  "phone": "9876543210"
+}
+
+###
+
+### 9. Add Address
+POST {{baseUrl}}/users/addresses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "label": "Home",
+  "fullName": "John Customer",
+  "phone": "9876543210",
+  "street": "123 Main Street, Sector 5",
+  "city": "Bengaluru",
+  "state": "Karnataka",
+  "pincode": "560001",
+  "isDefault": true
+}
+
+###
+
+### 10. Get My Addresses
+GET {{baseUrl}}/users/addresses
+Authorization: Bearer {{token}}
+
+
+# ============================================================
+# 🗂️ CATEGORIES
+# ============================================================
+
+### 11. List All Categories (Public)
+GET {{baseUrl}}/categories
+
+###
+
+### 12. Create Category (Admin only)
+POST {{baseUrl}}/categories
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Vitamins & Supplements",
+  "description": "All vitamins and health supplements",
+  "icon": "💊"
+}
+
+###
+
+### 13. Create Subcategory (under Vitamins)
+POST {{baseUrl}}/categories
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Vitamin C",
+  "parentId": "PASTE_PARENT_CATEGORY_ID_HERE",
+  "icon": "🍊"
+}
+
+
+# ============================================================
+# 📦 PRODUCTS
+# ============================================================
+
+### 14. List All Products (Public)
+GET {{baseUrl}}/products
+
+###
+
+### 15. Search & Filter Products
+GET {{baseUrl}}/products?search=vitamin&minPrice=100&maxPrice=1000&page=1&limit=10
+
+###
+
+### 16. Get Product by ID
+GET {{baseUrl}}/products/PASTE_PRODUCT_ID_HERE
+
+###
+
+### 17. Create Product (Vendor only)
+POST {{baseUrl}}/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Vitamin C 1000mg",
+  "description": "High-potency Vitamin C supplement for immunity",
+  "shortDesc": "Boosts immunity naturally",
+  "categoryId": "76b2af8d-63cb-46b5-98dc-8d7d9840aca5",
+  "price": 499,
+  "comparePrice": 699,
+  "stockQty": 100,
+  "sku": "VIT-C-1000",
+  "tags": ["vitamins", "immunity", "organic"]
+}
+
+###
+
+### 18. Update Product (Vendor only)
+PUT {{baseUrl}}/products/PASTE_PRODUCT_ID_HERE
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "price": 449,
+  "stockQty": 80
+}
+
+###
+
+### 19. Delete Product (Vendor only)
+DELETE {{baseUrl}}/products/PASTE_PRODUCT_ID_HERE
+Authorization: Bearer {{token}}
+
+###
+
+### 20. My Products (Vendor only)
+GET {{baseUrl}}/products/vendor/my
+Authorization: Bearer {{token}}
+
+
+# ============================================================
+# 🏪 VENDORS
+# ============================================================
+
+### 21. List All Vendors (Public)
+GET {{baseUrl}}/vendors
+
+###
+
+### 22. Apply as Vendor
+POST {{baseUrl}}/vendors/apply
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "storeName": "Nature's Best Health",
+  "storeDescription": "Premium organic health products from nature",
+  "gstNumber": "GST123456789"
+}
+
+###
+
+### 23. Get My Store
+GET {{baseUrl}}/vendors/me
+Authorization: Bearer {{token}}
+
+###
+
+### 24. Update My Store
+PUT {{baseUrl}}/vendors/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "storeDescription": "Updated: Premium organic health products",
+  "gstNumber": "GST999888777"
+}
+
+###
+
+### 24b. Get Vendor Analytics (Vendor only)
+GET {{baseUrl}}/vendors/me/analytics
+Authorization: Bearer {{token}}
+
+
+# ============================================================
+# 🛒 CART
+# ============================================================
+
+### 25. Get My Cart
+GET {{baseUrl}}/cart
+Authorization: Bearer {{token}}
+
+###
+
+### 26. Add Item to Cart
+POST {{baseUrl}}/cart/items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "productId": "a0f63658-de8e-41a1-a1b6-72775a71f632",
+  "quantity": 2
+}
+
+###
+
+### 27. Update Cart Item Quantity
+PUT {{baseUrl}}/cart/items/b362fe60-2752-4ebf-ae96-029834b2a0a2
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "quantity": 3
+}
+
+###
+
+### 28. Remove Cart Item
+DELETE {{baseUrl}}/cart/items/b362fe60-2752-4ebf-ae96-029834b2a0a2
+Authorization: Bearer {{token}}
+
+###
+
+### 29. Clear Entire Cart
+DELETE {{baseUrl}}/cart
+Authorization: Bearer {{token}}
+
+
+# ============================================================
+# 📋 ORDERS
+# ============================================================
+
+### 30. Place Order (uses cart items)
+POST {{baseUrl}}/orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "addressId": "PASTE_ADDRESS_ID_HERE",
+  "paymentMethod": "COD",
+  "notes": "Please deliver before 6pm"
+}
+
+###
+
+### 31. Get My Orders
+GET {{baseUrl}}/orders
+Authorization: Bearer {{token}}
+
+###
+
+### 32. Get Order Detail
+GET {{baseUrl}}/orders/PASTE_ORDER_ID_HERE
+Authorization: Bearer {{token}}
+
+###
+
+### 33. Cancel Order
+PUT {{baseUrl}}/orders/PASTE_ORDER_ID_HERE/cancel
+Authorization: Bearer {{token}}
+
+
+# ============================================================
+# ⭐ REVIEWS
+# ============================================================
+
+### 34. Add Review
+POST {{baseUrl}}/products/a0f63658-de8e-41a1-a1b6-72775a71f632/reviews
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "rating": 5,
+  "title": "Excellent product!",
+  "comment": "Very effective and fast delivery."
+}
+
+###
+
+### 35. Get Product Reviews (Public)
+GET {{baseUrl}}/products/a0f63658-de8e-41a1-a1b6-72775a71f632/reviews
+
+
+# ============================================================
+# 👑 ADMIN
+# ============================================================
+
+### 36. Dashboard Analytics (Admin only)
+GET {{baseUrl}}/admin/analytics
+Authorization: Bearer {{token}}
+
+###
+
+### 37. List All Vendors with Filter (Admin only)
+GET {{baseUrl}}/admin/vendors?status=PENDING
+Authorization: Bearer {{token}}
+
+###
+
+### 38. Approve a Vendor (Admin only)
+PUT {{baseUrl}}/admin/vendors/PASTE_VENDOR_ID_HERE/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "APPROVED"
+}
+
+###
+
+### 39. Suspend a Vendor (Admin only)
+PUT {{baseUrl}}/admin/vendors/PASTE_VENDOR_ID_HERE/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "SUSPENDED"
+}
+
+###
+
+### 40. List All Orders (Admin only)
+GET {{baseUrl}}/admin/orders?status=PENDING
+Authorization: Bearer {{token}}
+
+###
+
+### 41. Update Order Status (Admin only)
+PUT {{baseUrl}}/admin/orders/PASTE_ORDER_ID_HERE/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "SHIPPED"
+}

@@ -1,0 +1,236 @@
+{
+  "clientName": "Thunder Client",
+  "collectionName": "Druxx Health Store API",
+  "collectionId": "druxx-health-store",
+  "dateExported": "2026-04-07",
+  "version": "1.2",
+  "folders": [
+    { "id": "f1", "name": "Auth", "containerId": "" },
+    { "id": "f2", "name": "Products", "containerId": "" },
+    { "id": "f3", "name": "Cart", "containerId": "" },
+    { "id": "f4", "name": "Orders", "containerId": "" },
+    { "id": "f5", "name": "Vendors", "containerId": "" },
+    { "id": "f6", "name": "Categories", "containerId": "" },
+    { "id": "f7", "name": "Admin", "containerId": "" }
+  ],
+  "requests": [
+    {
+      "id": "r1", "colId": "druxx-health-store", "containerId": "f1",
+      "name": "Register (Customer)",
+      "url": "http://localhost:5001/api/v1/auth/register",
+      "method": "POST",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"John Customer\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"CUSTOMER\"\n}"
+      }
+    },
+    {
+      "id": "r2", "colId": "druxx-health-store", "containerId": "f1",
+      "name": "Register (Vendor)",
+      "url": "http://localhost:5001/api/v1/auth/register",
+      "method": "POST",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Vendor Shop\",\n  \"email\": \"vendor@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"VENDOR\"\n}"
+      }
+    },
+    {
+      "id": "r3", "colId": "druxx-health-store", "containerId": "f1",
+      "name": "Login",
+      "url": "http://localhost:5001/api/v1/auth/login",
+      "method": "POST",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+      }
+    },
+    {
+      "id": "r4", "colId": "druxx-health-store", "containerId": "f1",
+      "name": "Get My Profile (needs token)",
+      "url": "http://localhost:5001/api/v1/auth/me",
+      "method": "GET",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer PASTE_YOUR_TOKEN_HERE" }
+      ],
+      "body": { "type": "none", "raw": "" }
+    },
+    {
+      "id": "r5", "colId": "druxx-health-store", "containerId": "f1",
+      "name": "Refresh Token",
+      "url": "http://localhost:5001/api/v1/auth/refresh",
+      "method": "POST",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"refreshToken\": \"PASTE_REFRESH_TOKEN_HERE\"\n}"
+      }
+    },
+    {
+      "id": "r6", "colId": "druxx-health-store", "containerId": "f2",
+      "name": "List All Products",
+      "url": "http://localhost:5001/api/v1/products",
+      "method": "GET",
+      "headers": [],
+      "body": { "type": "none", "raw": "" }
+    },
+    {
+      "id": "r7", "colId": "druxx-health-store", "containerId": "f2",
+      "name": "Search Products",
+      "url": "http://localhost:5001/api/v1/products?search=vitamin&minPrice=100&maxPrice=1000&page=1&limit=10",
+      "method": "GET",
+      "headers": [],
+      "body": { "type": "none", "raw": "" }
+    },
+    {
+      "id": "r8", "colId": "druxx-health-store", "containerId": "f2",
+      "name": "Create Product (Vendor only)",
+      "url": "http://localhost:5001/api/v1/products",
+      "method": "POST",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer PASTE_VENDOR_TOKEN_HERE" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"title\": \"Vitamin C 1000mg\",\n  \"description\": \"High-potency Vitamin C supplement\",\n  \"categoryId\": \"PASTE_CATEGORY_ID_HERE\",\n  \"price\": 499,\n  \"comparePrice\": 699,\n  \"stockQty\": 100,\n  \"sku\": \"VIT-C-1000\",\n  \"tags\": [\"vitamins\", \"immunity\"]\n}"
+      }
+    },
+    {
+      "id": "r9", "colId": "druxx-health-store", "containerId": "f3",
+      "name": "Get My Cart",
+      "url": "http://localhost:5001/api/v1/cart",
+      "method": "GET",
+      "headers": [{ "name": "Authorization", "value": "Bearer PASTE_YOUR_TOKEN_HERE" }],
+      "body": { "type": "none", "raw": "" }
+    },
+    {
+      "id": "r10", "colId": "druxx-health-store", "containerId": "f3",
+      "name": "Add Item to Cart",
+      "url": "http://localhost:5001/api/v1/cart/items",
+      "method": "POST",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer PASTE_YOUR_TOKEN_HERE" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"productId\": \"PASTE_PRODUCT_ID_HERE\",\n  \"quantity\": 2\n}"
+      }
+    },
+    {
+      "id": "r11", "colId": "druxx-health-store", "containerId": "f3",
+      "name": "Clear Cart",
+      "url": "http://localhost:5001/api/v1/cart",
+      "method": "DELETE",
+      "headers": [{ "name": "Authorization", "value": "Bearer PASTE_YOUR_TOKEN_HERE" }],
+      "body": { "type": "none", "raw": "" }
+    },
+    {
+      "id": "r12", "colId": "druxx-health-store", "containerId": "f4",
+      "name": "Place Order",
+      "url": "http://localhost:5001/api/v1/orders",
+      "method": "POST",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer PASTE_YOUR_TOKEN_HERE" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"addressId\": \"PASTE_ADDRESS_ID_HERE\",\n  \"paymentMethod\": \"COD\"\n}"
+      }
+    },
+    {
+      "id": "r13", "colId": "druxx-health-store", "containerId": "f4",
+      "name": "Get My Orders",
+      "url": "http://localhost:5001/api/v1/orders",
+      "method": "GET",
+      "headers": [{ "name": "Authorization", "value": "Bearer PASTE_YOUR_TOKEN_HERE" }],
+      "body": { "type": "none", "raw": "" }
+    },
+    {
+      "id": "r14", "colId": "druxx-health-store", "containerId": "f5",
+      "name": "Apply as Vendor",
+      "url": "http://localhost:5001/api/v1/vendors/apply",
+      "method": "POST",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer PASTE_YOUR_TOKEN_HERE" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"storeName\": \"Nature's Best\",\n  \"storeDescription\": \"Premium organic health products\",\n  \"gstNumber\": \"GST123456789\"\n}"
+      }
+    },
+    {
+      "id": "r15", "colId": "druxx-health-store", "containerId": "f5",
+      "name": "List All Vendors (Public)",
+      "url": "http://localhost:5001/api/v1/vendors",
+      "method": "GET",
+      "headers": [],
+      "body": { "type": "none", "raw": "" }
+    },
+    {
+      "id": "r16", "colId": "druxx-health-store", "containerId": "f6",
+      "name": "List Categories",
+      "url": "http://localhost:5001/api/v1/categories",
+      "method": "GET",
+      "headers": [],
+      "body": { "type": "none", "raw": "" }
+    },
+    {
+      "id": "r17", "colId": "druxx-health-store", "containerId": "f6",
+      "name": "Create Category (Admin only)",
+      "url": "http://localhost:5001/api/v1/categories",
+      "method": "POST",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer PASTE_ADMIN_TOKEN_HERE" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Vitamins & Supplements\",\n  \"description\": \"All vitamins and supplements\",\n  \"icon\": \"💊\"\n}"
+      }
+    },
+    {
+      "id": "r18", "colId": "druxx-health-store", "containerId": "f7",
+      "name": "Dashboard Stats (Admin only)",
+      "url": "http://localhost:5001/api/v1/admin/analytics",
+      "method": "GET",
+      "headers": [{ "name": "Authorization", "value": "Bearer PASTE_ADMIN_TOKEN_HERE" }],
+      "body": { "type": "none", "raw": "" }
+    },
+    {
+      "id": "r19", "colId": "druxx-health-store", "containerId": "f7",
+      "name": "List All Vendors (Admin)",
+      "url": "http://localhost:5001/api/v1/admin/vendors?status=PENDING",
+      "method": "GET",
+      "headers": [{ "name": "Authorization", "value": "Bearer PASTE_ADMIN_TOKEN_HERE" }],
+      "body": { "type": "none", "raw": "" }
+    },
+    {
+      "id": "r20", "colId": "druxx-health-store", "containerId": "f7",
+      "name": "Approve Vendor (Admin)",
+      "url": "http://localhost:5001/api/v1/admin/vendors/PASTE_VENDOR_ID_HERE/status",
+      "method": "PUT",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer PASTE_ADMIN_TOKEN_HERE" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"status\": \"APPROVED\"\n}"
+      }
+    },
+    {
+      "id": "r21", "colId": "druxx-health-store", "containerId": "f1",
+      "name": "Health Check",
+      "url": "http://localhost:5001/health",
+      "method": "GET",
+      "headers": [],
+      "body": { "type": "none", "raw": "" }
+    }
+  ]
+}
