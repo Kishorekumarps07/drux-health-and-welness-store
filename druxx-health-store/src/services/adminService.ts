@@ -1,51 +1,117 @@
-import { supabase } from "@/lib/supabase";
+import api from "@/lib/api";
 
 export const adminService = {
   async getDashboardStats() {
-    return { revenue: 0, growth: 0, vendors: 0, users: 0, orders: 0 };
+    try {
+      const response = await api.get('/admin/analytics/overview');
+      return response.data.data?.stats || { revenue: 0, growth: 0, vendors: 0, users: 0, orders: 0 };
+    } catch (err) {
+      console.error("Failed to fetch dashboard stats:", err);
+      return { revenue: 0, growth: 0, vendors: 0, users: 0, orders: 0 };
+    }
   },
 
   async listVendors(params?: { search?: string; status?: string; page?: number; limit?: number }) {
-    let query = supabase.from('vendors').select('*', { count: 'exact' });
-    if (params?.search) query = query.ilike('name', `%${params.search}%`);
-    const { data, count } = await query;
-    return { status: "success", vendors: data || [], total: count || 0, page: 1, pages: 1 };
+    try {
+      const response = await api.get('/admin/vendors', { params });
+      return {
+        status: "success",
+        vendors: response.data.vendors || [],
+        total: response.data.total || 0,
+        page: response.data.page || 1,
+        pages: response.data.pages || 1
+      };
+    } catch (err) {
+      console.error("Failed to fetch vendors:", err);
+      return { status: "error", vendors: [], total: 0, page: 1, pages: 1 };
+    }
   },
 
   async updateVendorStatus(id: string, status: string, reason?: string) {
-    const { data } = await supabase.from('vendors').update({ status }).eq('id', id).select().single();
-    return { status: "success", data };
+    const response = await api.put(`/admin/vendors/${id}/status`, { status, reason });
+    return response.data;
   },
 
   async listAllOrders(params?: any) {
-    const { data, count } = await supabase.from('orders').select('*, items:order_items(*)', { count: 'exact' });
-    return { status: "success", orders: data || [], total: count || 0, page: 1, pages: 1 };
+    try {
+      const response = await api.get('/admin/orders', { params });
+      return {
+        status: "success",
+        orders: response.data.orders || [],
+        total: response.data.total || 0,
+        page: response.data.page || 1,
+        pages: response.data.pages || 1
+      };
+    } catch (err) {
+      console.error("Failed to fetch orders:", err);
+      return { status: "error", orders: [], total: 0, page: 1, pages: 1 };
+    }
   },
 
   async updateOrderStatus(id: string, status: string) {
-    const { data } = await supabase.from('orders').update({ status }).eq('id', id).select().single();
-    return { status: "success", data };
+    const response = await api.put(`/admin/orders/${id}/status`, { status });
+    return response.data;
   },
 
   async getRevenueAnalytics(range = '7d') {
-    return [];
+    try {
+      const response = await api.get('/admin/analytics/revenue', { params: { range } });
+      return response.data.data || [];
+    } catch (err) {
+      console.error("Failed to fetch revenue analytics:", err);
+      return [];
+    }
   },
 
   async getPerformanceStats() {
-    return { topVendors: [], topProducts: [] };
+    try {
+      const response = await api.get('/admin/analytics/performance');
+      return response.data.data || { topVendors: [], topProducts: [] };
+    } catch (err) {
+      console.error("Failed to fetch performance stats:", err);
+      return { topVendors: [], topProducts: [] };
+    }
   },
 
   async getActivityFeed() {
-    return [];
+    try {
+      const response = await api.get('/admin/analytics/activity');
+      return response.data.data || [];
+    } catch (err) {
+      console.error("Failed to fetch activity feed:", err);
+      return [];
+    }
   },
 
   async listUsers(params?: any) {
-    // Return empty array for now since auth.users cannot be easily queried from client side without service role
-    return { status: "success", users: [], total: 0, page: 1, pages: 1 };
+    try {
+      const response = await api.get('/admin/users', { params });
+      return {
+        status: "success",
+        users: response.data.users || [],
+        total: response.data.total || 0,
+        page: response.data.page || 1,
+        pages: response.data.pages || 1
+      };
+    } catch (err) {
+      console.error("Failed to fetch users:", err);
+      return { status: "error", users: [], total: 0, page: 1, pages: 1 };
+    }
   },
 
   async listInventory(params?: { search?: string }) {
-    const { data, count } = await supabase.from('products').select('*', { count: 'exact' });
-    return { status: "success", products: data || [], total: count || 0, page: 1, pages: 1 };
+    try {
+      const response = await api.get('/admin/inventory', { params });
+      return {
+        status: "success",
+        products: response.data.products || [],
+        total: response.data.total || 0,
+        page: response.data.page || 1,
+        pages: response.data.pages || 1
+      };
+    } catch (err) {
+      console.error("Failed to fetch inventory:", err);
+      return { status: "error", products: [], total: 0, page: 1, pages: 1 };
+    }
   }
 };
