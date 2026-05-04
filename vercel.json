@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd druxx-health-store && npm run build",
+  "outputDirectory": "druxx-health-store/.next",
+  "framework": "nextjs"
+}
