@@ -49,18 +49,18 @@ export const useCMSStore = create<CMSState>((set, get) => ({
         supabase.from('advantages').select('*').order('created_at', { ascending: true })
       ]);
 
-      if (heroRes.error) throw heroRes.error;
-      if (advRes.error) throw advRes.error;
+      const heroData = heroRes.data || [];
+      const advData = advRes.data || [];
 
       set({ 
-        heroSlides: heroRes.data.map(s => ({
+        heroSlides: heroData.map(s => ({
           id: s.id,
           title: s.title,
           subtitle: s.subtitle,
           image: s.image,
           bgColor: s.bg_color
         })),
-        advantages: advRes.data.map(a => ({
+        advantages: advData.map(a => ({
           id: a.id,
           title: a.title,
           desc: a.description,
@@ -70,6 +70,27 @@ export const useCMSStore = create<CMSState>((set, get) => ({
       });
     } catch (error) {
       console.error("Error fetching CMS data:", error);
+      // Fallbacks
+      set({
+        heroSlides: [
+          {
+            id: "default-slide",
+            title: "Your Health, Elevated",
+            subtitle: "Discover premium health & wellness brands.",
+            image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2000",
+            bgColor: "bg-green-100"
+          }
+        ],
+        advantages: [
+          {
+            id: "adv-1",
+            title: "100% Original",
+            desc: "Directly sourced from trusted official brands.",
+            image: "",
+            iconType: "shield"
+          }
+        ]
+      });
     } finally {
       set({ loading: false });
     }
