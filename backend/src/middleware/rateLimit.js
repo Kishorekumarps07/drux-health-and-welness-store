@@ -9,7 +9,7 @@ const globalLimiter = rateLimit({
   max: nodeEnv === 'production' ? 200 : 500,
   standardHeaders: true,
   legacyHeaders: false,
-  store: nodeEnv === 'production' ? new RedisStore({
+  store: (nodeEnv === 'production' && process.env.REDIS_URL) ? new RedisStore({
     sendCommand: (...args) => redisClient.sendCommand(args),
     prefix: 'drx:rl:global:',
   }) : undefined,
@@ -22,7 +22,7 @@ const authLimiter = rateLimit({
   max: nodeEnv === 'production' ? 10 : 100, // 10 attempts per 15 minutes in prod
   standardHeaders: true,
   legacyHeaders: false,
-  store: nodeEnv === 'production' ? new RedisStore({
+  store: (nodeEnv === 'production' && process.env.REDIS_URL) ? new RedisStore({
     sendCommand: (...args) => redisClient.sendCommand(args),
     prefix: 'drx:rl:auth:',
   }) : undefined,
@@ -35,7 +35,7 @@ const paymentLimiter = rateLimit({
   max: nodeEnv === 'production' ? 5 : 50, // 5 payment intents per minute max
   standardHeaders: true,
   legacyHeaders: false,
-  store: nodeEnv === 'production' ? new RedisStore({
+  store: (nodeEnv === 'production' && process.env.REDIS_URL) ? new RedisStore({
     sendCommand: (...args) => redisClient.sendCommand(args),
     prefix: 'drx:rl:pay:',
   }) : undefined,
