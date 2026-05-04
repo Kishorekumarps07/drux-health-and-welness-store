@@ -39,13 +39,18 @@ class VendorsService {
       select: { ...VENDOR_SELECT, products: { select: { id: true }, take: 1 } },
     });
     if (!vendor) throw new AppError('You do not have a vendor profile.', 404);
+    if (!['APPROVED', 'ACTIVE'].includes(vendor.approvalStatus)) {
+      throw new AppError('Your vendor profile has not been approved by an admin yet.', 403);
+    }
     return vendor;
   }
 
   async updateMyStore(userId, data) {
     const vendor = await prisma.vendor.findUnique({ where: { userId } });
     if (!vendor) throw new AppError('Vendor profile not found.', 404);
-    if (vendor.approvalStatus === 'SUSPENDED') throw new AppError('Your store is suspended.', 403);
+    if (!['APPROVED', 'ACTIVE'].includes(vendor.approvalStatus)) {
+      throw new AppError('Your vendor profile is not approved or is suspended.', 403);
+    }
 
     return prisma.vendor.update({
       where: { userId },
@@ -57,6 +62,9 @@ class VendorsService {
   async getMyAnalytics(userId) {
     const vendor = await prisma.vendor.findUnique({ where: { userId } });
     if (!vendor) throw new AppError('Vendor profile not found.', 404);
+    if (!['APPROVED', 'ACTIVE'].includes(vendor.approvalStatus)) {
+      throw new AppError('Your vendor profile is not approved or is suspended.', 403);
+    }
 
     const [totalProducts, totalOrders, revenueData] = await prisma.$transaction([
       prisma.product.count({ where: { vendorId: vendor.id } }),
