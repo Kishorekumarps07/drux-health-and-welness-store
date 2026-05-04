@@ -9,7 +9,7 @@ const cacheResponse = (durationInSeconds) => {
 
     try {
       // Check if Redis is connected
-      if (!redisClient.isReady) {
+      if (!redisClient || !redisClient.isReady || typeof redisClient.get !== 'function') {
         return next();
       }
 
