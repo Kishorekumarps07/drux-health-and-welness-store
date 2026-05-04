@@ -1,50 +1,52 @@
-import { supabase } from "@/lib/supabase";
+import api from "@/lib/api";
 import { Product } from "@/types";
 
-const mapSupabaseProduct = (p: any): Product => {
+const mapBackendProduct = (p: any): Product => {
   if (!p) return {} as Product;
 
-  const discount = p.original_price > 0 
-    ? Math.round(((p.original_price - p.price) / p.original_price) * 100) 
+  const comparePrice = p.comparePrice ? Number(p.comparePrice) : Number(p.price);
+  const price = Number(p.price) || 0;
+  const discount = comparePrice > price 
+    ? Math.round(((comparePrice - price) / comparePrice) * 100) 
     : 0;
 
   return {
     id: p.id,
-    name: p.name,
+    name: p.title,
     slug: p.slug,
     description: p.description || "",
-    shortDescription: p.description?.substring(0, 160) || "",
-    price: Number(p.price) || 0,
-    originalPrice: Number(p.original_price) || Number(p.price) || 0,
+    shortDescription: p.shortDesc || p.description?.substring(0, 160) || "",
+    price,
+    originalPrice: comparePrice,
     discount,
-    rating: Number(p.rating) || 0,
+    rating: Number(p.averageRating) || 0,
     reviewCount: 0,
-    images: p.image ? [p.image] : ["/placeholder.png"],
-    category: p.categories?.name || "Uncategorized",
-    categorySlug: p.categories?.slug || "uncategorized",
+    images: p.images && p.images.length > 0 ? p.images.map((img: any) => img.url) : ["/placeholder.png"],
+    category: p.category?.name || "Uncategorized",
+    categorySlug: p.category?.slug || "uncategorized",
     vendor: {
-      id: p.vendors?.id || "",
-      name: p.vendors?.name || "Druxx Seller",
-      slug: p.vendors?.slug || "",
-      logo: p.vendors?.logo || "/vendor-placeholder.png",
-      description: p.vendors?.description || "",
-      rating: Number(p.vendors?.rating) || 0,
+      id: p.vendor?.id || "",
+      name: p.vendor?.storeName || "Druxx Seller",
+      slug: p.vendor?.storeSlug || "",
+      logo: p.vendor?.storeLogo || "/vendor-placeholder.png",
+      description: p.vendor?.storeDescription || "",
+      rating: Number(p.vendor?.rating) || 0,
       reviewCount: 0,
       productCount: 0,
       location: "India",
-      isVerified: !!p.vendors?.is_verified,
+      isVerified: true,
       isTopSeller: false,
       deliveryPerformance: 98,
-      joinedDate: p.vendors?.created_at || "",
+      joinedDate: p.vendor?.createdAt || "",
       specialties: [],
     },
-    stock: p.stock || 0,
-    tags: [],
-    isFeatured: !!p.is_featured,
-    isBestSeller: !!p.is_best_seller,
-    isNew: !!p.is_new,
+    stock: p.stockQty || 0,
+    tags: p.tags || [],
+    isFeatured: !!p.isFeatured,
+    isBestSeller: false,
+    isNew: false,
     brand: "Druxx",
-    sku: "",
+    sku: p.sku || "",
     weight: "500g",
     shippingInfo: "Standard: 2-5 Days",
   };
@@ -53,97 +55,37 @@ const mapSupabaseProduct = (p: any): Product => {
 export const productService = {
   async getAllProducts(params: any = {}) {
     try {
-      let query = supabase.from('products').select(`
-        *,
-        categories!inner (name, slug),
-        vendors!inner (*)
-      `, { count: 'exact' });
-
-      if (params.search) {
-        query = query.ilike('name', `%${params.search}%`);
-      }
-      if (params.category && params.category !== "All") {
-        query = query.eq('categories.name', params.category);
-      }
-      if (params.minPrice !== undefined && params.minPrice !== null) {
-        query = query.gte('price', params.minPrice);
-      }
-      if (params.maxPrice !== undefined && params.maxPrice !== null) {
-        query = query.lte('price', params.maxPrice);
-      }
-      if (params.rating) {
-        query = query.gte('rating', params.rating);
-      }
-
-      if (params.isFeatured) query = query.eq('is_featured', true);
-      if (params.isBestSeller) query = query.eq('is_best_seller', true);
-      if (params.isNew) query = query.eq('is_new', true);
-
-      if (params.sort === 'price-low') {
-        query = query.order('price', { ascending: true });
-      } else if (params.sort === 'price-high') {
-        query = query.order('price', { ascending: false });
-      } else if (params.sort === 'rating') {
-        query = query.order('rating', { ascending: false });
-      } else {
-        query = query.order('created_at', { ascending: false });
-      }
-
-      if (params.limit) {
-        query = query.limit(params.limit);
-      }
-
-      const { data, error, count } = await query;
-
-      if (error) {
-        console.error("Supabase Error:", error);
-        throw error;
-      }
-
+      const response = await api.get('/products', { params });
+      const products = response.data.products || [];
       return {
-        products: (data || []).map(mapSupabaseProduct),
-        total: count || data?.length || 0,
-        pages: Math.ceil((count || data?.length || 0) / (params.limit || 12)),
+        products: products.map(mapBackendProduct),
+        total: response.data.total || products.length,
+        pages: response.data.pages || 1,
       };
     } catch (err: any) {
-      console.error("Product Fetch Error Details:", {
-        message: err.message,
-        details: err.details,
-        hint: err.hint
-      });
-      throw err;
+      console.error("Product Fetch Error:", err);
+      return { products: [], total: 0, pages: 1 };
     }
   },
 
   async getProductBySlug(slug: string) {
-    const { data, error } = await supabase
-      .from('products')
-      .select(`
-        *,
-        categories (name, slug),
-        vendors (*)
-      `)
-      .eq('slug', slug)
-      .single();
-
-    if (error) throw error;
-    return mapSupabaseProduct(data);
+    const response = await api.get(`/products/slug/${slug}`);
+    return mapBackendProduct(response.data);
   },
 
   async getFeatured() {
-    return this.getAllProducts({ isFeatured: true, limit: 10 });
+    return this.getAllProducts({ sort: 'featured', limit: 10 });
   },
 
   async getBestSellers() {
-    return this.getAllProducts({ isBestSeller: true, limit: 10 });
+    return this.getAllProducts({ limit: 10 });
   },
 
   async getNewArrivals() {
-    return this.getAllProducts({ isNew: true, limit: 10 });
+    return this.getAllProducts({ sort: 'newest', limit: 10 });
   },
 
   async getReviews(productId: string) {
-    // Currently no reviews table, return empty
     return [];
   },
 };
