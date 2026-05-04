@@ -230,23 +230,12 @@ export const vendorService = {
    * Submit a new vendor application
    */
   async applyVendor(data: { storeName: string; storeDescription: string; gstNumber?: string; category: string }) {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) throw new Error("Unauthorized");
-
-    const { data: vendor, error } = await supabase
-      .from('vendors')
-      .insert({
-        name: data.storeName,
-        slug: data.storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        description: data.storeDescription,
-        owner_id: session.user.id,
-        is_verified: false,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { status: "success", vendor };
+    const response = await api.post('/vendors/apply', {
+      storeName: data.storeName,
+      storeDescription: data.storeDescription,
+      gstNumber: data.gstNumber
+    });
+    return response.data;
   },
 
   /**
