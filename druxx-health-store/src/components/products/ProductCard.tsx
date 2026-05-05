@@ -100,7 +100,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
             className="relative w-full h-full p-2 sm:p-4"
           >
             <Image
-              src={product.images[0] || product.image || "/placeholder-product.png"}
+              src={product.images?.[0] || "/placeholder-product.png"}
               alt={product.name}
               fill
               className="object-contain"
