@@ -11,6 +11,7 @@ const ordersRoutes     = require('../modules/orders/orders.routes');
 const reviewsRoutes    = require('../modules/reviews/reviews.routes');
 const adminRoutes      = require('../modules/admin/admin.routes');
 const paymentsRoutes   = require('../modules/payments/payments.routes');
+const cmsRoutes        = require('../modules/cms/cms.routes');
 
 const router = Router();
 
@@ -40,5 +41,6 @@ router.use('/cart',        cartRoutes);
 router.use('/orders',      ordersRoutes);
 router.use('/payments',    paymentsRoutes);
 router.use('/admin',       adminRoutes);
+router.use('/cms',         cmsRoutes);
 
 module.exports = router;

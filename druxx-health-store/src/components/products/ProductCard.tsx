@@ -22,20 +22,7 @@ import { QuickView } from "./QuickView";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    originalPrice?: number;
-    discount?: number;
-    rating?: number;
-    reviewCount?: number;
-    stock: number;
-    image: string;
-    images: string[];
-    vendorName?: string;
-    slug?: string;
-  };
+  product: Product;
   className?: string;
 }
 
@@ -168,7 +155,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <div className="flex flex-col flex-1 relative z-1 pointer-events-none">
           <div className="flex items-center justify-between mb-0.5 sm:mb-1">
             <span className="text-[9px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-widest truncate">
-              {product.vendorName || "Premium Wellness"}
+              {product.vendor?.name || "Druxx Seller"}
             </span>
           </div>
 

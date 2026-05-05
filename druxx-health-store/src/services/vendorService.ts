@@ -75,34 +75,30 @@ export const vendorService = {
    */
   async getAllVendors(params: { page?: number; limit?: number; search?: string } = {}) {
     try {
-      const { data, error, count } = await supabase
-        .from('vendors')
-        .select('*', { count: 'exact' });
-
-      if (error) throw error;
-
+      const response = await api.get('/vendors', { params });
+      const data = response.data.vendors || [];
       return {
         status: "success",
-        vendors: (data || []).map((bv: any) => ({
+        vendors: data.map((bv: any) => ({
           id: bv.id,
-          name: bv.name,
-          slug: bv.slug,
-          logo: bv.logo || `https://api.dicebear.com/7.x/identicon/svg?seed=${bv.name}`,
-          banner: bv.banner || "https://images.unsplash.com/photo-1506784919140-50cf144ad310?q=80&w=2000",
-          description: bv.description || "A trusted wellness brand on Druxx Health Store.",
+          name: bv.storeName,
+          slug: bv.storeSlug,
+          logo: bv.storeLogo || `https://api.dicebear.com/7.x/identicon/svg?seed=${bv.storeName}`,
+          banner: bv.storeBanner || "https://images.unsplash.com/photo-1506784919140-50cf144ad310?q=80&w=2000",
+          description: bv.storeDescription || "A trusted wellness brand on Druxx Health Store.",
           rating: parseFloat(bv.rating) || 0,
           reviewCount: 0,
-          productCount: 0,
+          productCount: bv._count?.products || 0,
           location: "India",
-          isVerified: true,
+          isVerified: bv.approvalStatus === "ACTIVE",
           isTopSeller: parseFloat(bv.rating) >= 4.5,
           deliveryPerformance: 99,
-          joinedDate: bv.created_at,
+          joinedDate: bv.createdAt,
           specialties: ["Health", "Wellness"]
         })),
-        total: count || 0,
-        pages: 1,
-        page: 1
+        total: response.data.total || data.length,
+        pages: response.data.pages || 1,
+        page: response.data.page || 1
       };
     } catch (err) {
       console.error("Vendor fetch error:", err);

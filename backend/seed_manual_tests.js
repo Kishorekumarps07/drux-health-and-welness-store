@@ -151,25 +151,26 @@ async function seed() {
         addressId: addressId,
         status: 'PROCESSING',
         subtotal: 8498.99,
-        shippingFee: 100,
-        taxAmount: 0,
+        shippingCharge: 100,
         total: 8598.99,
         items: {
           create: [
             {
               productId: v1p1.id,
               vendorId: vendor1.id,
-              productName: v1p1.title,
+              title: v1p1.title,
               quantity: 1,
-              priceAtPurchase: v1p1.price,
+              price: v1p1.price,
+              total: v1p1.price,
               status: 'PENDING'
             },
             {
               productId: v2p1.id,
               vendorId: vendor2.id,
-              productName: v2p1.title,
+              title: v2p1.title,
               quantity: 1,
-              priceAtPurchase: v2p1.price,
+              price: v2p1.price,
+              total: v2p1.price,
               status: 'PENDING'
             }
           ]

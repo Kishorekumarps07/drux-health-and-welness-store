@@ -10,6 +10,7 @@ interface AuthState {
   isLoading: boolean;
   initialized: boolean;
   isAuthenticated: boolean;
+  accessToken: string | null;
 
   initialize: () => Promise<void>;
   logout: () => Promise<void>;
@@ -26,15 +27,18 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: true,
   initialized: false,
   isAuthenticated: false,
+  accessToken: null,
   mismatchError: null,
 
   initialize: async () => {
-    const syncUser = async (sUser: User | null) => {
+    const syncUser = async (sUser: User | null, session?: any) => {
+      const accessToken = session?.access_token || null;
       if (sUser) {
         try {
           if (sUser.email === 'infopromptix@gmail.com') {
             set({
               supabaseUser: sUser,
+              accessToken,
               profile: { role: "ADMIN" },
               isAuthenticated: true,
               mismatchError: null,
@@ -58,44 +62,47 @@ export const useAuthStore = create<AuthState>((set) => ({
             .eq('id', sUser.id)
             .maybeSingle();
           
-          set({ 
-            supabaseUser: sUser, 
-            profile: profile || null,
-            isAuthenticated: true,
-            mismatchError: null,
-            user: {
-              id: sUser.id,
-              name: profile?.full_name || sUser.email?.split('@')[0] || "User",
-              email: sUser.email || "",
-              avatar: profile?.avatar_url || "",
-              roles: [profile?.role || "CUSTOMER"],
-              activeRole: profile?.role || "CUSTOMER",
-              isAdmin: profile?.role === "ADMIN",
-              isVendor: profile?.role === "VENDOR",
-              addresses: profile?.addresses || []
-            }
-          });
-        } catch (err) {
-          console.error("Profile fetch error:", err);
-          if (sUser.email === 'infopromptix@gmail.com') {
-            set({
+          if (profile) {
+            set({ 
               supabaseUser: sUser,
+              accessToken,
+              profile,
               isAuthenticated: true,
               user: {
                 id: sUser.id,
-                name: "Admin",
-                email: sUser.email,
-                roles: ["CUSTOMER", "ADMIN"],
-                isAdmin: true,
+                name: profile.full_name || sUser.email?.split('@')[0] || "User",
+                email: sUser.email || "",
+                avatar: profile.avatar_url || "",
+                roles: profile.role ? ["CUSTOMER", profile.role] : ["CUSTOMER"],
+                activeRole: profile.role || "CUSTOMER",
+                isAdmin: profile.role === 'ADMIN',
+                isVendor: profile.role === 'VENDOR',
+                addresses: []
+              }
+            });
+          } else {
+            // Fallback to basic user info if profile fetch fails
+            set({ 
+              supabaseUser: sUser,
+              accessToken,
+              isAuthenticated: true,
+              user: {
+                id: sUser.id,
+                name: sUser.email?.split('@')[0] || "User",
+                email: sUser.email || "",
+                roles: ["CUSTOMER"],
+                isAdmin: false,
                 isVendor: false,
                 addresses: []
               }
             });
-            return;
           }
+        } catch (err) {
+          console.error("Error syncing user:", err);
           // Fallback to basic user info if profile fetch fails
           set({ 
             supabaseUser: sUser,
+            accessToken,
             isAuthenticated: true,
             user: {
               id: sUser.id,
@@ -109,13 +116,13 @@ export const useAuthStore = create<AuthState>((set) => ({
           });
         }
       } else {
-        set({ isAuthenticated: false, user: null, supabaseUser: null, profile: null });
+        set({ isAuthenticated: false, user: null, supabaseUser: null, profile: null, accessToken: null });
       }
     };
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      await syncUser(session?.user ?? null);
+      await syncUser(session?.user ?? null, session);
     } catch (error) {
       console.error("Auth init error:", error);
     } finally {
@@ -123,7 +130,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
 
     supabase.auth.onAuthStateChange(async (event, session) => {
-      await syncUser(session?.user ?? null);
+      await syncUser(session?.user ?? null, session);
     });
   },
 

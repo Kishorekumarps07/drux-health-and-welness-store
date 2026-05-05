@@ -8,10 +8,20 @@ const api = axios.create({
   },
 });
 
+import { supabase } from "@/lib/supabase";
+
 // Request interceptor: Attach JWT token if available
 api.interceptors.request.use(
-  (config) => {
-    const token = (useAuthStore.getState() as any).accessToken;
+  async (config) => {
+    // Try to get token from state first (fast)
+    let token = (useAuthStore.getState() as any).accessToken;
+    
+    // If not in state, try Supabase session (slower)
+    if (!token) {
+      const { data: { session } } = await supabase.auth.getSession();
+      token = session?.access_token;
+    }
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

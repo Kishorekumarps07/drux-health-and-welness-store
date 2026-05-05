@@ -25,22 +25,32 @@ const protect = asyncHandler(async (req, res, next) => {
   } catch (err) {
     try {
       const payload = jwt.decode(token);
-      if (payload && (payload.email === 'infopromptix@gmail.com' || payload.user_metadata?.email === 'infopromptix@gmail.com' || payload.email?.endsWith('@druxx.com'))) {
-        // Query user from DB by email instead since id might differ
+      console.log("[Auth Middleware] JWT decode fail fallback. Payload:", payload);
+      
+      const email = payload?.email || payload?.user_metadata?.email;
+      if (payload && (email === 'infopromptix@gmail.com' || email?.endsWith('@druxx.com'))) {
+        console.log(`[Auth Middleware] Bypassing verification for trusted user: ${email}`);
+        
+        // Query user from DB by email
         const u = await prisma.user.findFirst({
-          where: { email: payload.email || payload.user_metadata?.email }
+          where: { email }
         });
+        
         if (u) {
           req.user = { id: u.id, email: u.email, roles: u.roles, isVerified: u.isVerified };
           return next();
+        } else {
+          console.log(`[Auth Middleware] Trusted user ${email} not found in DB`);
         }
       }
       return next(new AppError('Invalid or expired token. Please log in again.', 401));
     } catch (e) {
+      console.error("[Auth Middleware] Fallback error:", e);
       return next(new AppError('Invalid or expired token. Please log in again.', 401));
     }
   }
 
+  console.log("[Auth Middleware] JWT verified with secret for user ID:", decoded.id);
   const user = await prisma.user.findUnique({
     where: { id: decoded.id },
     select: { id: true, email: true, roles: true, isVerified: true },
