@@ -149,4 +149,3 @@ export const useCMSStore = create<CMSState>((set, get) => ({
     }));
   }
 }));
-}));
