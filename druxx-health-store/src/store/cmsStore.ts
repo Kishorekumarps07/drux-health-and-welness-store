@@ -24,6 +24,16 @@ interface CMSState {
 
   // Global Actions
   fetchCMSData: () => Promise<void>;
+  
+  // Hero Actions
+  addHeroSlide: (slide: Omit<HeroSlide, "id">) => Promise<void>;
+  updateHeroSlide: (id: string, slide: Partial<HeroSlide>) => Promise<void>;
+  deleteHeroSlide: (id: string) => Promise<void>;
+
+  // Advantage Actions
+  addAdvantage: (item: Omit<AdvantageItem, "id">) => Promise<void>;
+  updateAdvantage: (id: string, item: Partial<AdvantageItem>) => Promise<void>;
+  deleteAdvantage: (id: string) => Promise<void>;
 }
 
 export const useCMSStore = create<CMSState>((set, get) => ({
@@ -76,4 +86,67 @@ export const useCMSStore = create<CMSState>((set, get) => ({
       set({ loading: false });
     }
   },
+
+  addHeroSlide: async (slide) => {
+    const { data } = await api.post('/cms/hero', slide);
+    set((state) => ({ heroSlides: [...state.heroSlides, data.data] }));
+  },
+
+  updateHeroSlide: async (id, updatedSlide) => {
+    const { data } = await api.put(`/cms/hero/${id}`, updatedSlide);
+    set((state) => ({
+      heroSlides: state.heroSlides.map(s => s.id === id ? data.data : s)
+    }));
+  },
+
+  deleteHeroSlide: async (id) => {
+    await api.delete(`/cms/hero/${id}`);
+    set((state) => ({
+      heroSlides: state.heroSlides.filter(s => s.id !== id)
+    }));
+  },
+
+  addAdvantage: async (item) => {
+    const { data } = await api.post('/cms/advantages', {
+      title: item.title,
+      description: item.desc,
+      image: item.image,
+      icon_type: item.iconType
+    });
+    set((state) => ({
+      advantages: [...state.advantages, {
+        id: data.data.id,
+        title: data.data.title,
+        desc: data.data.description,
+        image: data.data.image,
+        iconType: data.data.icon_type
+      }]
+    }));
+  },
+
+  updateAdvantage: async (id, updatedItem) => {
+    const { data } = await api.put(`/cms/advantages/${id}`, {
+      title: updatedItem.title,
+      description: updatedItem.desc,
+      image: updatedItem.image,
+      icon_type: updatedItem.iconType
+    });
+    set((state) => ({
+      advantages: state.advantages.map(a => a.id === id ? {
+        id: data.data.id,
+        title: data.data.title,
+        desc: data.data.description,
+        image: data.data.image,
+        iconType: data.data.icon_type
+      } : a)
+    }));
+  },
+
+  deleteAdvantage: async (id) => {
+    await api.delete(`/cms/advantages/${id}`);
+    set((state) => ({
+      advantages: state.advantages.filter(a => a.id !== id)
+    }));
+  }
+}));
 }));

@@ -1,6 +1,6 @@
 const { Router } = require('express');
 
-const heroSlides = [
+let heroSlides = [
   {
     id: "h1",
     title: "Premium Health\nSupplements.",
@@ -17,7 +17,7 @@ const heroSlides = [
   }
 ];
 
-const advantages = [
+let advantages = [
   {
     id: "a1",
     title: "Certified Pure",
@@ -36,12 +36,51 @@ const advantages = [
 
 const router = Router();
 
-router.get('/hero', (req, res) => {
-  res.json({ status: 'success', data: heroSlides });
+// GET
+router.get('/hero', (req, res) => res.json({ status: 'success', data: heroSlides }));
+router.get('/advantages', (req, res) => res.json({ status: 'success', data: advantages }));
+
+// POST
+router.post('/hero', (req, res) => {
+  const newSlide = { id: Date.now().toString(), ...req.body };
+  heroSlides.push(newSlide);
+  res.status(201).json({ status: 'success', data: newSlide });
 });
 
-router.get('/advantages', (req, res) => {
-  res.json({ status: 'success', data: advantages });
+router.post('/advantages', (req, res) => {
+  const newAdv = { id: Date.now().toString(), ...req.body };
+  advantages.push(newAdv);
+  res.status(201).json({ status: 'success', data: newAdv });
+});
+
+// PUT
+router.put('/hero/:id', (req, res) => {
+  const index = heroSlides.findIndex(s => s.id === req.params.id);
+  if (index !== -1) {
+    heroSlides[index] = { ...heroSlides[index], ...req.body };
+    return res.json({ status: 'success', data: heroSlides[index] });
+  }
+  res.status(404).json({ status: 'fail', message: 'Slide not found' });
+});
+
+router.put('/advantages/:id', (req, res) => {
+  const index = advantages.findIndex(a => a.id === req.params.id);
+  if (index !== -1) {
+    advantages[index] = { ...advantages[index], ...req.body };
+    return res.json({ status: 'success', data: advantages[index] });
+  }
+  res.status(404).json({ status: 'fail', message: 'Advantage not found' });
+});
+
+// DELETE
+router.delete('/hero/:id', (req, res) => {
+  heroSlides = heroSlides.filter(s => s.id !== req.params.id);
+  res.status(204).send();
+});
+
+router.delete('/advantages/:id', (req, res) => {
+  advantages = advantages.filter(a => a.id !== req.params.id);
+  res.status(204).send();
 });
 
 module.exports = router;
