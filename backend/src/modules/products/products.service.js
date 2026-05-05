@@ -36,7 +36,8 @@ class ProductsService {
     else if (sort === 'price-low') orderBy = { price: 'asc' };
     else if (sort === 'price-high') orderBy = { price: 'desc' };
     else if (sort === 'rating') orderBy = { averageRating: 'desc' };
-    else if (sort === 'newest') orderBy = { createdAt: 'desc' };
+    else if (sort === 'newest' || sort === 'new-arrival') orderBy = { createdAt: 'desc' };
+    else if (sort === 'best-seller') orderBy = { isBestSeller: 'desc' };
     else orderBy = { [sort]: order };
 
     const [products, total] = await prisma.$transaction([

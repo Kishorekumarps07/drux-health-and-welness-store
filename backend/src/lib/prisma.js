@@ -2,9 +2,19 @@ const { PrismaClient } = require('@prisma/client');
 
 const globalForPrisma = globalThis;
 
+let databaseUrl = process.env.DATABASE_URL;
+if (databaseUrl && databaseUrl.includes(':6543') && !databaseUrl.includes('pgbouncer=true')) {
+  databaseUrl += (databaseUrl.includes('?') ? '&' : '?') + 'pgbouncer=true';
+}
+
 const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
+    datasources: {
+      db: {
+        url: databaseUrl,
+      },
+    },
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   });
 
