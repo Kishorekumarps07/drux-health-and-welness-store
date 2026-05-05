@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter, usePathname } from "next/navigation";
+import { Product } from "@/types";
 import { QuickView } from "./QuickView";
 import { cn } from "@/lib/utils";
 
