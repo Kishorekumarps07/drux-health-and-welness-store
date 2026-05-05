@@ -208,7 +208,7 @@ export default function VendorInventoryPage() {
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden relative flex-shrink-0 flex items-center justify-center group-hover/row:scale-105 transition-transform duration-300">
                           {product.images?.[0]?.url ? (
-                            <Image src={product.images[0].url} alt="" fill className="object-cover" />
+                            <Image src={product.images[0].url} alt={product.title} fill className="object-cover" />
                           ) : (
                             <Package className="w-6 h-6 text-gray-300" />
                           )}

@@ -34,6 +34,8 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
+  DrawerClose,
+  DrawerFooter,
 } from "@/components/ui/drawer";
 import { Slider } from "@/components/ui/slider";
 
@@ -176,7 +178,7 @@ function ProductsContent() {
                  </DrawerTrigger>
                  <DrawerContent className="rounded-t-[3rem] px-6 pb-12">
                    <div className="mx-auto w-12 h-1.5 bg-gray-200 rounded-full my-4" />
-                   <h3 className="text-center text-[10px] font-black uppercase tracking-[0.3em] text-[#A6D608] mb-6">Sort Selection</h3>
+                   <DrawerTitle className="text-center text-[10px] font-black uppercase tracking-[0.3em] text-[#A6D608] mb-6">Sort Selection</DrawerTitle>
                    <div className="space-y-2">
                       {[
                         { id: "featured", label: "Featured" },
@@ -185,15 +187,16 @@ function ProductsContent() {
                         { id: "rating", label: "Top Customer Rating" },
                         { id: "newest", label: "Newest Arrivals" }
                       ].map((opt) => (
-                        <button
-                          key={opt.id}
-                          onClick={() => { setSort(opt.id); }}
-                          className={`w-full text-left p-5 rounded-2xl font-bold text-sm transition-all ${
-                            sort === opt.id ? "bg-[#A6D608] text-[#1E1E1E] shadow-lg shadow-[#A6D608]/20" : "bg-gray-50 text-gray-600 active:scale-[0.98]"
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
+                        <DrawerClose key={opt.id} asChild>
+                          <button
+                            onClick={() => { setSort(opt.id); }}
+                            className={`w-full text-left p-5 rounded-2xl font-bold text-sm transition-all ${
+                              sort === opt.id ? "bg-[#A6D608] text-[#1E1E1E] shadow-lg shadow-[#A6D608]/20" : "bg-gray-50 text-gray-600 active:scale-[0.98]"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        </DrawerClose>
                       ))}
                    </div>
                  </DrawerContent>
@@ -211,7 +214,7 @@ function ProductsContent() {
                 <DrawerContent className="h-[85vh] rounded-t-[3rem] px-6 pb-12">
                   <div className="mx-auto w-12 h-1.5 bg-gray-200 rounded-full my-4" />
                   <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A6D608]">Marketplace Filters</h3>
+                    <DrawerTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A6D608]">Marketplace Filters</DrawerTitle>
                     <button onClick={clearFilters} className="text-[10px] font-black uppercase text-red-500">Reset</button>
                   </div>
                   <div className="overflow-y-auto px-1 h-full pb-20">
@@ -224,6 +227,13 @@ function ProductsContent() {
                       onClear={clearFilters}
                     />
                   </div>
+                  <DrawerFooter className="px-0 pt-4">
+                    <DrawerClose asChild>
+                      <Button className="w-full h-14 rounded-2xl bg-[#A6D608] text-[#1E1E1E] font-black uppercase tracking-widest text-xs shadow-xl shadow-[#A6D608]/20 active:scale-95 transition-transform">
+                        Show {totalProducts} Results
+                      </Button>
+                    </DrawerClose>
+                  </DrawerFooter>
                 </DrawerContent>
               </Drawer>
             </div>

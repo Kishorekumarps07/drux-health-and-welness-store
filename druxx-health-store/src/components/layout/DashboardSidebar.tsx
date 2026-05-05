@@ -152,7 +152,7 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
                 isAdmin ? "bg-[#1F2937]" : "bg-gray-50 border border-gray-100"
               )}>
                 {user?.avatar ? (
-                  <img src={user.avatar} alt="" className="object-cover w-full h-full" />
+                  <img src={user.avatar} alt={user.name || "User Avatar"} className="object-cover w-full h-full" />
                 ) : (
                   <UserCircle className={cn("w-6 h-6", isAdmin ? "text-[#9CA3AF]" : "text-gray-300")} />
                 )}

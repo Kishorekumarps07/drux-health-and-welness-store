@@ -81,7 +81,7 @@ export default function AdminDashboardLayout({
                   </div>
                   <div className="w-10 h-10 rounded-xl bg-[#111827] border border-[#1F2937] flex items-center justify-center overflow-hidden shadow-sm hover:border-[#10B981]/50 cursor-pointer transition-all">
                     {user?.avatar ? (
-                      <img src={user.avatar} alt="" className="w-full h-full object-cover" />
+                      <img src={user.avatar} alt={user.name || "User Avatar"} className="w-full h-full object-cover" />
                     ) : (
                       <UserCircle className="w-6 h-6 text-[#9CA3AF]" />
                     )}

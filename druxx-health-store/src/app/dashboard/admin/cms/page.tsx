@@ -168,7 +168,7 @@ export default function AdminCMSPage() {
                   {(item.image && !brokenImages.has(item.id)) ? (
                     <img 
                       src={item.image} 
-                      alt="" 
+                      alt={item.title} 
                       className="w-full h-full object-cover opacity-60" 
                       onError={() => handleImageError(item.id)}
                     />

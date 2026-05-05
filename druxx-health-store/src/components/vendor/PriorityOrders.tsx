@@ -54,7 +54,7 @@ export function PriorityOrders({ orders, onAction, loading = false }: PriorityOr
             <div className="flex items-center gap-4 mb-6">
                <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
                   {item.product.images?.[0] ? (
-                    <img src={item.product.images[0].url} alt="" className="w-full h-full object-cover" />
+                    <img src={item.product.images[0].url} alt={item.product.title} className="w-full h-full object-cover" />
                   ) : (
                     <Package className="w-6 h-6 text-gray-200" />
                   )}

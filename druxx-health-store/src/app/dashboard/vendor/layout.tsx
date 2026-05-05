@@ -94,7 +94,7 @@ export default function VendorDashboardLayout({
                       <p className="text-[9px] text-gray-400 font-black uppercase tracking-tighter mt-1">Merchant Account</p>
                    </div>
                    <div className="w-12 h-12 rounded-2xl bg-gray-50 border-2 border-[#A6D608]/20 flex items-center justify-center overflow-hidden shadow-sm">
-                      {user?.avatar ? <img src={user.avatar} alt="" className="w-full h-full object-cover" /> : <UserCircle className="w-7 h-7 text-gray-300" />}
+                      {user?.avatar ? <img src={user.avatar} alt={user.name || "User Avatar"} className="w-full h-full object-cover" /> : <UserCircle className="w-7 h-7 text-gray-300" />}
                    </div>
                 </div>
             </div>

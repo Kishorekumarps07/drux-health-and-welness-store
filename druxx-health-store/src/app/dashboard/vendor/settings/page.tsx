@@ -159,6 +159,7 @@ export default function VendorSettingsPage() {
                           <div className="w-32 h-32 rounded-3xl bg-gray-50 border-4 border-white shadow-lg overflow-hidden relative group">
                              <img 
                                src={formData.storeLogo || "https://api.dicebear.com/7.x/identicon/svg?seed=Store"} 
+                               alt="Store Logo"
                                className="w-full h-full object-cover transition-transform group-hover:scale-110" 
                              />
                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -189,6 +190,7 @@ export default function VendorSettingsPage() {
                        <div className="w-full h-48 rounded-[2rem] bg-gray-50 border-4 border-white shadow-lg overflow-hidden relative group">
                           <img 
                             src={formData.storeBanner || "https://images.unsplash.com/photo-1506784919140-50cf144ad310"} 
+                            alt="Store Banner"
                             className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-700" 
                           />
                           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center">
