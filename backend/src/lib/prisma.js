@@ -3,7 +3,7 @@ const { PrismaClient } = require('@prisma/client');
 const globalForPrisma = globalThis;
 
 let databaseUrl = process.env.DATABASE_URL;
-if (databaseUrl && databaseUrl.includes(':6543') && !databaseUrl.includes('pgbouncer=true')) {
+if (databaseUrl && databaseUrl.includes('pooler.supabase.com') && !databaseUrl.includes('pgbouncer=true')) {
   databaseUrl += (databaseUrl.includes('?') ? '&' : '?') + 'pgbouncer=true';
 }
 

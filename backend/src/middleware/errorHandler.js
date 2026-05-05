@@ -57,8 +57,7 @@ const errorHandler = (err, req, res, next) => {
     });
     
     if (process.env.NODE_ENV === 'production') {
-      // Temporarily show message for debugging the 500 error
-      // message = 'Something went wrong on our end. Please try again later.';
+      message = 'Something went wrong on our end. Please try again later.';
       statusCode = 500;
     }
   }
