@@ -175,7 +175,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
                 <span className="text-[10px] sm:text-[10px] text-gray-400 font-medium">({product.reviewCount || 0})</span>
               </>
             ) : (
-              <span className="text-[12px] sm:text-xs text-[#A6D608] font-black">No reviews</span>
+              <span className="text-[12px] sm:text-xs text-[#A6D608] font-medium">No reviews</span>
             )}
           </div>
 
