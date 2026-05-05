@@ -117,7 +117,7 @@ export function Navbar() {
                 >
                   <ShoppingCart size={24} className="text-[#A6D608]" />
                   {mounted && (
-                    <span className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center text-[9px] font-black bg-[#FF7A00] text-white border-2 border-white rounded-full">
+                    <span className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center text-[10px] font-black bg-[#FF7A00] text-white border-2 border-white rounded-full">
                       {totalItemsCount}
                     </span>
                   )}
@@ -281,7 +281,7 @@ export function Navbar() {
                      )}
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-gray-500 text-[10px] uppercase font-bold tracking-widest">Welcome,</span>
+                    <span className="text-gray-500 text-[11px] uppercase font-bold tracking-widest">Welcome,</span>
                     <span className="text-gray-900 font-black text-lg truncate max-w-[140px]">
                       {isAuthenticated ? user?.name.split(" ")[0] : "Sign In"}
                     </span>
@@ -299,7 +299,7 @@ export function Navbar() {
 
             <nav className="flex-1 overflow-y-auto custom-scrollbar">
               <div className="p-6">
-                <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Shop By Category</h3>
+                <h3 className="text-[12px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Shop By Category</h3>
                 <div className="grid gap-2">
                   {categories.map((cat) => (
                     <Link
@@ -319,7 +319,7 @@ export function Navbar() {
               </div>
 
               <div className="border-t border-gray-100 p-6">
-                <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Help & Account</h3>
+                <h3 className="text-[12px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Help & Account</h3>
                 <div className="grid grid-cols-1 gap-1">
                    {[
                     { label: "Your Account", icon: <User size={16} />, href: "/dashboard" },
@@ -354,7 +354,7 @@ export function Navbar() {
                <div className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden whitespace-nowrap">
                   <MapPin size={20} className="text-[#A6D608]" />
                   <div className="flex-1 min-w-0">
-                     <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight block">Deliver to</span>
+                     <span className="text-[11px] text-gray-400 font-bold uppercase tracking-tight block">Deliver to</span>
                      <span className="text-sm font-black text-gray-900 leading-none mt-1 truncate block">{location.city}, {location.pincode}</span>
                   </div>
                   <Button 

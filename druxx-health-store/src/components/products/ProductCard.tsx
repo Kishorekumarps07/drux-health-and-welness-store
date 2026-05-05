@@ -111,7 +111,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           {/* Badges */}
           <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex flex-col gap-1 z-10">
             {discountAmount > 0 && (
-              <Badge className="bg-[#A6D608] text-[#1E1E1E] border-none font-black text-[8px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-md shadow-sm">
+              <Badge className="bg-[#A6D608] text-[#1E1E1E] border-none font-black text-[10px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-md shadow-sm">
                 {discountAmount}% OFF
               </Badge>
             )}
@@ -155,7 +155,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         {/* Product Details */}
         <div className="flex flex-col flex-1 relative z-1 pointer-events-none">
           <div className="flex items-center justify-between mb-0.5 sm:mb-1">
-            <span className="text-[9px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-widest truncate">
+            <span className="text-[11px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-widest truncate">
               {product.vendor?.name || "Druxx Seller"}
             </span>
           </div>
@@ -170,12 +170,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
               <>
                 <div className="flex items-center gap-0.5">
                   <Star size={10} className="sm:w-3 fill-[#FF7A00] text-[#FF7A00]" />
-                  <span className="text-[10px] sm:text-xs font-black text-gray-900">{product.rating.toFixed(1)}</span>
+                  <span className="text-[11px] sm:text-xs font-black text-gray-900">{product.rating.toFixed(1)}</span>
                 </div>
-                <span className="text-[9px] sm:text-[10px] text-gray-400 font-medium">({product.reviewCount || 0})</span>
+                <span className="text-[10px] sm:text-[10px] text-gray-400 font-medium">({product.reviewCount || 0})</span>
               </>
             ) : (
-              <span className="text-[9px] sm:text-[10px] text-gray-300 italic font-medium">No reviews</span>
+              <span className="text-[10px] sm:text-[10px] text-gray-300 italic font-medium">No reviews</span>
             )}
           </div>
 
@@ -183,14 +183,14 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <div className="flex items-baseline gap-1.5 sm:gap-2 mb-3 sm:mb-4">
             <span className="text-base sm:text-xl font-bold text-gray-900 tracking-tight">₹{product.price.toLocaleString("en-IN")}</span>
             {product.originalPrice && product.originalPrice > product.price && (
-              <span className="text-[10px] sm:text-xs text-gray-400 line-through">₹{product.originalPrice.toLocaleString("en-IN")}</span>
+              <span className="text-[11px] sm:text-xs text-gray-400 line-through">₹{product.originalPrice.toLocaleString("en-IN")}</span>
             )}
           </div>
 
           {/* Stock Logic */}
           <div className="mt-auto">
             {product.stock <= 5 && product.stock > 0 && (
-              <p className="text-[8px] sm:text-[10px] font-black text-orange-500 uppercase tracking-widest flex items-center gap-1 mb-1.5 sm:mb-2">
+              <p className="text-[10px] sm:text-[10px] font-black text-orange-500 uppercase tracking-widest flex items-center gap-1 mb-1.5 sm:mb-2">
                 <AlertCircle size={10} className="sm:w-2.5" /> Only {product.stock} left
               </p>
             )}
@@ -199,7 +199,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
               onClick={handleAddToCart}
               disabled={product.stock === 0 || cartStatus === "loading"}
               className={cn(
-                "w-full h-9 sm:h-11 rounded-lg sm:rounded-xl font-black text-[9px] sm:text-[10px] uppercase tracking-[0.1em] transition-all duration-300 pointer-events-auto",
+                "w-full h-9 sm:h-11 rounded-lg sm:rounded-xl font-black text-[11px] sm:text-[10px] uppercase tracking-[0.1em] transition-all duration-300 pointer-events-auto",
                 cartStatus === "success" 
                   ? "bg-green-600 hover:bg-green-700 text-white" 
                   : "bg-[#1E1E1E] hover:bg-[#A6D608] hover:text-[#1E1E1E] text-white shadow-lg"

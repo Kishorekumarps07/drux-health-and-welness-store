@@ -57,14 +57,14 @@ export function FeaturedProducts() {
         {/* Header */}
         <div className="flex flex-row items-end justify-between gap-4 mb-8 sm:mb-12">
           <div>
-            <p className="text-[#A6D608] font-bold uppercase tracking-[0.2em] text-[9px] sm:text-xs mb-1 sm:mb-2">Curated Selection</p>
+            <p className="text-[#A6D608] font-bold uppercase tracking-[0.2em] text-[10px] sm:text-xs mb-1 sm:mb-2">Curated Selection</p>
             <h2 className="text-2xl sm:text-5xl font-black text-[#1E1E1E] uppercase tracking-tighter leading-[0.9]">
               Top Health <br />Essentials.
             </h2>
           </div>
           <Link
             href="/products"
-            className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 hover:bg-[#A6D608]/10 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest text-[#1E1E1E] transition-all group shrink-0 border border-gray-100"
+            className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 hover:bg-[#A6D608]/10 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-widest text-[#1E1E1E] transition-all group shrink-0 border border-gray-100"
           >
             All <ArrowRight size={14} className="transform group-hover:translate-x-0.5 transition-transform" />
           </Link>
@@ -76,19 +76,19 @@ export function FeaturedProducts() {
           <TabsList className="bg-gray-100/50 p-1 rounded-2xl mb-10 w-fit">
             <TabsTrigger
               value="featured"
-              className="rounded-xl px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-[10px] uppercase tracking-widest"
+              className="rounded-xl px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-[12px] uppercase tracking-widest"
             >
               Featured
             </TabsTrigger>
             <TabsTrigger
               value="bestsellers"
-              className="rounded-xl px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-[10px] uppercase tracking-widest"
+              className="rounded-xl px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-[12px] uppercase tracking-widest"
             >
               🔥 Best Sellers
             </TabsTrigger>
             <TabsTrigger
               value="new"
-              className="rounded-xl px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-[10px] uppercase tracking-widest"
+              className="rounded-xl px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-[12px] uppercase tracking-widest"
             >
               ✨ New Arrivals
             </TabsTrigger>

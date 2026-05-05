@@ -59,7 +59,7 @@ export function BottomNav() {
                   strokeWidth={isActive ? 3 : 2} 
                   className={isActive ? "drop-shadow-[0_0_10px_rgba(166,214,8,0.4)]" : ""} 
                 />
-                <span className={`text-[8px] font-bold uppercase tracking-tight mt-1 truncate max-w-[50px] ${
+                <span className={`text-[10px] font-bold uppercase tracking-tight mt-1 truncate max-w-[50px] ${
                   isActive ? "text-[#A6D608]" : "text-gray-500"
                 }`}>
                   {item.label}
@@ -87,7 +87,7 @@ export function BottomNav() {
                 {totalItemsCount}
               </span>
             )}
-            <span className={`text-[8px] font-bold uppercase tracking-tight mt-1 ${
+            <span className={`text-[10px] font-bold uppercase tracking-tight mt-1 ${
               totalItemsCount > 0 ? "text-[#FF7A00]" : "text-gray-500"
             }`}>
               Cart

@@ -197,7 +197,7 @@ export function SearchBar() {
         <div className="absolute top-[calc(100%+12px)] left-0 right-0 bg-white border border-gray-100 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] z-[60] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="p-3">
             <div className="px-4 py-3 flex items-center justify-between border-b border-gray-50 mb-3">
-               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Recommended Products</p>
+               <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Recommended Products</p>
                <Link href={`/products?q=${localQuery}`} className="text-[11px] font-bold text-[#A6D608] hover:text-[#8ab506] transition-colors">View All Results</Link>
             </div>
             <div className="space-y-1 max-h-[440px] overflow-y-auto custom-scrollbar">
@@ -219,11 +219,11 @@ export function SearchBar() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                       <span className="px-1.5 py-0.5 bg-gray-100 text-[9px] font-black text-gray-500 uppercase tracking-tighter rounded">
+                       <span className="px-1.5 py-0.5 bg-gray-100 text-[10px] font-black text-gray-500 uppercase tracking-tighter rounded">
                           {product.category}
                        </span>
                        {product.isBestSeller && (
-                          <span className="text-[9px] font-black text-[#FF7A00]">BEST SELLER</span>
+                          <span className="text-[10px] font-black text-[#FF7A00]">BEST SELLER</span>
                        )}
                     </div>
                     <p className="text-sm font-bold text-gray-900 truncate group-hover/suggestion:text-[#A6D608] transition-colors leading-none">
@@ -234,7 +234,7 @@ export function SearchBar() {
                   <div className="text-right">
                     <p className="text-sm font-black text-[#1E1E1E]">₹{product.price}</p>
                     {product.discount > 0 && (
-                       <p className="text-[10px] text-green-600 font-bold">{product.discount}% OFF</p>
+                       <p className="text-[11px] text-green-600 font-bold">{product.discount}% OFF</p>
                     )}
                   </div>
                 </button>
