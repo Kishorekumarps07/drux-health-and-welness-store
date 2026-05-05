@@ -85,7 +85,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
         className={cn(
-          "group relative bg-white rounded-xl sm:rounded-2xl p-2 sm:p-4 border border-gray-100 transition-all duration-200",
+          "group relative bg-white rounded-2xl sm:rounded-2xl p-3.5 sm:p-4 border border-gray-100 transition-all duration-200",
           "hover:shadow-xl hover:border-gray-200 cursor-pointer flex flex-col h-full",
           className
         )}
@@ -93,7 +93,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <Link href={`/products/${product.slug || product.id}`} className="absolute inset-0 z-0" />
 
         {/* Image Container */}
-        <div className="relative aspect-square rounded-lg sm:rounded-xl bg-gray-50 overflow-hidden mb-3 sm:mb-4 flex items-center justify-center">
+        <div className="relative aspect-[4/5] rounded-xl sm:rounded-xl bg-gray-50 overflow-hidden mb-4 sm:mb-4 flex items-center justify-center">
           <motion.div 
             animate={{ scale: isHovered ? 1.05 : 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
