@@ -16,7 +16,7 @@ interface ProductGridProps {
 
 function ProductGrid({ products }: ProductGridProps) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
       {products.map((product) => (
         <ProductCard key={product.id} product={product as any} />
       ))}
@@ -52,7 +52,7 @@ export function FeaturedProducts() {
   }, []);
 
   return (
-    <section className="py-10 sm:py-12 px-6 sm:px-10">
+    <section className="py-10 sm:py-12 px-2.5 sm:px-10">
       <div className="w-full">
         {/* Header */}
         <div className="flex flex-row items-end justify-between gap-4 mb-8 sm:mb-12">

@@ -85,7 +85,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
         className={cn(
-          "group relative bg-white rounded-2xl sm:rounded-2xl p-3.5 sm:p-4 border border-gray-100 transition-all duration-200",
+          "group relative bg-white rounded-2xl sm:rounded-2xl p-2.5 sm:p-4 border border-gray-100 transition-all duration-200",
           "hover:shadow-xl hover:border-gray-200 cursor-pointer flex flex-col h-full",
           className
         )}
