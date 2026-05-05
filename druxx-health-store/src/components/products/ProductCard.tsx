@@ -155,7 +155,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         {/* Product Details */}
         <div className="flex flex-col flex-1 relative z-1 pointer-events-none">
           <div className="flex items-center justify-between mb-0.5 sm:mb-1">
-            <span className="text-[12px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-widest truncate">
+            <span className="text-[12px] sm:text-[11px] font-bold text-gray-800 uppercase tracking-widest truncate">
               {product.vendor?.name || "Druxx Seller"}
             </span>
           </div>
@@ -175,7 +175,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
                 <span className="text-[10px] sm:text-[10px] text-gray-400 font-medium">({product.reviewCount || 0})</span>
               </>
             ) : (
-              <span className="text-[12px] sm:text-xs text-gray-500 font-bold">No reviews</span>
+              <span className="text-[12px] sm:text-xs text-gray-800 font-bold">No reviews</span>
             )}
           </div>
 
@@ -183,7 +183,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <div className="flex items-baseline gap-1.5 sm:gap-2 mb-3 sm:mb-4">
             <span className="text-base sm:text-xl font-bold text-gray-900 tracking-tight">₹{product.price.toLocaleString("en-IN")}</span>
             {product.originalPrice && product.originalPrice > product.price && (
-              <span className="text-[11px] sm:text-xs text-gray-400 line-through">₹{product.originalPrice.toLocaleString("en-IN")}</span>
+              <span className="text-[11px] sm:text-xs text-gray-600 font-medium line-through opacity-80">₹{product.originalPrice.toLocaleString("en-IN")}</span>
             )}
           </div>
 
