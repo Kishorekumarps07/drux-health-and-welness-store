@@ -57,8 +57,8 @@ export function FeaturedProducts() {
         {/* Header */}
         <div className="flex flex-row items-end justify-between gap-4 mb-8 sm:mb-12">
           <div>
-            <p className="text-[#A6D608] font-bold uppercase tracking-[0.2em] text-[10px] sm:text-xs mb-1 sm:mb-2">Curated Selection</p>
-            <h2 className="text-2xl sm:text-5xl font-black text-[#1E1E1E] uppercase tracking-tighter leading-[0.9]">
+            <p className="text-[#A6D608] font-bold uppercase tracking-[0.2em] text-[8px] sm:text-xs mb-1 sm:mb-2">Curated Selection</p>
+            <h2 className="text-lg sm:text-5xl font-black text-[#1E1E1E] uppercase tracking-tighter leading-[0.9]">
               Top Health <br />Essentials.
             </h2>
           </div>
