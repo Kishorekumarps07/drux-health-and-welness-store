@@ -89,15 +89,21 @@ export const useCMSStore = create<CMSState>((set, get) => ({
 
   addHeroSlide: async (slide) => {
     let payload = slide;
-    // If it's already FormData (from component), pass as is
-    // Otherwise, it's a plain object (handled by Axios default)
-    const { data } = await api.post('/cms/hero', payload);
+    const config = (payload instanceof FormData) 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : {};
+    
+    const { data } = await api.post('/cms/hero', payload, config);
     set((state) => ({ heroSlides: [...state.heroSlides, data.data] }));
   },
 
   updateHeroSlide: async (id, updatedSlide) => {
     let payload = updatedSlide;
-    const { data } = await api.put(`/cms/hero/${id}`, payload);
+    const config = (payload instanceof FormData) 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : {};
+
+    const { data } = await api.put(`/cms/hero/${id}`, payload, config);
     set((state) => ({
       heroSlides: state.heroSlides.map(s => s.id === id ? data.data : s)
     }));
@@ -125,7 +131,12 @@ export const useCMSStore = create<CMSState>((set, get) => ({
         icon_type: item.iconType
       };
     }
-    const { data } = await api.post('/cms/advantages', payload);
+    
+    const config = (payload instanceof FormData) 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : {};
+
+    const { data } = await api.post('/cms/advantages', payload, config);
     set((state) => ({
       advantages: [...state.advantages, {
         id: data.data.id,
@@ -149,7 +160,12 @@ export const useCMSStore = create<CMSState>((set, get) => ({
         icon_type: updatedItem.iconType
       };
     }
-    const { data } = await api.put(`/cms/advantages/${id}`, payload);
+
+    const config = (payload instanceof FormData) 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : {};
+
+    const { data } = await api.put(`/cms/advantages/${id}`, payload, config);
     set((state) => ({
       advantages: state.advantages.map(a => a.id === id ? {
         id: data.data.id,
