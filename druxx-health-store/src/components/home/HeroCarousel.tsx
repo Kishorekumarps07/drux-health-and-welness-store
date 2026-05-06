@@ -88,7 +88,7 @@ export function HeroCarousel() {
             </div>
 
             {/* Content Layout */}
-            <div className="relative z-10 w-full h-full max-w-[1400px] mx-auto flex flex-col md:flex-row items-end md:items-center px-6 md:px-16 pb-20 md:pb-0">
+            <div className="relative z-10 w-full h-full max-w-[1400px] mx-auto flex flex-col md:flex-row justify-end md:justify-start items-start md:items-center px-8 md:px-16 pb-32 md:pb-0">
               
               {/* Text Area */}
               <div className="w-full md:w-1/2 flex flex-col justify-center text-left z-20">
@@ -96,14 +96,14 @@ export function HeroCarousel() {
                   <span className="hidden md:inline-block px-3 py-1 rounded-full bg-white/10 text-white/50 text-[10px] font-bold tracking-[0.2em] mb-6 uppercase border border-white/10">
                     Druxx Exclusive
                   </span>
-                  <h1 className="font-heading font-black text-white text-4xl md:text-6xl lg:text-8xl leading-[1.0] mb-4 md:mb-6 tracking-tighter uppercase italic">
+                  <h1 className="font-heading font-black text-white text-5xl md:text-6xl lg:text-8xl leading-[0.95] mb-4 md:mb-6 tracking-tighter uppercase italic drop-shadow-2xl">
                     {s.title}
                   </h1>
-                  <p className="text-white/60 text-sm md:text-xl mb-8 md:mb-10 leading-relaxed max-w-[260px] md:max-w-md font-medium tracking-wide">
+                  <p className="text-white/80 text-base md:text-xl mb-8 md:mb-10 leading-relaxed max-w-[280px] md:max-w-md font-medium tracking-wide drop-shadow-lg">
                     {s.subtitle}
                   </p>
                   <div className="flex">
-                    <button className="group relative px-10 py-3.5 md:px-12 md:py-5 bg-[#A6D608] text-[#1E1E1E] font-black rounded-full transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#A6D608]/20">
+                    <button className="group relative px-10 py-4 md:px-12 md:py-5 bg-[#A6D608] text-[#1E1E1E] font-black rounded-full transition-all hover:scale-105 active:scale-95 shadow-[0_20px_40px_rgba(166,214,8,0.4)]">
                       <span className="relative z-10 flex items-center gap-3 tracking-widest text-[11px] md:text-xs">
                         EXPLORE NOW
                         <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
