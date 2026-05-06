@@ -432,3 +432,35 @@ model WebhookEvent {
 
   @@map("webhook_events")
 }
+
+// ─────────────────────────────────────────────
+// CMS (Carousel & Advantages)
+// ─────────────────────────────────────────────
+
+model HeroSlide {
+  id        String   @id @default(uuid())
+  title     String
+  subtitle  String?
+  image     String
+  bgColor   String   @default("from-green-100 to-green-200") @map("bg_color")
+  sortOrder Int      @default(0) @map("sort_order")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("hero_slides")
+}
+
+model AdvantageItem {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  image       String?
+  iconType    String?  @map("icon_type")
+  sortOrder   Int      @default(0) @map("sort_order")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("advantage_items")
+}

@@ -1,119 +1,190 @@
 const { Router } = require('express');
 const { cmsUpload } = require('../../middleware/upload');
 const { deleteImageByUrl } = require('../../utils/cloudinary');
-
-let heroSlides = [
-  {
-    id: "h1",
-    title: "Premium Health\nSupplements.",
-    subtitle: "Fuel your performance with the highest quality whey, creatine, and vitamins.",
-    image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2000",
-    bgColor: "from-[#1E1E1E] to-[#2CA7A0]"
-  },
-  {
-    id: "h2",
-    title: "100% Authentic\nBrands.",
-    subtitle: "We partner directly with manufacturers to guarantee genuine products.",
-    image: "https://images.unsplash.com/photo-1593079831268-3381b0db4a77?q=80&w=2000",
-    bgColor: "from-[#A6D608] to-[#2CA7A0]"
-  }
-];
-
-let advantages = [
-  {
-    id: "a1",
-    title: "Certified Pure",
-    description: "Every product is lab-tested and certified for purity and safety.",
-    image: "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?q=80&w=800",
-    icon_type: "shield"
-  },
-  {
-    id: "a2",
-    title: "Fast Delivery",
-    description: "Experience lightning-fast shipping across India within 48 hours.",
-    image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=800",
-    icon_type: "zap"
-  }
-];
+const prisma = require('../../lib/prisma');
+const asyncHandler = require('../../lib/asyncHandler');
 
 const router = Router();
 
-// GET
-router.get('/hero', (req, res) => res.json({ status: 'success', data: heroSlides }));
-router.get('/advantages', (req, res) => res.json({ status: 'success', data: advantages }));
+// GET - Hero Slides
+router.get('/hero', asyncHandler(async (req, res) => {
+  const slides = await prisma.heroSlide.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: 'asc' }
+  });
+  
+  // If empty, return initial defaults (but don't save them to DB yet to avoid duplicates)
+  if (slides.length === 0) {
+    const defaults = [
+      {
+        id: "h1",
+        title: "Premium Health\nSupplements.",
+        subtitle: "Fuel your performance with the highest quality whey, creatine, and vitamins.",
+        image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2000",
+        bgColor: "from-[#1E1E1E] to-[#2CA7A0]"
+      },
+      {
+        id: "h2",
+        title: "100% Authentic\nBrands.",
+        subtitle: "We partner directly with manufacturers to guarantee genuine products.",
+        image: "https://images.unsplash.com/photo-1593079831268-3381b0db4a77?q=80&w=2000",
+        bgColor: "from-[#A6D608] to-[#2CA7A0]"
+      }
+    ];
+    return res.json({ status: 'success', data: defaults });
+  }
 
-// POST
-router.post('/hero', cmsUpload.single('image'), (req, res) => {
-  console.log('CMS Hero Upload - File:', req.file);
-  console.log('CMS Hero Upload - Body:', req.body);
+  res.json({ status: 'success', data: slides });
+}));
+
+// GET - Advantages
+router.get('/advantages', asyncHandler(async (req, res) => {
+  const items = await prisma.advantageItem.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: 'asc' }
+  });
+
+  if (items.length === 0) {
+    const defaults = [
+      {
+        id: "a1",
+        title: "Certified Pure",
+        description: "Every product is lab-tested and certified for purity and safety.",
+        image: "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?q=80&w=800",
+        icon_type: "shield"
+      },
+      {
+        id: "a2",
+        title: "Fast Delivery",
+        description: "Experience lightning-fast shipping across India within 48 hours.",
+        image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=800",
+        icon_type: "zap"
+      }
+    ];
+    return res.json({ status: 'success', data: defaults });
+  }
+
+  res.json({ status: 'success', data: items });
+}));
+
+// POST - Hero
+router.post('/hero', cmsUpload.single('image'), asyncHandler(async (req, res) => {
   const image = req.file ? req.file.path : req.body.image;
-  const newSlide = { id: Date.now().toString(), ...req.body, image };
-  heroSlides.push(newSlide);
-  res.status(201).json({ status: 'success', data: newSlide });
-});
+  
+  if (!image) {
+    return res.status(400).json({ status: 'fail', message: 'Image is required for a new slide' });
+  }
 
-router.post('/advantages', cmsUpload.single('image'), (req, res) => {
-  console.log('CMS Advantage Upload - File:', req.file);
-  console.log('CMS Advantage Upload - Body:', req.body);
+  const slide = await prisma.heroSlide.create({
+    data: {
+      title: req.body.title,
+      subtitle: req.body.subtitle,
+      image,
+      bgColor: req.body.bgColor || "from-[#1E1E1E] to-[#2CA7A0]"
+    }
+  });
+
+  res.status(201).json({ status: 'success', data: slide });
+}));
+
+// POST - Advantages
+router.post('/advantages', cmsUpload.single('image'), asyncHandler(async (req, res) => {
   const image = req.file ? req.file.path : req.body.image;
-  const newAdv = { id: Date.now().toString(), ...req.body, image };
-  advantages.push(newAdv);
-  res.status(201).json({ status: 'success', data: newAdv });
-});
 
-// PUT
-router.put('/hero/:id', cmsUpload.single('image'), async (req, res) => {
-  const index = heroSlides.findIndex(s => s.id === req.params.id);
-  if (index !== -1) {
-    const oldImage = heroSlides[index].image;
-    const image = req.file ? req.file.path : req.body.image;
-    
-    // If a new image is provided, delete the old one from Cloudinary
-    if (req.file && oldImage) {
-      await deleteImageByUrl(oldImage);
+  const item = await prisma.advantageItem.create({
+    data: {
+      title: req.body.title,
+      description: req.body.description,
+      image,
+      iconType: req.body.icon_type
     }
+  });
 
-    heroSlides[index] = { ...heroSlides[index], ...req.body, ...(image && { image }) };
-    return res.json({ status: 'success', data: heroSlides[index] });
+  res.status(201).json({ status: 'success', data: item });
+}));
+
+// PUT - Hero
+router.put('/hero/:id', cmsUpload.single('image'), asyncHandler(async (req, res) => {
+  const oldSlide = await prisma.heroSlide.findUnique({ where: { id: req.params.id } });
+  
+  if (!oldSlide) {
+    return res.status(404).json({ status: 'fail', message: 'Slide not found' });
   }
-  res.status(404).json({ status: 'fail', message: 'Slide not found' });
-});
 
-router.put('/advantages/:id', cmsUpload.single('image'), async (req, res) => {
-  const index = advantages.findIndex(a => a.id === req.params.id);
-  if (index !== -1) {
-    const oldImage = advantages[index].image;
-    const image = req.file ? req.file.path : req.body.image;
-    
-    if (req.file && oldImage) {
-      await deleteImageByUrl(oldImage);
+  const image = req.file ? req.file.path : req.body.image;
+
+  if (req.file && oldSlide.image && oldSlide.image.startsWith('http')) {
+    await deleteImageByUrl(oldSlide.image);
+  }
+
+  const updated = await prisma.heroSlide.update({
+    where: { id: req.params.id },
+    data: {
+      title: req.body.title,
+      subtitle: req.body.subtitle,
+      image: image || undefined,
+      bgColor: req.body.bgColor,
+      isActive: req.body.isActive !== undefined ? req.body.isActive === 'true' : undefined
     }
+  });
 
-    advantages[index] = { ...advantages[index], ...req.body, ...(image && { image }) };
-    return res.json({ status: 'success', data: advantages[index] });
-  }
-  res.status(404).json({ status: 'fail', message: 'Advantage not found' });
-});
+  res.json({ status: 'success', data: updated });
+}));
 
-// DELETE
-router.delete('/hero/:id', async (req, res) => {
-  const index = heroSlides.findIndex(s => s.id === req.params.id);
-  if (index !== -1) {
-    const image = heroSlides[index].image;
-    if (image) await deleteImageByUrl(image);
-    heroSlides.splice(index, 1);
+// PUT - Advantages
+router.put('/advantages/:id', cmsUpload.single('image'), asyncHandler(async (req, res) => {
+  const oldItem = await prisma.advantageItem.findUnique({ where: { id: req.params.id } });
+
+  if (!oldItem) {
+    return res.status(404).json({ status: 'fail', message: 'Advantage item not found' });
   }
+
+  const image = req.file ? req.file.path : req.body.image;
+
+  if (req.file && oldItem.image && oldItem.image.startsWith('http')) {
+    await deleteImageByUrl(oldItem.image);
+  }
+
+  const updated = await prisma.advantageItem.update({
+    where: { id: req.params.id },
+    data: {
+      title: req.body.title,
+      description: req.body.description,
+      image: image || undefined,
+      iconType: req.body.icon_type,
+      isActive: req.body.isActive !== undefined ? req.body.isActive === 'true' : undefined
+    }
+  });
+
+  res.json({ status: 'success', data: updated });
+}));
+
+// DELETE - Hero
+router.delete('/hero/:id', asyncHandler(async (req, res) => {
+  const slide = await prisma.heroSlide.findUnique({ where: { id: req.params.id } });
+  
+  if (slide) {
+    if (slide.image && slide.image.startsWith('http')) {
+      await deleteImageByUrl(slide.image);
+    }
+    await prisma.heroSlide.delete({ where: { id: req.params.id } });
+  }
+  
   res.status(204).send();
-});
+}));
 
-router.delete('/advantages/:id', async (req, res) => {
-  const index = advantages.findIndex(a => a.id === req.params.id);
-  if (index !== -1) {
-    const image = advantages[index].image;
-    if (image) await deleteImageByUrl(image);
-    advantages.splice(index, 1);
+// DELETE - Advantages
+router.delete('/advantages/:id', asyncHandler(async (req, res) => {
+  const item = await prisma.advantageItem.findUnique({ where: { id: req.params.id } });
+
+  if (item) {
+    if (item.image && item.image.startsWith('http')) {
+      await deleteImageByUrl(item.image);
+    }
+    await prisma.advantageItem.delete({ where: { id: req.params.id } });
   }
+
   res.status(204).send();
-});
+}));
 
 module.exports = router;
