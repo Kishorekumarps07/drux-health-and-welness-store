@@ -105,9 +105,10 @@ export default function AdminCMSPage() {
       setFormData({});
       setImageFile(null);
       setImagePreview(null);
-    } catch (error) {
-      toast.error("Failed to save changes", { id: loadingToast });
-      console.error(error);
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message || error.message || "Failed to save changes";
+      toast.error(errorMsg, { id: loadingToast });
+      console.error("CMS Save Error:", error);
     }
   };
 
