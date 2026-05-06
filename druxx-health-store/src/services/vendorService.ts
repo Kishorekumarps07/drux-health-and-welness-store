@@ -276,82 +276,42 @@ export const vendorService = {
   },
 
   /**
-   * Fetch vendor's own products
+   * Fetch vendor's own products via Backend API
    */
   async getMyProducts(params: { page?: number; limit?: number; search?: string } = {}) {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) throw new Error("Unauthorized");
+    const response = await api.get('/products/vendor/my', { params });
+    const { products, total, pages, page } = response.data;
 
-    const { data: vendor } = await supabase.from('vendors').select('id').eq('owner_id', session.user.id).single();
-    if (!vendor) return { status: "success", products: [], total: 0, pages: 1, page: 1 };
-
-    let query = supabase
-      .from('products')
-      .select('*, category:categories(id, name)', { count: 'exact' })
-      .eq('vendor_id', vendor.id)
-      .order('created_at', { ascending: false });
-
-    if (params.search) {
-      query = query.ilike('name', `%${params.search}%`);
-    }
-
-    const { data, error, count } = await query;
-    if (error) throw error;
-
-    // Map to what the frontend expects
-    const products = data.map(p => ({
-      id: p.id,
-      title: p.name,
-      price: p.price,
-      stock: p.stock,
-      description: p.description,
-      images: p.image ? [{ url: p.image }] : [], // Format image for the frontend
-      category: p.category,
-      sku: `PRD-${p.id.substring(0, 5).toUpperCase()}`
-    }));
-
-    return { status: "success", products, total: count || 0, pages: 1, page: 1 };
+    return { 
+      status: "success", 
+      products: products.map((p: any) => ({
+        id: p.id,
+        title: p.title,
+        price: p.price,
+        stock: p.stockQty,
+        description: p.description,
+        images: p.images || [],
+        category: p.category,
+        sku: p.sku || `PRD-${p.id.substring(0, 5).toUpperCase()}`
+      })), 
+      total, 
+      pages, 
+      page 
+    };
   },
 
   async deleteProduct(id: string) {
-    const { error } = await supabase.from('products').delete().eq('id', id);
-    if (error) throw error;
+    await api.delete(`/products/${id}`);
     return { status: "success" };
   },
 
   async createProduct(data: any) {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) throw new Error("Unauthorized");
-
-    const { data: vendor } = await supabase.from('vendors').select('id').eq('owner_id', session.user.id).single();
-    if (!vendor) throw new Error("No vendor profile found");
-
-    const { data: newProd, error } = await supabase.from('products').insert({
-      name: data.title,
-      slug: data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.floor(Math.random()*1000),
-      description: data.description,
-      price: data.price,
-      stock: data.stockQty || data.stock || 0,
-      category_id: data.categoryId,
-      vendor_id: vendor.id,
-      image: data.image || "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=600"
-    }).select().single();
-
-    if (error) throw error;
-    return { status: "success", product: newProd };
+    const response = await api.post('/products', data);
+    return response.data;
   },
 
   async updateProduct(id: string, data: any) {
-    const { data: updatedProd, error } = await supabase.from('products').update({
-      name: data.title,
-      description: data.description,
-      price: data.price,
-      stock: data.stockQty || data.stock,
-      category_id: data.categoryId,
-      image: data.image
-    }).eq('id', id).select().single();
-
-    if (error) throw error;
-    return { status: "success", product: updatedProd };
+    const response = await api.put(`/products/${id}`, data);
+    return response.data;
   }
 };

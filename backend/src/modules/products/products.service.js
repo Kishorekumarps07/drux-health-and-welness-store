@@ -1,6 +1,7 @@
 const slugify = require('slugify');
 const prisma = require('../../lib/prisma');
 const AppError = require('../../lib/AppError');
+const { deleteImageByUrl } = require('../../utils/cloudinary');
 
 const PRODUCT_INCLUDE = {
   images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] },
@@ -86,8 +87,15 @@ class ProductsService {
       slug = `${baseSlug}-${++attempt}`;
     }
 
+    const { images, ...productData } = data;
+
     return prisma.product.create({
-      data: { ...data, vendorId: vendor.id, slug },
+      data: { 
+        ...productData, 
+        vendorId: vendor.id, 
+        slug,
+        ...(images && { images: { create: images } })
+      },
       include: PRODUCT_INCLUDE,
     });
   }
@@ -99,7 +107,25 @@ class ProductsService {
     const product = await prisma.product.findFirst({ where: { id: productId, vendorId: vendor.id } });
     if (!product) throw new AppError('Product not found or you do not own it.', 404);
 
-    return prisma.product.update({ where: { id: productId }, data, include: PRODUCT_INCLUDE });
+    const { images, ...productData } = data;
+
+    // If new images are provided, we'll replace existing ones for simplicity in this version
+    if (images) {
+      const existingImages = await prisma.productImage.findMany({ where: { productId } });
+      for (const img of existingImages) {
+        await deleteImageByUrl(img.url);
+      }
+      await prisma.productImage.deleteMany({ where: { productId } });
+    }
+
+    return prisma.product.update({ 
+      where: { id: productId }, 
+      data: {
+        ...productData,
+        ...(images && { images: { create: images } })
+      }, 
+      include: PRODUCT_INCLUDE 
+    });
   }
 
   async delete(userId, productId) {
@@ -108,6 +134,11 @@ class ProductsService {
 
     const product = await prisma.product.findFirst({ where: { id: productId, vendorId: vendor.id } });
     if (!product) throw new AppError('Product not found or you do not own it.', 404);
+
+    const productImages = await prisma.productImage.findMany({ where: { productId } });
+    for (const img of productImages) {
+      await deleteImageByUrl(img.url);
+    }
 
     await prisma.product.delete({ where: { id: productId } });
   }

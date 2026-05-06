@@ -12,7 +12,9 @@ import {
   ChevronRight,
   Filter,
   Check,
-  X
+  X,
+  Upload,
+  Loader2
 } from "lucide-react"
 import { vendorService } from "@/services/vendorService"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
@@ -29,6 +31,8 @@ export default function VendorInventoryPage() {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [isAddingProduct, setIsAddingProduct] = React.useState(false)
   const [editingProduct, setEditingProduct] = React.useState<any | null>(null)
+  const [imageFiles, setImageFiles] = React.useState<File[]>([])
+  const [previews, setPreviews] = React.useState<string[]>([])
 
   const categories = [
     { id: 'b1bf4209-33a2-4038-b328-27a12b9f9e0e', name: 'Vitamins & Supplements' }, 
@@ -72,21 +76,43 @@ export default function VendorInventoryPage() {
     image: ""
   })
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setImageFiles(files);
+      
+      const newPreviews = files.map(file => URL.createObjectURL(file));
+      setPreviews(newPreviews);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleUpdateProduct = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingProduct) return
     setLoading(true)
+    
+    const formData = new FormData();
+    formData.append("title", editingProduct.title);
+    formData.append("price", editingProduct.price.toString());
+    formData.append("categoryId", categories.find(c => c.name === editingProduct.categoryName)?.id || editingProduct.categoryId);
+    formData.append("stockQty", editingProduct.stock.toString());
+    formData.append("description", editingProduct.description);
+    
+    if (imageFiles.length > 0) {
+      imageFiles.forEach(file => formData.append("images", file));
+    }
+
     try {
-      await vendorService.updateProduct(editingProduct.id, {
-        title: editingProduct.title,
-        price: editingProduct.price,
-        categoryId: categories.find(c => c.name === editingProduct.categoryName)?.id || editingProduct.categoryId,
-        stockQty: editingProduct.stock,
-        description: editingProduct.description,
-        image: editingProduct.image
-      })
+      await vendorService.updateProduct(editingProduct.id, formData)
       toast.success("Product updated successfully")
       setEditingProduct(null)
+      setImageFiles([])
+      setPreviews([])
       fetchProducts()
     } catch (error) {
       toast.error("Failed to update product")
@@ -99,19 +125,26 @@ export default function VendorInventoryPage() {
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+
+    const formData = new FormData();
+    formData.append("title", newProduct.name);
+    formData.append("price", newProduct.price.toString());
+    formData.append("categoryId", categories.find(c => c.name === newProduct.category)?.id || categories[0].id);
+    formData.append("stockQty", newProduct.stock.toString());
+    formData.append("description", newProduct.description);
+    formData.append("status", "ACTIVE");
+    
+    if (imageFiles.length > 0) {
+      imageFiles.forEach(file => formData.append("images", file));
+    }
+
     try {
-      await vendorService.createProduct({
-        title: newProduct.name,
-        price: newProduct.price,
-        categoryId: categories.find(c => c.name === newProduct.category)?.id || categories[0].id,
-        stockQty: newProduct.stock,
-        description: newProduct.description,
-        image: newProduct.image,
-        status: 'ACTIVE'
-      })
+      await vendorService.createProduct(formData)
       toast.success("Product listed successfully!")
       setIsAddingProduct(false)
       setNewProduct({ name: "", price: 0, category: "", stock: 0, description: "", image: "" })
+      setImageFiles([])
+      setPreviews([])
       fetchProducts()
     } catch (error) {
       toast.error("Failed to list product")
@@ -346,14 +379,34 @@ export default function VendorInventoryPage() {
                       />
                    </div>
                    <div className="space-y-2">
-                      <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Product Image URL</label>
-                      <input 
-                        type="url" 
-                        value={newProduct.image}
-                        onChange={(e) => setNewProduct({...newProduct, image: e.target.value})}
-                        className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
-                        placeholder="https://images.unsplash.com/..." 
-                      />
+                      <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Product Images</label>
+                      <div className="grid grid-cols-4 gap-4">
+                        {previews.map((preview, idx) => (
+                          <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-50">
+                            <Image src={preview} alt="Preview" fill className="object-cover" />
+                            <button 
+                              type="button"
+                              onClick={() => removeImage(idx)}
+                              className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-md"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                        {previews.length < 5 && (
+                          <label className="flex flex-col items-center justify-center aspect-square rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50 hover:border-[#A6D608] hover:bg-[#A6D608]/5 transition-all cursor-pointer group">
+                            <Upload className="w-6 h-6 text-gray-300 group-hover:text-[#A6D608] transition-colors" />
+                            <input 
+                              type="file" 
+                              multiple 
+                              accept="image/*" 
+                              onChange={handleFileChange} 
+                              className="hidden" 
+                            />
+                          </label>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-gray-400 font-bold mt-2 ml-1">Upload up to 5 images. First image will be primary.</p>
                    </div>
                    
                    <div className="pt-6">
@@ -435,13 +488,38 @@ export default function VendorInventoryPage() {
                       />
                    </div>
                    <div className="space-y-2">
-                      <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Product Image URL</label>
-                      <input 
-                        type="url" 
-                        value={editingProduct.image || ""}
-                        onChange={(e) => setEditingProduct({...editingProduct, image: e.target.value})}
-                        className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
-                      />
+                      <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Update Images</label>
+                      <div className="grid grid-cols-4 gap-4">
+                        {previews.length > 0 ? previews.map((preview, idx) => (
+                          <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-50">
+                            <Image src={preview} alt="Preview" fill className="object-cover" />
+                            <button 
+                              type="button"
+                              onClick={() => removeImage(idx)}
+                              className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-md"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        )) : editingProduct.images?.map((img: any, idx: number) => (
+                          <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-50">
+                            <Image src={img.url} alt="Current" fill className="object-cover opacity-80" />
+                          </div>
+                        ))}
+                        {previews.length < 5 && (
+                          <label className="flex flex-col items-center justify-center aspect-square rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50 hover:border-[#A6D608] hover:bg-[#A6D608]/5 transition-all cursor-pointer group">
+                            <Upload className="w-6 h-6 text-gray-300 group-hover:text-[#A6D608] transition-colors" />
+                            <input 
+                              type="file" 
+                              multiple 
+                              accept="image/*" 
+                              onChange={handleFileChange} 
+                              className="hidden" 
+                            />
+                          </label>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-gray-400 font-bold mt-2 ml-1">Selecting new images will replace existing ones.</p>
                    </div>
                    
                    <div className="pt-6">

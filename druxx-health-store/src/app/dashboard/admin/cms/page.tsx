@@ -16,7 +16,9 @@ import {
   Smartphone,
   Zap,
   Target,
-  Heart
+  Heart,
+  Upload,
+  X
 } from "lucide-react";
 import { useCMSStore } from "@/store/cmsStore";
 import { Button } from "@/components/ui/button";
@@ -47,6 +49,8 @@ export default function AdminCMSPage() {
   const [activeTab, setActiveTab] = useState<"hero" | "advantage">("hero");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<any>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
 
@@ -56,33 +60,72 @@ export default function AdminCMSPage() {
   }, [fetchCMSData]);
 
   const handleSave = async () => {
-    if (!formData.title || !formData.image) {
-      toast.error("Title and Image URL are required");
+    if (!formData.title || (!formData.image && !imageFile)) {
+      toast.error("Title and Image are required");
       return;
+    }
+
+    const payload = new FormData();
+    
+    // Proper field mapping for backend
+    if (activeTab === "hero") {
+      payload.append("title", formData.title);
+      payload.append("subtitle", formData.subtitle || "");
+      payload.append("bgColor", formData.bgColor || "");
+    } else {
+      payload.append("title", formData.title);
+      payload.append("description", formData.desc || "");
+      payload.append("icon_type", formData.iconType || "shield");
+    }
+    
+    // Prioritize the file if uploaded, otherwise use the existing URL/string
+    if (imageFile) {
+      payload.append("image", imageFile);
+    } else if (formData.image) {
+      payload.append("image", formData.image);
     }
 
     const loadingToast = toast.loading("Saving changes...");
     try {
       if (activeTab === "hero") {
         if (editingId === "new") {
-          await addHeroSlide(formData);
+          await addHeroSlide(payload as any);
         } else {
-          await updateHeroSlide(editingId!, formData);
+          await updateHeroSlide(editingId!, payload as any);
         }
       } else {
         if (editingId === "new") {
-          await addAdvantage(formData);
+          await addAdvantage(payload as any);
         } else {
-          await updateAdvantage(editingId!, formData);
+          await updateAdvantage(editingId!, payload as any);
         }
       }
       toast.success("Saved successfully", { id: loadingToast });
       setEditingId(null);
       setFormData({});
+      setImageFile(null);
+      setImagePreview(null);
     } catch (error) {
       toast.error("Failed to save changes", { id: loadingToast });
       console.error(error);
     }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearFile = () => {
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -148,6 +191,8 @@ export default function AdminCMSPage() {
               onClick={() => {
                 setEditingId("new");
                 setFormData(activeTab === "hero" ? { title: "", subtitle: "", image: "", bgColor: "from-[#1E1E1E] to-[#2a2a2a]" } : { title: "", desc: "", image: "", iconType: "shield" });
+                setImageFile(null);
+                setImagePreview(null);
               }}
               className="bg-[#10B981] hover:bg-[#059669] rounded-xl h-10 gap-2 font-bold"
             >
@@ -185,6 +230,8 @@ export default function AdminCMSPage() {
                     onClick={() => {
                       setEditingId(item.id);
                       setFormData({ ...item });
+                      setImageFile(null);
+                      setImagePreview(null);
                     }}
                     className="p-2.5 rounded-lg bg-[#1F2937] text-[#9CA3AF] hover:text-[#10B981] hover:bg-[#10B981]/10 transition-all border border-transparent hover:border-[#10B981]/20"
                   >
@@ -256,14 +303,58 @@ export default function AdminCMSPage() {
 
                     <div className="space-y-2">
                        <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest flex items-center gap-2">
-                         <ImageIcon size={12} /> Image URL
+                         <ImageIcon size={12} /> Image
                        </label>
-                       <input 
-                         type="text" 
-                         value={formData.image || ""} 
-                         onChange={(e) => setFormData({...formData, image: e.target.value})}
-                         className="w-full bg-[#0B0F14] border border-[#1F2937] rounded-xl px-4 py-3 text-white text-sm focus:border-[#10B981] outline-none transition-all"
-                       />
+                       
+                       <div className="space-y-3">
+                         {imagePreview ? (
+                           <div className="relative aspect-video rounded-xl overflow-hidden border border-[#1F2937] bg-black/40">
+                             <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                             <button 
+                               onClick={clearFile}
+                               className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-md"
+                             >
+                               <X size={14} />
+                             </button>
+                           </div>
+                         ) : formData.image ? (
+                            <div className="relative aspect-video rounded-xl overflow-hidden border border-[#1F2937] bg-black/40 group/img">
+                              <img src={formData.image} alt="Current" className="w-full h-full object-cover opacity-80" />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity">
+                                <label htmlFor="cms-image-upload" className="cursor-pointer bg-white/10 hover:bg-white/20 p-2 rounded-lg backdrop-blur-md text-white">
+                                  <Upload size={16} />
+                                </label>
+                              </div>
+                            </div>
+                         ) : (
+                           <label htmlFor="cms-image-upload" className="flex flex-col items-center justify-center aspect-video rounded-xl border border-dashed border-[#1F2937] bg-[#0B0F14] hover:border-[#10B981] transition-colors cursor-pointer group">
+                             <Upload size={24} className="text-[#374151] group-hover:text-[#10B981] transition-colors" />
+                             <span className="text-[10px] font-bold text-[#4B5563] mt-2">Click to upload</span>
+                           </label>
+                         )}
+                         
+                         <input 
+                           type="file" 
+                           id="cms-image-upload"
+                           className="hidden" 
+                           accept="image/*"
+                           onChange={handleFileChange}
+                         />
+                         
+                         <div className="flex items-center gap-2">
+                           <div className="h-px flex-1 bg-[#1F2937]" />
+                           <span className="text-[9px] font-bold text-[#374151] uppercase tracking-widest">Or URL</span>
+                           <div className="h-px flex-1 bg-[#1F2937]" />
+                         </div>
+
+                         <input 
+                           type="text" 
+                           value={formData.image || ""} 
+                           placeholder="https://..."
+                           onChange={(e) => setFormData({...formData, image: e.target.value})}
+                           className="w-full bg-[#0B0F14] border border-[#1F2937] rounded-xl px-4 py-2.5 text-white text-xs focus:border-[#10B981] outline-none transition-all"
+                         />
+                       </div>
                     </div>
 
                     {activeTab === "hero" ? (

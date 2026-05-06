@@ -88,12 +88,16 @@ export const useCMSStore = create<CMSState>((set, get) => ({
   },
 
   addHeroSlide: async (slide) => {
-    const { data } = await api.post('/cms/hero', slide);
+    let payload = slide;
+    // If it's already FormData (from component), pass as is
+    // Otherwise, it's a plain object (handled by Axios default)
+    const { data } = await api.post('/cms/hero', payload);
     set((state) => ({ heroSlides: [...state.heroSlides, data.data] }));
   },
 
   updateHeroSlide: async (id, updatedSlide) => {
-    const { data } = await api.put(`/cms/hero/${id}`, updatedSlide);
+    let payload = updatedSlide;
+    const { data } = await api.put(`/cms/hero/${id}`, payload);
     set((state) => ({
       heroSlides: state.heroSlides.map(s => s.id === id ? data.data : s)
     }));
@@ -107,12 +111,21 @@ export const useCMSStore = create<CMSState>((set, get) => ({
   },
 
   addAdvantage: async (item) => {
-    const { data } = await api.post('/cms/advantages', {
-      title: item.title,
-      description: item.desc,
-      image: item.image,
-      icon_type: item.iconType
-    });
+    let payload;
+    if (item instanceof FormData) {
+      payload = item;
+      // Handle field name mapping if needed (desc -> description, iconType -> icon_type)
+      // For FormData, we should ideally have done this in the component, 
+      // but let's ensure consistency here if possible or just pass through.
+    } else {
+      payload = {
+        title: item.title,
+        description: item.desc,
+        image: item.image,
+        icon_type: item.iconType
+      };
+    }
+    const { data } = await api.post('/cms/advantages', payload);
     set((state) => ({
       advantages: [...state.advantages, {
         id: data.data.id,
@@ -125,12 +138,18 @@ export const useCMSStore = create<CMSState>((set, get) => ({
   },
 
   updateAdvantage: async (id, updatedItem) => {
-    const { data } = await api.put(`/cms/advantages/${id}`, {
-      title: updatedItem.title,
-      description: updatedItem.desc,
-      image: updatedItem.image,
-      icon_type: updatedItem.iconType
-    });
+    let payload;
+    if (updatedItem instanceof FormData) {
+      payload = updatedItem;
+    } else {
+      payload = {
+        title: updatedItem.title,
+        description: updatedItem.desc,
+        image: updatedItem.image,
+        icon_type: updatedItem.iconType
+      };
+    }
+    const { data } = await api.put(`/cms/advantages/${id}`, payload);
     set((state) => ({
       advantages: state.advantages.map(a => a.id === id ? {
         id: data.data.id,

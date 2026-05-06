@@ -81,12 +81,18 @@ export function AdvantageCarousel() {
             >
               <div className="w-full md:w-2/3 h-[450px] md:h-[550px] rounded-[3rem] border border-white/5 relative overflow-hidden group shadow-2xl">
                  {/* Background Image */}
-                 <Image 
-                   src={item.image} 
-                   alt={item.title} 
-                   fill 
-                   className="object-cover transition-transform duration-700 group-hover:scale-105"
-                 />
+                 {typeof item.image === 'string' && item.image.length > 0 ? (
+                   <Image 
+                     src={item.image} 
+                     alt={item.title} 
+                     fill 
+                     className="object-cover transition-transform duration-700 group-hover:scale-105"
+                   />
+                 ) : (
+                   <div className="absolute inset-0 bg-gray-900 flex items-center justify-center text-white/10 italic">
+                     No Image Available
+                   </div>
+                 )}
                  {/* Dark Overlay Gradient */}
                  <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent`} />
                  <div className={`absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent`} />
@@ -109,7 +115,11 @@ export function AdvantageCarousel() {
                  {advantages.filter((_, idx) => idx !== current).slice(0, 2).map((other, idx) => (
                    <div key={other.id} className="p-8 rounded-[2.5rem] bg-white/5 border border-white/5 flex items-center gap-6 group hover:bg-white/10 transition-all cursor-pointer" onClick={() => setCurrent(advantages.indexOf(other))}>
                       <div className="w-16 h-16 rounded-2xl overflow-hidden relative shrink-0">
-                         <Image src={other.image} alt={other.title} fill className="object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                         {typeof other.image === 'string' && other.image.length > 0 ? (
+                           <Image src={other.image} alt={other.title} fill className="object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                         ) : (
+                           <div className="absolute inset-0 bg-gray-800" />
+                         )}
                       </div>
                       <div>
                         <h4 className="text-white font-black uppercase text-sm tracking-tight mb-1">{other.title}</h4>

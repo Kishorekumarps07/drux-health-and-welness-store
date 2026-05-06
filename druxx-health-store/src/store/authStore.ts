@@ -121,10 +121,19 @@ export const useAuthStore = create<AuthState>((set) => ({
     };
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      await syncUser(session?.user ?? null, session);
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.warn("Auth initialization warning:", error.message);
+        if (error.message.includes("Refresh Token Not Found") || error.status === 400) {
+          await supabase.auth.signOut();
+          await syncUser(null, null);
+        }
+      } else {
+        await syncUser(session?.user ?? null, session);
+      }
     } catch (error) {
-      console.error("Auth init error:", error);
+      console.error("Critical Auth init error:", error);
     } finally {
       set({ loading: false, isLoading: false, initialized: true });
     }

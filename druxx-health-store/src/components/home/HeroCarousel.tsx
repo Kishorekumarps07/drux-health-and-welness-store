@@ -55,14 +55,20 @@ export function HeroCarousel() {
           <div className={`relative w-full h-full bg-gradient-to-r ${s.bgColor} flex items-center`}>
             {/* Background image */}
             <div className="absolute inset-0">
-              <Image
-                src={s.image}
-                alt={s.title}
-                fill
-                className="object-cover opacity-20 object-top"
-                priority={i === 0}
-                sizes="100vw"
-              />
+              {typeof s.image === 'string' && s.image.length > 0 ? (
+                <Image
+                  src={s.image}
+                  alt={s.title}
+                  fill
+                  className="object-cover opacity-20 object-top"
+                  priority={i === 0}
+                  sizes="100vw"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gray-900 flex items-center justify-center text-white/10 italic">
+                  No Image Available
+                </div>
+              )}
             </div>
 
             {/* Amazon-style Bottom Fade */}

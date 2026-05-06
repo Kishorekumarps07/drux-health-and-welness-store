@@ -12,6 +12,7 @@ const reviewsRoutes    = require('../modules/reviews/reviews.routes');
 const adminRoutes      = require('../modules/admin/admin.routes');
 const paymentsRoutes   = require('../modules/payments/payments.routes');
 const cmsRoutes        = require('../modules/cms/cms.routes');
+const uploadRoutes     = require('../modules/upload/upload.routes');
 
 const router = Router();
 
@@ -42,5 +43,6 @@ router.use('/orders',      ordersRoutes);
 router.use('/payments',    paymentsRoutes);
 router.use('/admin',       adminRoutes);
 router.use('/cms',         cmsRoutes);
+router.use('/upload',      uploadRoutes);
 
 module.exports = router;

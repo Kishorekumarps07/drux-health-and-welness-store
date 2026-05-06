@@ -18,13 +18,33 @@ const getBySlug        = asyncHandler(async (req, res) => {
 });
 
 const create           = asyncHandler(async (req, res) => {
-  const product = await productsService.create(req.user.id, req.body);
+  const data = { ...req.body };
+  
+  if (req.files && req.files.length > 0) {
+    data.images = req.files.map((file, index) => ({
+      url: file.path,
+      isPrimary: index === 0,
+      sortOrder: index
+    }));
+  }
+
+  const product = await productsService.create(req.user.id, data);
   await clearCacheKeys('/products*');
   res.status(201).json({ status: 'success', data: { product } });
 });
 
 const update           = asyncHandler(async (req, res) => {
-  const product = await productsService.update(req.user.id, req.params.id, req.body);
+  const data = { ...req.body };
+  
+  if (req.files && req.files.length > 0) {
+    data.images = req.files.map((file, index) => ({
+      url: file.path,
+      isPrimary: index === 0,
+      sortOrder: index
+    }));
+  }
+
+  const product = await productsService.update(req.user.id, req.params.id, data);
   await clearCacheKeys('/products*');
   res.json({ status: 'success', data: { product } });
 });
