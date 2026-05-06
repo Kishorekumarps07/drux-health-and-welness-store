@@ -87,15 +87,41 @@ export function HeroCarousel() {
             {/* Subtle Overlay for text readability */}
             <div className="absolute inset-0 z-[1] bg-black/30" />
 
-            {/* Content */}
-            <div className="relative z-10 w-full px-0 md:px-12 py-6 md:py-10">
-              <div className="w-full px-6 sm:px-0 max-w-2xl">
-                <h1 className="font-heading font-black text-white text-2xl md:text-4xl leading-tight mb-3 whitespace-pre-line animate-fade-slide uppercase tracking-tighter">
+            {/* Content & Image Wrapper */}
+            <div className="relative z-10 w-full h-full flex flex-col md:flex-row items-center">
+              {/* Text Content (Left on Desktop) */}
+              <div className="w-full md:w-1/2 px-8 md:px-16 py-10 flex flex-col justify-center order-2 md:order-1 text-center md:text-left">
+                <h1 className="font-heading font-black text-white text-3xl md:text-5xl lg:text-6xl leading-[1.1] mb-4 animate-fade-slide uppercase tracking-tighter drop-shadow-lg">
                   {s.title}
                 </h1>
-                <p className="text-white/90 text-xs md:text-sm mb-5 leading-relaxed max-w-md animate-fade-slide font-medium">
+                <p className="text-white/90 text-sm md:text-lg mb-8 leading-relaxed max-w-md animate-fade-slide font-medium drop-shadow-md">
                   {s.subtitle}
                 </p>
+                <div className="mt-2">
+                   <button className="px-8 py-3 bg-[#A6D608] text-[#1E1E1E] font-bold rounded-full hover:bg-[#95c207] transition-all transform hover:scale-105 active:scale-95 shadow-lg">
+                     Shop Collection
+                   </button>
+                </div>
+              </div>
+
+              {/* Image Content (Right on Desktop) */}
+              <div className="w-full md:w-1/2 h-1/2 md:h-full relative order-1 md:order-2 p-6 md:p-12">
+                <div className="relative w-full h-full">
+                  {typeof s.image === 'string' && s.image.length > 0 ? (
+                    <Image
+                      src={s.image}
+                      alt={s.title}
+                      fill
+                      className="object-contain drop-shadow-2xl"
+                      priority={i === 0}
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-white/20 italic">
+                      No Image Available
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
