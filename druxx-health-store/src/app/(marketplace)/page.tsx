@@ -33,7 +33,7 @@ export default function HomePage() {
       <HeroCarousel />
       
       {/* Featured dynamic products with Amazon-style overlap */}
-      <div className="-mt-16 md:-mt-28 relative z-20 mx-auto max-w-7xl px-4 md:px-6">
+      <div className="-mt-10 md:-mt-12 relative z-20 mx-auto max-w-7xl px-4 md:px-6">
         <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-gray-200/50 overflow-hidden border border-gray-100">
            <FeaturedProducts />
         </div>

@@ -72,8 +72,8 @@ export function HeroCarousel() {
             <div className="relative z-20 w-full h-full max-w-[1400px] mx-auto flex flex-col md:flex-row items-center justify-between px-6 md:px-12">
               
               {/* Left Column: Typography & CTA */}
-              <div className="w-full md:w-[45%] flex flex-col justify-center order-2 md:order-1 text-center md:text-left py-8 md:py-0">
-                <div className="glass-panel p-8 md:p-12 rounded-[2.5rem] border border-white/5 animate-fade-slide">
+              <div className="w-full md:w-[45%] flex flex-col justify-center order-2 md:order-1 text-center md:text-left py-12 md:py-0">
+                <div className="glass-panel p-8 md:p-12 pb-16 md:pb-16 rounded-[2.5rem] border border-white/5 animate-fade-slide">
                   <span className="inline-block px-4 py-1.5 rounded-full bg-[#A6D608]/10 text-[#A6D608] text-xs font-bold tracking-[0.2em] mb-6 uppercase border border-[#A6D608]/20">
                     Premium Selection
                   </span>
