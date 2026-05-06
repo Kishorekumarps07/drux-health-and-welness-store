@@ -14,7 +14,6 @@ export default function MediaManagerPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
