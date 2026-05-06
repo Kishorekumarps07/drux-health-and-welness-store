@@ -60,7 +60,7 @@ export function HeroCarousel() {
                   src={s.image}
                   alt={s.title}
                   fill
-                  className="object-cover opacity-20 object-top"
+                  className="object-cover object-top"
                   priority={i === 0}
                   sizes="100vw"
                 />
@@ -71,8 +71,8 @@ export function HeroCarousel() {
               )}
             </div>
 
-            {/* Amazon-style Bottom Fade */}
-            <div className="absolute inset-0 z-[5] pointer-events-none bg-gradient-to-t from-white via-white/20 to-transparent" />
+            {/* Subtle Overlay for text readability */}
+            <div className="absolute inset-0 z-[1] bg-black/30" />
 
             {/* Content */}
             <div className="relative z-10 w-full px-0 md:px-12 py-6 md:py-10">
