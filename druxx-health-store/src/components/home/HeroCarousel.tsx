@@ -39,7 +39,7 @@ export function HeroCarousel() {
 
   return (
     <div
-      className="relative w-full overflow-hidden h-[600px] md:h-auto md:aspect-[21/8] lg:aspect-[21/7] rounded-[2rem] md:rounded-[3rem] shadow-2xl"
+      className="relative w-full overflow-hidden aspect-[4/5] md:aspect-[21/8] lg:aspect-[21/7] rounded-[2rem] md:rounded-[3rem] shadow-2xl"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       id="hero-carousel"
@@ -52,65 +52,78 @@ export function HeroCarousel() {
             i === current ? "opacity-100 z-10" : "opacity-0 z-0"
           }`}
         >
-          <div className="relative w-full h-full bg-[#0A0A0A] flex items-center overflow-hidden">
+          <div className="relative w-full h-full bg-[#0A0A0A] overflow-hidden">
             
-            {/* Dynamic Immersive Background */}
-            <div className="absolute inset-0 z-0 overflow-hidden">
+            {/* Immersive Background: Cover on Mobile, Blur + Contain on Desktop */}
+            <div className="absolute inset-0 z-0">
               {typeof s.image === 'string' && s.image.length > 0 ? (
-                <Image
-                  src={s.image}
-                  alt=""
-                  fill
-                  className="object-cover blur-[120px] opacity-40 scale-150"
-                  aria-hidden="true"
-                />
-              ) : null}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,255,255,0.1),transparent_50%)] md:bg-[radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
-              <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/80 to-transparent z-[1]" />
+                <>
+                  {/* Mobile Background (Sharp Cover) */}
+                  <div className="block md:hidden absolute inset-0">
+                    <Image
+                      src={s.image}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      priority={i === 0}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                  </div>
+
+                  {/* Desktop Background (Immersive Blur) */}
+                  <div className="hidden md:block absolute inset-0">
+                    <Image
+                      src={s.image}
+                      alt=""
+                      fill
+                      className="object-cover blur-[100px] opacity-30 scale-125"
+                    />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.05),transparent_50%)]" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/60 to-transparent" />
+                  </div>
+                </>
+              ) : (
+                <div className="absolute inset-0 bg-[#0A0A0A]" />
+              )}
             </div>
 
-            {/* Main Content Layout */}
-            <div className="relative z-10 w-full h-full max-w-[1400px] mx-auto flex flex-col md:flex-row items-center px-6 md:px-16 pt-12 md:pt-0">
+            {/* Content Layout */}
+            <div className="relative z-10 w-full h-full max-w-[1400px] mx-auto flex flex-col md:flex-row items-end md:items-center px-6 md:px-16 pb-20 md:pb-0">
               
               {/* Text Area */}
-              <div className="w-full md:w-1/2 flex flex-col justify-center order-2 md:order-1 text-center md:text-left z-20 mt-4 md:mt-0">
+              <div className="w-full md:w-1/2 flex flex-col justify-center text-left z-20">
                 <div className="animate-fade-slide">
-                  <span className="inline-block px-3 py-1 rounded-full bg-white/5 text-white/50 text-[9px] font-bold tracking-[0.2em] mb-4 md:mb-8 uppercase border border-white/10">
+                  <span className="hidden md:inline-block px-3 py-1 rounded-full bg-white/10 text-white/50 text-[10px] font-bold tracking-[0.2em] mb-6 uppercase border border-white/10">
                     Druxx Exclusive
                   </span>
-                  <h1 className="font-heading font-black text-white text-4xl md:text-7xl lg:text-8xl leading-[1.0] mb-4 md:mb-6 tracking-tighter uppercase italic">
+                  <h1 className="font-heading font-black text-white text-4xl md:text-6xl lg:text-8xl leading-[1.0] mb-4 md:mb-6 tracking-tighter uppercase italic">
                     {s.title}
                   </h1>
-                  <p className="text-white/40 text-sm md:text-2xl mb-8 md:mb-12 leading-relaxed max-w-[280px] md:max-w-md mx-auto md:mx-0 font-light tracking-wide">
+                  <p className="text-white/60 text-sm md:text-xl mb-8 md:mb-10 leading-relaxed max-w-[260px] md:max-w-md font-medium tracking-wide">
                     {s.subtitle}
                   </p>
-                  <div className="flex justify-center md:justify-start">
-                    <button className="group relative px-10 py-4 md:px-12 md:py-5 bg-white text-black font-black rounded-full transition-all hover:bg-[#A6D608] hover:scale-105 active:scale-95 shadow-2xl">
-                      <span className="relative z-10 flex items-center gap-3 tracking-widest text-[10px] md:text-xs">
+                  <div className="flex">
+                    <button className="group relative px-10 py-3.5 md:px-12 md:py-5 bg-[#A6D608] text-[#1E1E1E] font-black rounded-full transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#A6D608]/20">
+                      <span className="relative z-10 flex items-center gap-3 tracking-widest text-[11px] md:text-xs">
                         EXPLORE NOW
-                        <ChevronRight className="group-hover:translate-x-1 transition-transform" size={16} />
+                        <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                       </span>
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* Image Area */}
-              <div className="w-full md:w-1/2 h-[35%] md:h-[80%] relative order-1 md:order-2 flex items-center justify-center">
-                <div className="relative w-full h-full group">
-                  {typeof s.image === 'string' && s.image.length > 0 ? (
+              {/* Desktop Product Visual */}
+              <div className="hidden md:flex w-1/2 h-[80%] relative items-center justify-center">
+                <div className="relative w-full h-full">
+                  {typeof s.image === 'string' && s.image.length > 0 && (
                     <Image
                       src={s.image}
                       alt={s.title}
                       fill
-                      className="object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.8)] animate-float scale-110 md:scale-100"
+                      className="object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.7)] animate-float"
                       priority={i === 0}
-                      sizes="(max-width: 768px) 100vw, 50vw"
                     />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white/5 text-6xl md:text-9xl font-black italic">
-                      DRUX
-                    </div>
                   )}
                 </div>
               </div>
@@ -120,7 +133,7 @@ export function HeroCarousel() {
       ))}
 
       {/* Navigation Arrows */}
-      <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 z-30 flex justify-between pointer-events-none">
+      <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 z-30 hidden md:flex justify-between pointer-events-none">
         <button
           onClick={prev}
           className="pointer-events-auto w-12 h-12 rounded-full glass-panel flex items-center justify-center text-white hover:bg-[#A6D608] hover:text-black transition-all group shadow-xl"
