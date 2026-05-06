@@ -35,11 +35,11 @@ export function HeroCarousel() {
     return () => clearInterval(timer);
   }, [isPaused, next, heroSlides.length, mounted]);
 
-  if (!mounted || heroSlides.length === 0) return <div className="w-full h-[300px] md:h-[420px] bg-[#1E1E1E] animate-pulse rounded-xl" />;
+  if (!mounted || heroSlides.length === 0) return <div className="w-full aspect-[4/3] md:aspect-[21/7] lg:aspect-[21/6] bg-[#1E1E1E] animate-pulse rounded-xl" />;
 
   return (
     <div
-      className="relative w-full overflow-hidden h-[300px] md:h-[420px]"
+      className="relative w-full overflow-hidden aspect-[4/3] md:aspect-[21/7] lg:aspect-[21/6]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       id="hero-carousel"
