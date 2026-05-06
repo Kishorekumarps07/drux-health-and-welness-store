@@ -39,7 +39,7 @@ export function HeroCarousel() {
 
   return (
     <div
-      className="relative w-full overflow-hidden aspect-[4/3] md:aspect-[21/7] lg:aspect-[21/6]"
+      className="relative w-full overflow-hidden aspect-[16/10] md:aspect-[21/8] lg:aspect-[21/7] rounded-[2rem] md:rounded-[3rem] shadow-2xl"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       id="hero-carousel"
@@ -48,77 +48,67 @@ export function HeroCarousel() {
       {heroSlides.map((s, i) => (
         <div
           key={s.id}
-          className={`absolute inset-0 transition-opacity duration-700 ${
+          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
             i === current ? "opacity-100 z-10" : "opacity-0 z-0"
           }`}
         >
-          <div className={`relative w-full h-full bg-gradient-to-r ${s.bgColor} flex items-center`}>
-            {/* Blurred Background Layer (for the "blur corners" effect) */}
-            <div className="absolute inset-0 overflow-hidden">
+          <div className="relative w-full h-full bg-[#121212] flex items-center overflow-hidden">
+            
+            {/* Premium Immersive Background */}
+            <div className="absolute inset-0 z-0 scale-110 pointer-events-none">
               {typeof s.image === 'string' && s.image.length > 0 ? (
                 <Image
                   src={s.image}
                   alt=""
                   fill
-                  className="object-cover blur-2xl scale-110 opacity-50"
+                  className="object-cover blur-[80px] opacity-30"
                   aria-hidden="true"
                 />
               ) : null}
+              <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-transparent to-black/40" />
             </div>
 
-            {/* Main Image Layer (Fit as per resolution) */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              {typeof s.image === 'string' && s.image.length > 0 ? (
-                <Image
-                  src={s.image}
-                  alt={s.title}
-                  fill
-                  className="object-contain z-[2]"
-                  priority={i === 0}
-                  sizes="100vw"
-                />
-              ) : (
-                <div className="absolute inset-0 bg-gray-900 flex items-center justify-center text-white/10 italic">
-                  No Image Available
-                </div>
-              )}
-            </div>
-
-            {/* Subtle Overlay for text readability */}
-            <div className="absolute inset-0 z-[1] bg-black/30" />
-
-            {/* Content & Image Wrapper */}
-            <div className="relative z-10 w-full h-full flex flex-col md:flex-row items-center">
-              {/* Text Content (Left on Desktop) */}
-              <div className="w-full md:w-1/2 px-8 md:px-16 py-10 flex flex-col justify-center order-2 md:order-1 text-center md:text-left">
-                <h1 className="font-heading font-black text-white text-3xl md:text-5xl lg:text-6xl leading-[1.1] mb-4 animate-fade-slide uppercase tracking-tighter drop-shadow-lg">
-                  {s.title}
-                </h1>
-                <p className="text-white/90 text-sm md:text-lg mb-8 leading-relaxed max-w-md animate-fade-slide font-medium drop-shadow-md">
-                  {s.subtitle}
-                </p>
-                <div className="mt-2">
-                   <button className="px-8 py-3 bg-[#A6D608] text-[#1E1E1E] font-bold rounded-full hover:bg-[#95c207] transition-all transform hover:scale-105 active:scale-95 shadow-lg">
-                     Shop Collection
-                   </button>
+            {/* Split Content Wrapper */}
+            <div className="relative z-20 w-full h-full max-w-[1400px] mx-auto flex flex-col md:flex-row items-center justify-between px-6 md:px-12">
+              
+              {/* Left Column: Typography & CTA */}
+              <div className="w-full md:w-[45%] flex flex-col justify-center order-2 md:order-1 text-center md:text-left py-8 md:py-0">
+                <div className="glass-panel p-8 md:p-12 rounded-[2.5rem] border border-white/5 animate-fade-slide">
+                  <span className="inline-block px-4 py-1.5 rounded-full bg-[#A6D608]/10 text-[#A6D608] text-xs font-bold tracking-[0.2em] mb-6 uppercase border border-[#A6D608]/20">
+                    Premium Selection
+                  </span>
+                  <h1 className="font-heading font-black text-white text-4xl md:text-6xl lg:text-7xl leading-[1.05] mb-6 tracking-tighter uppercase">
+                    {s.title}
+                  </h1>
+                  <p className="text-white/70 text-base md:text-xl mb-10 leading-relaxed font-medium max-w-sm mx-auto md:mx-0">
+                    {s.subtitle}
+                  </p>
+                  <div className="flex justify-center md:justify-start">
+                    <button className="group relative px-12 py-5 bg-[#A6D608] text-[#1E1E1E] font-black rounded-full transition-all hover:scale-105 active:scale-95 shadow-[0_15px_30px_rgba(166,214,8,0.3)]">
+                      <span className="relative z-10 flex items-center gap-3">
+                        SHOP NOW
+                        <ChevronRight className="group-hover:translate-x-1 transition-transform" size={22} />
+                      </span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {/* Image Content (Right on Desktop) */}
-              <div className="w-full md:w-1/2 h-1/2 md:h-full relative order-1 md:order-2 p-6 md:p-12">
-                <div className="relative w-full h-full">
+              {/* Right Column: Hero Visual */}
+              <div className="w-full md:w-[50%] h-[40%] md:h-[85%] relative order-1 md:order-2 flex items-center justify-center pt-8 md:pt-0">
+                <div className="relative w-full h-full animate-float">
                   {typeof s.image === 'string' && s.image.length > 0 ? (
                     <Image
                       src={s.image}
                       alt={s.title}
                       fill
-                      className="object-contain drop-shadow-2xl"
+                      className="object-contain drop-shadow-[0_35px_60px_rgba(0,0,0,0.6)]"
                       priority={i === 0}
                       sizes="(max-width: 768px) 100vw, 50vw"
                     />
                   ) : (
-                    <div className="flex items-center justify-center h-full text-white/20 italic">
-                      No Image Available
+                    <div className="w-full h-full flex items-center justify-center bg-white/5 rounded-3xl border border-white/10 text-white/20">
+                      No Visual
                     </div>
                   )}
                 </div>
@@ -128,31 +118,30 @@ export function HeroCarousel() {
         </div>
       ))}
 
-      {/* Arrows */}
-      <button
-        onClick={prev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/10 hover:bg-white/30 flex items-center justify-center text-white transition-all backdrop-blur-sm"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft size={18} />
-      </button>
-      <button
-        onClick={next}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/10 hover:bg-white/30 flex items-center justify-center text-white transition-all backdrop-blur-sm"
-        aria-label="Next slide"
-      >
-        <ChevronRight size={18} />
-      </button>
+      {/* Navigation Arrows */}
+      <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 z-30 flex justify-between pointer-events-none">
+        <button
+          onClick={prev}
+          className="pointer-events-auto w-12 h-12 rounded-full glass-panel flex items-center justify-center text-white hover:bg-[#A6D608] hover:text-black transition-all group shadow-xl"
+        >
+          <ChevronLeft className="group-hover:-translate-x-0.5 transition-transform" size={24} />
+        </button>
+        <button
+          onClick={next}
+          className="pointer-events-auto w-12 h-12 rounded-full glass-panel flex items-center justify-center text-white hover:bg-[#A6D608] hover:text-black transition-all group shadow-xl"
+        >
+          <ChevronRight className="group-hover:translate-x-0.5 transition-transform" size={24} />
+        </button>
+      </div>
 
-      {/* Dot indicators */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+      {/* Progress Indicators */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3">
         {heroSlides.map((_, i) => (
           <button
             key={i}
             onClick={() => setCurrent(i)}
-            aria-label={`Go to slide ${i + 1}`}
-            className={`transition-all duration-300 rounded-full ${
-              i === current ? "w-6 h-1.5 bg-[#A6D608]" : "w-1.5 h-1.5 bg-white/40 hover:bg-white/70"
+            className={`h-2 rounded-full transition-all duration-500 ${
+              i === current ? "w-10 bg-[#A6D608]" : "w-2 bg-white/20 hover:bg-white/40"
             }`}
           />
         ))}
