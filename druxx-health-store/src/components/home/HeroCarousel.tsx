@@ -53,14 +53,27 @@ export function HeroCarousel() {
           }`}
         >
           <div className={`relative w-full h-full bg-gradient-to-r ${s.bgColor} flex items-center`}>
-            {/* Background image */}
-            <div className="absolute inset-0">
+            {/* Blurred Background Layer (for the "blur corners" effect) */}
+            <div className="absolute inset-0 overflow-hidden">
+              {typeof s.image === 'string' && s.image.length > 0 ? (
+                <Image
+                  src={s.image}
+                  alt=""
+                  fill
+                  className="object-cover blur-2xl scale-110 opacity-50"
+                  aria-hidden="true"
+                />
+              ) : null}
+            </div>
+
+            {/* Main Image Layer (Fit as per resolution) */}
+            <div className="absolute inset-0 flex items-center justify-center">
               {typeof s.image === 'string' && s.image.length > 0 ? (
                 <Image
                   src={s.image}
                   alt={s.title}
                   fill
-                  className="object-cover object-top"
+                  className="object-contain z-[2]"
                   priority={i === 0}
                   sizes="100vw"
                 />
