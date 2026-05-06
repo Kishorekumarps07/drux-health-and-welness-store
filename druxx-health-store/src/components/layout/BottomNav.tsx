@@ -28,12 +28,11 @@ export function BottomNav() {
   if (!mounted) return null;
 
   return (
-    <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50">
+    <div className="lg:hidden fixed bottom-0 left-0 w-full z-50">
       <nav 
-        className="rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-white/10 backdrop-blur-2xl px-2 py-2 flex items-center justify-between relative overflow-hidden"
+        className="bg-[#121212]/95 backdrop-blur-2xl border-t border-white/10 px-4 py-2 pb-safe flex items-center justify-between relative overflow-hidden"
         style={{ 
-          background: "linear-gradient(110deg, rgba(30, 30, 30, 0.7) 0%, rgba(30, 30, 30, 0.85) 50%, rgba(30, 30, 30, 0.7) 100%)",
-          boxShadow: "0 20px 50px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1)"
+          boxShadow: "0 -4px 20px rgba(0,0,0,0.3)"
         }}
       >
         {navItems.map((item) => {
@@ -57,10 +56,10 @@ export function BottomNav() {
                 <Icon 
                   size={20} 
                   strokeWidth={isActive ? 3 : 2} 
-                  className={isActive ? "drop-shadow-[0_0_10px_rgba(166,214,8,0.4)]" : ""} 
+                  className={isActive ? "drop-shadow-[0_0_10px_rgba(166,214,8,0.4)]" : "opacity-60"} 
                 />
                 <span className={`text-[10px] font-bold uppercase tracking-tight mt-1 truncate max-w-[50px] ${
-                  isActive ? "text-[#A6D608]" : "text-gray-900"
+                  isActive ? "text-[#A6D608]" : "text-white/40"
                 }`}>
                   {item.label}
                 </span>
@@ -88,7 +87,7 @@ export function BottomNav() {
               </span>
             )}
             <span className={`text-[10px] font-bold uppercase tracking-tight mt-1 ${
-              totalItemsCount > 0 ? "text-[#FF7A00]" : "text-gray-900"
+              totalItemsCount > 0 ? "text-[#FF7A00]" : "text-white/40"
             }`}>
               Cart
             </span>
