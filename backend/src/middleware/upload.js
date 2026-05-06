@@ -13,7 +13,7 @@ const createStorage = (folder) => {
     cloudinary: cloudinary,
     params: {
       folder: `druxx/${folder}`,
-      allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+      allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'avif', 'gif'],
       transformation: [{ width: 1000, height: 1000, crop: 'limit' }],
     },
   });
