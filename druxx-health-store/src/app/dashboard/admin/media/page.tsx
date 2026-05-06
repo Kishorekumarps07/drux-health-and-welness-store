@@ -5,7 +5,7 @@ import { Upload, Copy, Check, Image as ImageIcon, X, Loader2 } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import api from "@/lib/api";
 
 export default function MediaManagerPage() {
@@ -14,7 +14,7 @@ export default function MediaManagerPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -45,16 +45,13 @@ export default function MediaManagerPage() {
 
       if (response.data.status === "success") {
         setUploadedUrl(response.data.data.url);
-        toast({
-          title: "Upload Successful",
+        toast.success("Upload Successful", {
           description: "Image has been uploaded to Cloudinary.",
         });
       }
     } catch (error: any) {
-      toast({
-        title: "Upload Failed",
+      toast.error("Upload Failed", {
         description: error.response?.data?.message || "Something went wrong",
-        variant: "destructive",
       });
     } finally {
       setUploading(false);
@@ -66,10 +63,7 @@ export default function MediaManagerPage() {
       navigator.clipboard.writeText(uploadedUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      toast({
-        title: "Copied!",
-        description: "URL copied to clipboard.",
-      });
+      toast.success("Copied to clipboard!");
     }
   };
 
