@@ -39,7 +39,7 @@ export function HeroCarousel() {
 
   return (
     <div
-      className="relative w-full overflow-hidden aspect-[16/10] md:aspect-[21/8] lg:aspect-[21/7] rounded-[2rem] md:rounded-[3rem] shadow-2xl"
+      className="relative w-full overflow-hidden h-[600px] md:h-auto md:aspect-[21/8] lg:aspect-[21/7] rounded-[2rem] md:rounded-[3rem] shadow-2xl"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       id="hero-carousel"
@@ -54,7 +54,7 @@ export function HeroCarousel() {
         >
           <div className="relative w-full h-full bg-[#0A0A0A] flex items-center overflow-hidden">
             
-            {/* Dynamic Immersive Background (Radial Glow) */}
+            {/* Dynamic Immersive Background */}
             <div className="absolute inset-0 z-0 overflow-hidden">
               {typeof s.image === 'string' && s.image.length > 0 ? (
                 <Image
@@ -65,54 +65,50 @@ export function HeroCarousel() {
                   aria-hidden="true"
                 />
               ) : null}
-              {/* Radial gradient to create a "spotlight" on the product */}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/80 to-transparent z-[1]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,255,255,0.1),transparent_50%)] md:bg-[radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
+              <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/80 to-transparent z-[1]" />
             </div>
 
             {/* Main Content Layout */}
-            <div className="relative z-10 w-full h-full max-w-[1400px] mx-auto flex flex-col md:flex-row items-center px-8 md:px-16 gap-12">
+            <div className="relative z-10 w-full h-full max-w-[1400px] mx-auto flex flex-col md:flex-row items-center px-6 md:px-16 pt-12 md:pt-0">
               
-              {/* Text Area: Minimalist & Bold */}
-              <div className="w-full md:w-1/2 flex flex-col justify-center order-2 md:order-1 text-center md:text-left z-20">
+              {/* Text Area */}
+              <div className="w-full md:w-1/2 flex flex-col justify-center order-2 md:order-1 text-center md:text-left z-20 mt-4 md:mt-0">
                 <div className="animate-fade-slide">
-                  <span className="inline-block px-4 py-1 rounded-full bg-white/5 text-white/50 text-[10px] font-bold tracking-[0.3em] mb-8 uppercase border border-white/10">
+                  <span className="inline-block px-3 py-1 rounded-full bg-white/5 text-white/50 text-[9px] font-bold tracking-[0.2em] mb-4 md:mb-8 uppercase border border-white/10">
                     Druxx Exclusive
                   </span>
-                  <h1 className="font-heading font-black text-white text-5xl md:text-7xl lg:text-8xl leading-[0.95] mb-6 tracking-tighter uppercase italic">
+                  <h1 className="font-heading font-black text-white text-4xl md:text-7xl lg:text-8xl leading-[1.0] mb-4 md:mb-6 tracking-tighter uppercase italic">
                     {s.title}
                   </h1>
-                  <p className="text-white/40 text-lg md:text-2xl mb-12 leading-relaxed max-w-md font-light tracking-wide">
+                  <p className="text-white/40 text-sm md:text-2xl mb-8 md:mb-12 leading-relaxed max-w-[280px] md:max-w-md mx-auto md:mx-0 font-light tracking-wide">
                     {s.subtitle}
                   </p>
                   <div className="flex justify-center md:justify-start">
-                    <button className="group relative px-12 py-5 bg-white text-black font-black rounded-full transition-all hover:bg-[#A6D608] hover:scale-105 active:scale-95 shadow-2xl">
-                      <span className="relative z-10 flex items-center gap-3 tracking-widest text-xs">
+                    <button className="group relative px-10 py-4 md:px-12 md:py-5 bg-white text-black font-black rounded-full transition-all hover:bg-[#A6D608] hover:scale-105 active:scale-95 shadow-2xl">
+                      <span className="relative z-10 flex items-center gap-3 tracking-widest text-[10px] md:text-xs">
                         EXPLORE NOW
-                        <ChevronRight className="group-hover:translate-x-1 transition-transform" size={18} />
+                        <ChevronRight className="group-hover:translate-x-1 transition-transform" size={16} />
                       </span>
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* Image Area: Floating & Clean */}
-              <div className="w-full md:w-1/2 h-1/2 md:h-[80%] relative order-1 md:order-2 flex items-center justify-center pt-8 md:pt-0">
+              {/* Image Area */}
+              <div className="w-full md:w-1/2 h-[35%] md:h-[80%] relative order-1 md:order-2 flex items-center justify-center">
                 <div className="relative w-full h-full group">
-                  {/* Subtle Glow behind product */}
-                  <div className="absolute inset-0 bg-[#A6D608]/10 blur-[100px] rounded-full scale-75 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-                  
                   {typeof s.image === 'string' && s.image.length > 0 ? (
                     <Image
                       src={s.image}
                       alt={s.title}
                       fill
-                      className="object-contain drop-shadow-[0_50px_100px_rgba(0,0,0,0.8)] animate-float scale-90 md:scale-100"
+                      className="object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.8)] animate-float scale-110 md:scale-100"
                       priority={i === 0}
                       sizes="(max-width: 768px) 100vw, 50vw"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white/5 text-9xl font-black italic">
+                    <div className="w-full h-full flex items-center justify-center text-white/5 text-6xl md:text-9xl font-black italic">
                       DRUX
                     </div>
                   )}
