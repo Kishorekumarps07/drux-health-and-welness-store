@@ -26,6 +26,14 @@ import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import { VendorHighlights } from "@/components/home/VendorHighlights";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { AdvantageCarousel } from "@/components/home/AdvantageCarousel";
+import { motion } from "framer-motion";
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 30 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-100px" },
+  transition: { duration: 0.8, ease: "easeOut" }
+};
 
 export default function HomePage() {
   return (
@@ -33,20 +41,30 @@ export default function HomePage() {
       <HeroCarousel />
       
       {/* Featured dynamic products */}
-      <div className="relative z-20 mx-auto max-w-7xl px-4 md:px-6 py-8">
+      <motion.div 
+        {...fadeInUp}
+        className="relative z-20 mx-auto max-w-7xl px-4 md:px-6 py-8"
+      >
         <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-gray-200/50 overflow-hidden border border-gray-100">
            <FeaturedProducts />
         </div>
-      </div>
+      </motion.div>
 
       {/* The Drux Advantage Carousel */}
-      <AdvantageCarousel />
+      <motion.div {...fadeInUp}>
+        <AdvantageCarousel />
+      </motion.div>
 
       {/* Vendor highlights */}
-      <VendorHighlights />
+      <motion.div {...fadeInUp}>
+        <VendorHighlights />
+      </motion.div>
 
       {/* Newsletter section */}
-      <section className="py-12 px-4 bg-gradient-to-r from-[#A6D608]/10 to-[#2CA7A0]/10 border-t border-[#A6D608]/20">
+      <motion.section 
+        {...fadeInUp}
+        className="py-12 px-4 bg-gradient-to-r from-[#A6D608]/10 to-[#2CA7A0]/10 border-t border-[#A6D608]/20"
+      >
         <div className="max-w-xl mx-auto text-center">
           <h2 className="font-heading font-bold text-2xl text-[#1E1E1E] mb-2">
             Stay Healthy, Stay Updated
@@ -68,7 +86,7 @@ export default function HomePage() {
             Join 50,000+ fitness enthusiasts
           </p>
         </div>
-      </section>
+      </motion.section>
     </>
   );
 }

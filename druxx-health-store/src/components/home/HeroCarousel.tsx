@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, MousePointer2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useCMSStore } from "@/store/cmsStore";
 
 export function HeroCarousel() {
@@ -39,7 +40,7 @@ export function HeroCarousel() {
 
   return (
     <div
-      className="relative w-full overflow-hidden aspect-[4/5] md:aspect-[21/8] lg:aspect-[21/7] rounded-[2rem] md:rounded-[3rem]"
+      className="relative w-full overflow-hidden aspect-[4/5] md:aspect-[21/8] lg:aspect-[21/7] rounded-[2rem] md:rounded-[3rem] shadow-xl border border-gray-100"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       id="hero-carousel"
@@ -52,69 +53,117 @@ export function HeroCarousel() {
             i === current ? "opacity-100 z-10" : "opacity-0 z-0"
           }`}
         >
-          <div className="relative w-full h-full bg-[#0F0F0F] overflow-hidden">
+          <div className="relative w-full h-full bg-[#F9F9F9] overflow-hidden">
             
-            {/* Image Layer: Always Full Fit (Contain) */}
-            <div className="absolute inset-0 z-0 flex items-center justify-center p-4 md:p-12">
-               {typeof s.image === 'string' && s.image.length > 0 ? (
-                  <div className="relative w-full h-full">
+            {/* Layer 1: Soft Light Immersive Background */}
+            <div className="absolute inset-0 z-0">
+              {/* Subtle background color based on slide (optional) or just soft white */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white via-[#F3F4F6] to-[#E5E7EB]" />
+              
+              {/* Soft blurred accent of the image */}
+              {typeof s.image === 'string' && s.image.length > 0 ? (
+                <Image
+                  src={s.image}
+                  alt=""
+                  fill
+                  className="object-cover blur-[140px] opacity-20 scale-150"
+                />
+              ) : null}
+            </div>
+
+            {/* Content Layout */}
+            <div className="relative z-10 w-full h-full max-w-[1400px] mx-auto flex flex-col md:flex-row items-center px-8 md:px-16">
+              
+              {/* Text Area (Deep Charcoal Typography) */}
+              <div className="w-full md:w-1/2 flex flex-col justify-center text-left pt-12 md:pt-0">
+                <div className="animate-fade-slide">
+                  <span className="inline-block px-3 py-1 rounded-full bg-black/5 text-black/40 text-[10px] font-bold tracking-[0.2em] mb-6 uppercase border border-black/5">
+                    Premium Quality
+                  </span>
+                  <h1 className="font-heading font-black text-[#1A1A1A] text-5xl md:text-6xl lg:text-8xl leading-[0.9] mb-6 tracking-tighter uppercase italic">
+                    {s.title}
+                  </h1>
+                  <p className="text-[#4A4A4A] text-base md:text-xl mb-10 leading-relaxed max-w-[280px] md:max-w-md font-medium tracking-wide">
+                    {s.subtitle}
+                  </p>
+                </div>
+              </div>
+
+              {/* Product Visual */}
+              <div className="w-full md:w-1/2 h-[50%] md:h-[80%] relative flex items-center justify-center">
+                <div className="relative w-full h-full p-4 md:p-8">
+                  {typeof s.image === 'string' && s.image.length > 0 && (
                     <Image
                       src={s.image}
                       alt={s.title}
                       fill
-                      className="object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
+                      className="object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.12)] animate-float"
                       priority={i === 0}
                     />
-                  </div>
-                ) : null}
-            </div>
-
-            {/* Subtle Gradient Overlay for Text Readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-[1]" />
-
-            {/* Content Overlay */}
-            <div className="relative z-10 w-full h-full max-w-[1400px] mx-auto flex flex-col justify-end p-8 md:p-16">
-              <div className="animate-fade-slide">
-                <h1 className="font-heading font-black text-white text-4xl md:text-7xl lg:text-8xl leading-[0.95] mb-2 md:mb-4 tracking-tighter uppercase italic drop-shadow-lg">
-                  {s.title}
-                </h1>
-                <p className="text-white/60 text-sm md:text-xl font-medium tracking-wide max-w-md drop-shadow-md">
-                  {s.subtitle}
-                </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
       ))}
 
-      {/* Navigation Arrows */}
-      <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 z-30 hidden md:flex justify-between pointer-events-none">
+      {/* Navigation Arrows (Light Glass Style) */}
+      <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 z-30 hidden md:flex justify-between pointer-events-none">
         <button
           onClick={prev}
-          className="pointer-events-auto w-12 h-12 rounded-full glass-panel flex items-center justify-center text-white hover:bg-[#A6D608] hover:text-black transition-all group shadow-xl"
+          className="pointer-events-auto w-14 h-14 rounded-full border border-gray-200 bg-white/70 backdrop-blur-xl flex items-center justify-center text-[#1A1A1A] hover:bg-[#A6D608] hover:border-[#A6D608] transition-all group shadow-lg"
         >
           <ChevronLeft className="group-hover:-translate-x-0.5 transition-transform" size={24} />
         </button>
         <button
           onClick={next}
-          className="pointer-events-auto w-12 h-12 rounded-full glass-panel flex items-center justify-center text-white hover:bg-[#A6D608] hover:text-black transition-all group shadow-xl"
+          className="pointer-events-auto w-14 h-14 rounded-full border border-gray-200 bg-white/70 backdrop-blur-xl flex items-center justify-center text-[#1A1A1A] hover:bg-[#A6D608] hover:border-[#A6D608] transition-all group shadow-lg"
         >
           <ChevronRight className="group-hover:translate-x-0.5 transition-transform" size={24} />
         </button>
       </div>
 
-      {/* Progress Indicators */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3">
+      {/* Modern Progress Line */}
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 flex items-center gap-4">
         {heroSlides.map((_, i) => (
           <button
             key={i}
             onClick={() => setCurrent(i)}
-            className={`h-2 rounded-full transition-all duration-500 ${
-              i === current ? "w-10 bg-[#A6D608]" : "w-2 bg-white/20 hover:bg-white/40"
+            className={`h-1.5 rounded-full transition-all duration-700 ${
+              i === current ? "w-16 bg-[#A6D608]" : "w-4 bg-black/10 hover:bg-black/20"
             }`}
           />
         ))}
       </div>
+
+      {/* State-of-the-Art Scroll Indicator */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5, duration: 1 }}
+        className="absolute bottom-24 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-6 pointer-events-none hidden md:flex"
+      >
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-[1.5px] h-16 bg-black/[0.05] relative overflow-hidden rounded-full">
+            <motion.div 
+              animate={{ 
+                y: [-64, 64],
+                opacity: [0, 1, 0]
+              }}
+              transition={{ 
+                duration: 2, 
+                repeat: Infinity, 
+                ease: "easeInOut" 
+              }}
+              className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-transparent via-[#A6D608] to-transparent shadow-[0_0_10px_rgba(166,214,8,0.6)]"
+            />
+          </div>
+          <span className="text-[8px] font-black text-black/25 tracking-[0.6em] uppercase ml-[0.6em]">
+            Explore
+          </span>
+        </div>
+      </motion.div>
     </div>
   );
 }
