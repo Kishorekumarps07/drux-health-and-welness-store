@@ -120,6 +120,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                 {product.images && product.images.length > 0 && (/\.(mp4|webm|mov|ogg)$/i.test(product.images[selectedImage]) || product.images[selectedImage].includes('/video/upload/') || (product.images[selectedImage].includes('res.cloudinary.com') && product.images[selectedImage].includes('/video/'))) ? (
                   <video
                     src={product.images[selectedImage]}
+                    poster={product.images[selectedImage].replace(/\.(mp4|webm|mov|ogg)$/i, ".jpg").replace('/video/upload/', '/video/upload/so_auto/')}
                     autoPlay
                     muted
                     loop

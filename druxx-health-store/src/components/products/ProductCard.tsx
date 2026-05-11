@@ -113,6 +113,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
               isHovered ? (
                 <video
                   src={product.images[0]}
+                  poster={getThumbnail(product.images[0])}
                   autoPlay
                   muted
                   loop

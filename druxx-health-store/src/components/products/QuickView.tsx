@@ -53,6 +53,7 @@ export function QuickView({ product, open, onOpenChange }: QuickViewProps) {
               {product.images[0] && (/\.(mp4|webm|mov|ogg)$/i.test(product.images[0]) || product.images[0].includes('/video/upload/') || (product.images[0].includes('res.cloudinary.com') && product.images[0].includes('/video/'))) ? (
                 <video
                   src={product.images[0]}
+                  poster={product.images[0].replace(/\.(mp4|webm|mov|ogg)$/i, ".jpg").replace('/video/upload/', '/video/upload/so_auto/')}
                   autoPlay
                   muted
                   loop

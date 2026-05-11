@@ -895,3 +895,20 @@ Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
 ⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
 ⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
 ⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+ GET / 200 in 239ms (next.js: 37ms, application-code: 202ms)
+ GET / 200 in 405ms (next.js: 5ms, application-code: 400ms)
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+✓ Compiled in 176ms
+ GET /products/test-2 200 in 91ms (next.js: 57ms, application-code: 34ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+✓ Compiled in 169ms
+ GET /products/test6-testing-continue 200 in 33ms (next.js: 10ms, application-code: 23ms)
+✓ Compiled in 193ms
+ GET /products/test6-testing-continue 200 in 71ms (next.js: 33ms, application-code: 38ms)
