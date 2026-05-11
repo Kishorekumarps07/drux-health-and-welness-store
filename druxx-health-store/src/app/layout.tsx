@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Lexend } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -9,11 +9,11 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { SessionManager } from "@/components/auth/SessionManager";
 import { Toaster } from "sonner";
 
-const inter = Inter({
-  variable: "--font-inter",
+const lexend = Lexend({
+  variable: "--font-lexend",
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -46,7 +46,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} font-sans`} suppressHydrationWarning>
+    <html lang="en" className={`${lexend.variable} font-sans`} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col bg-white text-gray-900 antialiased" suppressHydrationWarning>
         <Suspense fallback={null}>
           <main className="flex-1">{children}</main>

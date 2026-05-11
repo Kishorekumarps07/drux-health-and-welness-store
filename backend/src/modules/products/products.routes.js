@@ -16,8 +16,8 @@ router.get('/:id',        cacheResponse(300), getById);
 // Vendor-protected
 router.use(protect, restrictTo('VENDOR', 'ADMIN'));
 router.get('/vendor/my',      getVendorProducts);
-router.post('/',              productUpload.array('images', 10), validate(productSchema), create);
-router.put('/:id',            productUpload.array('images', 10), validate(updateProductSchema), update);
+router.post('/',              productUpload.array('images', 3), validate(productSchema), create);
+router.put('/:id',            productUpload.array('images', 3), validate(updateProductSchema), update);
 router.delete('/:id',         remove);
 
 module.exports = router;

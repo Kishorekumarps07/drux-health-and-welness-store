@@ -381,12 +381,7 @@ function FilterSidebar({
   onClear: () => void;
 }) {
   const { setCategory, categories: storeCategories } = useMarketplaceStore();
-  const categories = storeCategories.length > 0 ? storeCategories : [
-    { id: "1", name: "Vitamins", slug: "vitamins", icon: "💊", productCount: 120 },
-    { id: "2", name: "Supplements", slug: "supplements", icon: "🧴", productCount: 85 },
-    { id: "3", name: "Organic Food", slug: "organic-food", icon: "🥦", productCount: 64 },
-    { id: "4", name: "Herbal", slug: "herbal", icon: "🌿", productCount: 42 }
-  ];
+  const categories = storeCategories.length > 0 ? storeCategories : [];
 
   return (
     <div className="space-y-8">

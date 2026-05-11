@@ -25,6 +25,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+const isVideo = (url: string) => /\.(mp4|webm|mov|ogg)$/i.test(url) || url.includes('/video/upload/');
+
 const iconOptions = [
   { value: "shield", label: "Shield", icon: ShieldCheck },
   { value: "smartphone", label: "Smartphone", icon: Smartphone },
@@ -310,7 +312,11 @@ export default function AdminCMSPage() {
                        <div className="space-y-3">
                          {imagePreview ? (
                            <div className="relative aspect-video rounded-xl overflow-hidden border border-[#1F2937] bg-black/40">
-                             <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                             {isVideo(imageFile?.name || "") ? (
+                               <video src={imagePreview} className="w-full h-full object-cover" autoPlay muted loop />
+                             ) : (
+                               <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                             )}
                              <button 
                                onClick={clearFile}
                                className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-md"
@@ -320,7 +326,11 @@ export default function AdminCMSPage() {
                            </div>
                          ) : formData.image ? (
                             <div className="relative aspect-video rounded-xl overflow-hidden border border-[#1F2937] bg-black/40 group/img">
-                              <img src={formData.image} alt="Current" className="w-full h-full object-cover opacity-80" />
+                              {isVideo(formData.image) ? (
+                                <video src={formData.image} className="w-full h-full object-cover opacity-80" autoPlay muted loop />
+                              ) : (
+                                <img src={formData.image} alt="Current" className="w-full h-full object-cover opacity-80" />
+                              )}
                               <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity">
                                 <label htmlFor="cms-image-upload" className="cursor-pointer bg-white/10 hover:bg-white/20 p-2 rounded-lg backdrop-blur-md text-white">
                                   <Upload size={16} />
@@ -338,7 +348,7 @@ export default function AdminCMSPage() {
                            type="file" 
                            id="cms-image-upload"
                            className="hidden" 
-                           accept="image/*"
+                           accept="image/*,video/*"
                            onChange={handleFileChange}
                          />
                          

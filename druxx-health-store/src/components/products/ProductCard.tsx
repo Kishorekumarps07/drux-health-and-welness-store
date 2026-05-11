@@ -22,6 +22,16 @@ import { Product } from "@/types";
 import { QuickView } from "./QuickView";
 import { cn } from "@/lib/utils";
 
+const isVideo = (url: string) => url ? (/\.(mp4|webm|mov|ogg)$/i.test(url) || url.includes('/video/upload/') || (url.includes('res.cloudinary.com') && url.includes('/video/'))) : false;
+const getThumbnail = (url: string) => {
+  if (!url) return "/placeholder.png";
+  if (isVideo(url)) {
+    // Cloudinary video thumbnail trick: replace extension with .jpg and add auto start offset
+    return url.replace(/\.(mp4|webm|mov|ogg)$/i, ".jpg").replace('/video/upload/', '/video/upload/so_auto/');
+  }
+  return url;
+};
+
 interface ProductCardProps {
   product: Product;
   className?: string;
@@ -85,7 +95,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
         className={cn(
-          "group relative bg-white rounded-2xl sm:rounded-2xl p-2.5 sm:p-4 border border-gray-100 transition-all duration-200",
+          "group relative bg-white rounded-2xl sm:rounded-2xl p-1.5 sm:p-4 border border-gray-100 transition-all duration-200",
           "hover:shadow-xl hover:border-gray-200 cursor-pointer flex flex-col h-full",
           className
         )}
@@ -99,13 +109,34 @@ export function ProductCard({ product, className }: ProductCardProps) {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="relative w-full h-full p-2 sm:p-4"
           >
-            <Image
-              src={product.images?.[0] || "/placeholder-product.png"}
-              alt={product.name}
-              fill
-              className="object-contain"
-              sizes="(max-width: 768px) 50vw, 25vw"
-            />
+            {product.images?.[0] && isVideo(product.images[0]) ? (
+              isHovered ? (
+                <video
+                  src={product.images[0]}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-full h-full object-contain rounded-lg"
+                />
+              ) : (
+                <Image
+                  src={getThumbnail(product.images[0])}
+                  alt={product.name || "Product Image"}
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                />
+              )
+            ) : (
+              <Image
+                src={product.images?.[0] || "/placeholder.png"}
+                alt={product.name || "Product Image"}
+                fill
+                className="object-contain"
+                sizes="(max-width: 768px) 50vw, 25vw"
+              />
+            )}
           </motion.div>
 
           {/* Badges */}
@@ -154,13 +185,13 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
         {/* Product Details */}
         <div className="flex flex-col flex-1 relative z-1 pointer-events-none">
-          <div className="flex items-center justify-between mb-0.5 sm:mb-1">
-            <span className="text-[12px] sm:text-[11px] font-bold text-gray-800 uppercase tracking-widest truncate">
+          <div className="flex items-center justify-between mb-0.5">
+            <span className="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate italic">
               {product.vendor?.name || "Druxx Seller"}
             </span>
           </div>
 
-          <h3 className="text-xs sm:text-base font-medium text-gray-900 line-clamp-2 leading-tight min-h-[1.75rem] sm:min-h-[2.5rem] mb-1.5 sm:mb-2 group-hover:text-[#A6D608] transition-colors">
+          <h3 className="text-sm sm:text-lg font-black text-[#1E1E1E] line-clamp-2 leading-tight min-h-[2.5rem] sm:min-h-[3rem] mb-1 sm:mb-2 group-hover:text-[#A6D608] transition-colors tracking-tight">
             {product.name}
           </h3>
 

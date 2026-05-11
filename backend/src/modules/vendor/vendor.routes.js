@@ -61,10 +61,15 @@ router.get('/me', getMyVendorProfile);
  */
 router.get('/payments', getPayments);
 
+const { vendorUpload } = require('../../middleware/upload');
+
 /**
  * @route   PATCH /api/v1/vendor/profile
  * @desc    Update vendor profile settings
  */
-router.patch('/profile', updateProfile);
+router.patch('/profile', vendorUpload.fields([
+  { name: 'logo', maxCount: 1 },
+  { name: 'banner', maxCount: 1 }
+]), updateProfile);
 
 module.exports = router;

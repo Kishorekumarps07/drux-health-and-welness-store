@@ -111,7 +111,14 @@ const getPayments = asyncHandler(async (req, res) => {
  * @access  Private (Vendor)
  */
 const updateProfile = asyncHandler(async (req, res) => {
-  const vendor = await vendorProfileService.updateProfile(req.user.id, req.body);
+  const data = { ...req.body };
+  
+  if (req.files) {
+    if (req.files.logo) data.storeLogo = req.files.logo[0].path;
+    if (req.files.banner) data.storeBanner = req.files.banner[0].path;
+  }
+
+  const vendor = await vendorProfileService.updateProfile(req.user.id, data);
   res.status(200).json({
     status: 'success',
     data: { vendor }

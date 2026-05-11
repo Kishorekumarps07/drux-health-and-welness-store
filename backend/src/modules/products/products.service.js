@@ -77,8 +77,12 @@ class ProductsService {
       throw new AppError('Your vendor account is not yet approved.', 403);
     }
 
-    const skuExists = await prisma.product.findUnique({ where: { sku: data.sku } });
-    if (skuExists) throw new AppError('A product with this SKU already exists.', 409);
+    if (data.sku) {
+      const skuExists = await prisma.product.findUnique({ where: { sku: data.sku } });
+      if (skuExists) throw new AppError('A product with this SKU already exists.', 409);
+    } else {
+      data.sku = `DRX-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    }
 
     const baseSlug = slugify(data.title, { lower: true, strict: true });
     let slug = baseSlug;
@@ -89,14 +93,28 @@ class ProductsService {
 
     const { images, ...productData } = data;
 
-    return prisma.product.create({
+    const product = await prisma.product.create({
       data: { 
         ...productData, 
         vendorId: vendor.id, 
-        slug,
-        ...(images && { images: { create: images } })
-      },
-      include: PRODUCT_INCLUDE,
+        slug
+      }
+    });
+
+    if (images && images.length > 0) {
+      await prisma.productImage.createMany({
+        data: images.map(img => ({
+          url: img.url,
+          isPrimary: img.isPrimary || false,
+          sortOrder: img.sortOrder || 0,
+          productId: product.id
+        }))
+      });
+    }
+
+    return prisma.product.findUnique({
+      where: { id: product.id },
+      include: PRODUCT_INCLUDE
     });
   }
 
@@ -109,21 +127,27 @@ class ProductsService {
 
     const { images, ...productData } = data;
 
-    // If new images are provided, we'll replace existing ones for simplicity in this version
-    if (images) {
+    // If new images are provided, we'll replace existing ones
+    if (images && images.length > 0) {
       const existingImages = await prisma.productImage.findMany({ where: { productId } });
       for (const img of existingImages) {
         await deleteImageByUrl(img.url);
       }
       await prisma.productImage.deleteMany({ where: { productId } });
+      
+      await prisma.productImage.createMany({
+        data: images.map(img => ({
+          url: img.url,
+          isPrimary: img.isPrimary || false,
+          sortOrder: img.sortOrder || 0,
+          productId
+        }))
+      });
     }
 
     return prisma.product.update({ 
       where: { id: productId }, 
-      data: {
-        ...productData,
-        ...(images && { images: { create: images } })
-      }, 
+      data: productData, 
       include: PRODUCT_INCLUDE 
     });
   }

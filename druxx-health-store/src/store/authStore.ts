@@ -81,18 +81,20 @@ export const useAuthStore = create<AuthState>((set) => ({
               }
             });
           } else {
-            // Fallback to basic user info if profile fetch fails
+            // Fallback to metadata if profile fetch fails (e.g. RLS)
+            const metaRole = sUser.user_metadata?.role || "CUSTOMER";
             set({ 
               supabaseUser: sUser,
               accessToken,
               isAuthenticated: true,
               user: {
                 id: sUser.id,
-                name: sUser.email?.split('@')[0] || "User",
+                name: sUser.user_metadata?.full_name || sUser.email?.split('@')[0] || "User",
                 email: sUser.email || "",
-                roles: ["CUSTOMER"],
-                isAdmin: false,
-                isVendor: false,
+                roles: ["CUSTOMER", metaRole],
+                activeRole: metaRole,
+                isAdmin: metaRole === 'ADMIN',
+                isVendor: metaRole === 'VENDOR',
                 addresses: []
               }
             });
@@ -154,12 +156,19 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ mismatchError: null });
         return true;
       }
+
+      // 1. Try metadata first (fast, bypasses RLS)
+      const metadataRole = data.user.user_metadata?.role;
+      
+      // 2. Try Database profile
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
-      if (profile?.role !== requiredRole && profile?.role !== 'ADMIN') {
+      const finalRole = profile?.role || metadataRole || 'CUSTOMER';
+
+      if (finalRole !== requiredRole && finalRole !== 'ADMIN') {
         await supabase.auth.signOut();
         set({ 
           mismatchError: {
-            message: `This account is a ${profile?.role || 'CUSTOMER'}. You need a ${requiredRole} account to login here.`,
+            message: `This account is a ${finalRole}. You need a ${requiredRole} account to login here.`,
             link: requiredRole === 'VENDOR' ? '/vendor/register' : '/login',
             cta: requiredRole === 'VENDOR' ? 'Create a Customer Login' : 'Go to Customer Login'
           } 

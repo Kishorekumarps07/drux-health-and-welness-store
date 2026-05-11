@@ -6,6 +6,8 @@ import { ChevronLeft, ChevronRight, MousePointer2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCMSStore } from "@/store/cmsStore";
 
+const isVideo = (url: string) => /\.(mp4|webm|mov|ogg)$/i.test(url) || url.includes('/video/upload/');
+
 export function HeroCarousel() {
   const heroSlides = useCMSStore((state) => state.heroSlides);
   const fetchCMSData = useCMSStore((state) => state.fetchCMSData);
@@ -60,14 +62,24 @@ export function HeroCarousel() {
               {/* Subtle background color based on slide (optional) or just soft white */}
               <div className="absolute inset-0 bg-gradient-to-br from-white via-[#F3F4F6] to-[#E5E7EB]" />
               
-              {/* Soft blurred accent of the image */}
+              {/* Soft blurred accent of the image/video */}
               {typeof s.image === 'string' && s.image.length > 0 ? (
-                <Image
-                  src={s.image}
-                  alt=""
-                  fill
-                  className="object-cover blur-[140px] opacity-20 scale-150"
-                />
+                isVideo(s.image) ? (
+                   <video
+                    src={s.image}
+                    autoPlay
+                    muted
+                    loop
+                    className="absolute inset-0 w-full h-full object-cover blur-[140px] opacity-20 scale-150"
+                  />
+                ) : (
+                  <Image
+                    src={s.image}
+                    alt=""
+                    fill
+                    className="object-cover blur-[140px] opacity-20 scale-150"
+                  />
+                )
               ) : null}
             </div>
 
@@ -93,13 +105,24 @@ export function HeroCarousel() {
               <div className="w-full md:w-1/2 h-[50%] md:h-[80%] relative flex items-center justify-center">
                 <div className="relative w-full h-full p-4 md:p-8">
                   {typeof s.image === 'string' && s.image.length > 0 && (
-                    <Image
-                      src={s.image}
-                      alt={s.title}
-                      fill
-                      className="object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.12)] animate-float"
-                      priority={i === 0}
-                    />
+                    isVideo(s.image) ? (
+                      <video
+                        src={s.image}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        className="w-full h-full object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.12)] animate-float"
+                      />
+                    ) : (
+                      <Image
+                        src={s.image}
+                        alt={s.title}
+                        fill
+                        className="object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.12)] animate-float"
+                        priority={i === 0}
+                      />
+                    )
                   )}
                 </div>
               </div>
@@ -137,33 +160,6 @@ export function HeroCarousel() {
         ))}
       </div>
 
-      {/* State-of-the-Art Scroll Indicator */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="absolute bottom-24 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-6 pointer-events-none hidden md:flex"
-      >
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-[1.5px] h-16 bg-black/[0.05] relative overflow-hidden rounded-full">
-            <motion.div 
-              animate={{ 
-                y: [-64, 64],
-                opacity: [0, 1, 0]
-              }}
-              transition={{ 
-                duration: 2, 
-                repeat: Infinity, 
-                ease: "easeInOut" 
-              }}
-              className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-transparent via-[#A6D608] to-transparent shadow-[0_0_10px_rgba(166,214,8,0.6)]"
-            />
-          </div>
-          <span className="text-[8px] font-black text-black/25 tracking-[0.6em] uppercase ml-[0.6em]">
-            Explore
-          </span>
-        </div>
-      </motion.div>
     </div>
   );
 }

@@ -24,6 +24,7 @@ const mapBackendProduct = (p: any): Product => {
     images: p.images && p.images.length > 0 ? p.images.map((img: any) => img.url) : ["/placeholder.png"],
     category: p.category?.name || "Uncategorized",
     categorySlug: p.category?.slug || "uncategorized",
+    categoryId: p.categoryId,
     vendor: {
       id: p.vendor?.id || "",
       name: p.vendor?.storeName || "Druxx Seller",
@@ -70,7 +71,9 @@ export const productService = {
 
   async getProductBySlug(slug: string) {
     const response = await api.get(`/products/slug/${slug}`);
-    return mapBackendProduct(response.data);
+    // Backend returns { status: 'success', data: { product: { ... } } }
+    const productData = response.data.data?.product || response.data;
+    return mapBackendProduct(productData);
   },
 
   async getFeatured() {
@@ -78,7 +81,7 @@ export const productService = {
   },
 
   async getBestSellers() {
-    return this.getAllProducts({ limit: 10 });
+    return this.getAllProducts({ sort: 'best-seller', limit: 10 });
   },
 
   async getNewArrivals() {
@@ -87,5 +90,10 @@ export const productService = {
 
   async getReviews(productId: string) {
     return [];
+  },
+
+  async getCategories() {
+    const response = await api.get('/categories');
+    return response.data.data?.categories || [];
   },
 };

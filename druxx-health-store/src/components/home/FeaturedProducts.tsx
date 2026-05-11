@@ -16,7 +16,7 @@ interface ProductGridProps {
 
 function ProductGrid({ products }: ProductGridProps) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6">
       {products.map((product) => (
         <ProductCard key={product.id} product={product as any} />
       ))}
@@ -52,7 +52,7 @@ export function FeaturedProducts() {
   }, []);
 
   return (
-    <section className="py-10 sm:py-12 px-2.5 sm:px-10">
+    <section className="py-10 sm:py-12 px-1 sm:px-10">
       <div className="w-full">
         {/* Header */}
         <div className="flex flex-row items-end justify-between gap-4 mb-8 sm:mb-12">
@@ -72,27 +72,29 @@ export function FeaturedProducts() {
 
 
         {/* Tabs */}
-        <Tabs defaultValue="featured" className="w-full px-4 sm:px-0">
-          <TabsList className="bg-gray-100/50 p-1 rounded-2xl mb-10 w-fit">
-            <TabsTrigger
-              value="featured"
-              className="rounded-xl px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-[12px] uppercase tracking-widest"
-            >
-              Featured
-            </TabsTrigger>
-            <TabsTrigger
-              value="bestsellers"
-              className="rounded-xl px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-[12px] uppercase tracking-widest"
-            >
-              🔥 Best Sellers
-            </TabsTrigger>
-            <TabsTrigger
-              value="new"
-              className="rounded-xl px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-[12px] uppercase tracking-widest"
-            >
-              ✨ New Arrivals
-            </TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="featured" className="w-full">
+          <div className="w-full overflow-x-auto hide-scrollbar mb-8 sm:mb-12">
+            <TabsList className="bg-gray-100/50 p-1 rounded-2xl flex w-fit min-w-full sm:min-w-0">
+              <TabsTrigger
+                value="featured"
+                className="rounded-xl px-6 sm:px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-[10px] sm:text-[12px] uppercase tracking-widest whitespace-nowrap"
+              >
+                Featured
+              </TabsTrigger>
+              <TabsTrigger
+                value="bestsellers"
+                className="rounded-xl px-6 sm:px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-[10px] sm:text-[12px] uppercase tracking-widest whitespace-nowrap"
+              >
+                🔥 Best Sellers
+              </TabsTrigger>
+              <TabsTrigger
+                value="new"
+                className="rounded-xl px-6 sm:px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-[10px] sm:text-[12px] uppercase tracking-widest whitespace-nowrap"
+              >
+                ✨ New Arrivals
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="featured" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
              {loading ? <SkeletonGrid /> : <ProductGrid products={featured} />}

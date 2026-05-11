@@ -1,0 +1,897 @@
+
+> druxx-health-store@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.2 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.12:3000
+- Environments: .env.local
+✓ Ready in 327ms
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/mythiljo/drux-health-and-welness-store/package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /Users/mythiljo/drux-health-and-welness-store/druxx-health-store/package-lock.json
+
+
+ GET / 200 in 454ms (next.js: 121ms, application-code: 333ms)
+ HEAD / 200 in 56ms (next.js: 4ms, application-code: 52ms)
+[browser] Image with src "/logo.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+⚠ The requested resource "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" is an animated image so it will not be optimized. Consider adding the "unoptimized" property to the <Image>.
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+⨯ upstream image response failed for https://images.unsplash.com/photo-1471864190281-ad5fe9bb0724?q=80&w=800 404
+⨯ upstream image response failed for https://images.unsplash.com/photo-1590779033100-9f60705a013d?q=80&w=800 404
+ GET / 200 in 86ms (next.js: 5ms, application-code: 80ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+⨯ upstream image response failed for https://images.unsplash.com/photo-1590779033100-9f60705a013d?q=80&w=800 404
+⨯ upstream image response failed for https://images.unsplash.com/photo-1471864190281-ad5fe9bb0724?q=80&w=800 404
+ GET /dashboard/admin 200 in 1535ms (next.js: 1474ms, application-code: 62ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] Failed to fetch dashboard stats: AxiosError: Request failed with status code 401
+    at async Object.getDashboardStats (src/services/adminService.ts:6:24)
+    at async fetchData (src/app/dashboard/admin/page.tsx:47:60)
+  4 |   async getDashboardStats() {
+  5 |     try {
+> 6 |       const response = await api.get('/admin/analytics/overview');
+    |                        ^
+  7 |       return response.data.data?.stats || { revenue: 0, growth: 0, vendors: 0, users: 0, or...
+  8 |     } catch (err) {
+  9 |       console.error("Failed to fetch dashboard stats:", err); (src/services/adminService.ts:9:15)
+[browser] Failed to fetch revenue analytics: AxiosError: Request failed with status code 401
+    at async Object.getRevenueAnalytics (src/services/adminService.ts:58:24)
+    at async fetchData (src/app/dashboard/admin/page.tsx:47:60)
+  56 |   async getRevenueAnalytics(range = '7d') {
+  57 |     try {
+> 58 |       const response = await api.get('/admin/analytics/revenue', { params: { range } });
+     |                        ^
+  59 |       return response.data.data || [];
+  60 |     } catch (err) {
+  61 |       console.error("Failed to fetch revenue analytics:", err); (src/services/adminService.ts:61:15)
+[browser] Failed to fetch orders: AxiosError: Request failed with status code 401
+    at async Object.listAllOrders (src/services/adminService.ts:37:24)
+    at async fetchData (src/app/dashboard/admin/page.tsx:47:60)
+  35 |   async listAllOrders(params?: any) {
+  36 |     try {
+> 37 |       const response = await api.get('/admin/orders', { params });
+     |                        ^
+  38 |       return {
+  39 |         status: "success",
+  40 |         orders: response.data.orders || [], (src/services/adminService.ts:46:15)
+[browser] Failed to fetch dashboard stats: AxiosError: Request failed with status code 401
+    at async Object.getDashboardStats (src/services/adminService.ts:6:24)
+    at async fetchData (src/app/dashboard/admin/page.tsx:47:60)
+  4 |   async getDashboardStats() {
+  5 |     try {
+> 6 |       const response = await api.get('/admin/analytics/overview');
+    |                        ^
+  7 |       return response.data.data?.stats || { revenue: 0, growth: 0, vendors: 0, users: 0, or...
+  8 |     } catch (err) {
+  9 |       console.error("Failed to fetch dashboard stats:", err); (src/services/adminService.ts:9:15)
+[browser] Failed to fetch activity feed: AxiosError: Request failed with status code 401
+    at async Object.getActivityFeed (src/services/adminService.ts:78:24)
+    at async fetchData (src/app/dashboard/admin/page.tsx:47:60)
+  76 |   async getActivityFeed() {
+  77 |     try {
+> 78 |       const response = await api.get('/admin/analytics/activity');
+     |                        ^
+  79 |       return response.data.data || [];
+  80 |     } catch (err) {
+  81 |       console.error("Failed to fetch activity feed:", err); (src/services/adminService.ts:81:15)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] Failed to fetch orders: AxiosError: Request failed with status code 401
+    at async Object.listAllOrders (src/services/adminService.ts:37:24)
+    at async fetchData (src/app/dashboard/admin/page.tsx:47:60)
+  35 |   async listAllOrders(params?: any) {
+  36 |     try {
+> 37 |       const response = await api.get('/admin/orders', { params });
+     |                        ^
+  38 |       return {
+  39 |         status: "success",
+  40 |         orders: response.data.orders || [], (src/services/adminService.ts:46:15)
+[browser] Failed to fetch revenue analytics: AxiosError: Request failed with status code 401
+    at async Object.getRevenueAnalytics (src/services/adminService.ts:58:24)
+    at async fetchData (src/app/dashboard/admin/page.tsx:47:60)
+  56 |   async getRevenueAnalytics(range = '7d') {
+  57 |     try {
+> 58 |       const response = await api.get('/admin/analytics/revenue', { params: { range } });
+     |                        ^
+  59 |       return response.data.data || [];
+  60 |     } catch (err) {
+  61 |       console.error("Failed to fetch revenue analytics:", err); (src/services/adminService.ts:61:15)
+[browser] Failed to fetch activity feed: AxiosError: Request failed with status code 401
+    at async Object.getActivityFeed (src/services/adminService.ts:78:24)
+    at async fetchData (src/app/dashboard/admin/page.tsx:47:60)
+  76 |   async getActivityFeed() {
+  77 |     try {
+> 78 |       const response = await api.get('/admin/analytics/activity');
+     |                        ^
+  79 |       return response.data.data || [];
+  80 |     } catch (err) {
+  81 |       console.error("Failed to fetch activity feed:", err); (src/services/adminService.ts:81:15)
+ GET /login?redirect=%2Fdashboard%2Fadmin 200 in 642ms (next.js: 466ms, application-code: 177ms)
+ GET /login?expired=true 200 in 433ms (next.js: 251ms, application-code: 183ms)
+ GET /admin/login 200 in 746ms (next.js: 657ms, application-code: 89ms)
+ GET /dashboard/admin 200 in 39ms (next.js: 9ms, application-code: 31ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /vendor/login 200 in 567ms (next.js: 451ms, application-code: 116ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "/merchant-saas-illustration.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET /dashboard/admin/cms 200 in 407ms (next.js: 380ms, application-code: 26ms)
+ GET / 200 in 51ms (next.js: 25ms, application-code: 26ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+⨯ upstream image response failed for https://images.unsplash.com/photo-1471864190281-ad5fe9bb0724?q=80&w=800 404
+⨯ upstream image response failed for https://images.unsplash.com/photo-1590779033100-9f60705a013d?q=80&w=800 404
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+ GET /dashboard/admin 200 in 48ms (next.js: 12ms, application-code: 36ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /dashboard/admin/cms 200 in 27ms (next.js: 6ms, application-code: 21ms)
+ GET / 200 in 52ms (next.js: 13ms, application-code: 38ms)
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+⨯ upstream image response failed for https://images.unsplash.com/photo-1471864190281-ad5fe9bb0724?q=80&w=800 404
+⨯ upstream image response failed for https://images.unsplash.com/photo-1590779033100-9f60705a013d?q=80&w=800 404
+✓ Compiled in 474ms
+ GET /vendor/login 200 in 77ms (next.js: 9ms, application-code: 68ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "/merchant-saas-illustration.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET /vendor/login 200 in 92ms (next.js: 15ms, application-code: 76ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "/merchant-saas-illustration.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 105ms (next.js: 13ms, application-code: 91ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+ GET /vendor/login 200 in 78ms (next.js: 13ms, application-code: 65ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "/merchant-saas-illustration.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 237ms
+✓ Compiled in 54ms
+ GET /dashboard/vendor 200 in 1223ms (next.js: 1171ms, application-code: 52ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] User is not linked to a vendor account. (src/services/vendorService.ts:143:15)
+[browser] User is not linked to a vendor account. (src/services/vendorService.ts:143:15)
+ GET /dashboard/vendor/inventory/add 404 in 337ms (next.js: 311ms, application-code: 25ms)
+ GET /dashboard/vendor/inventory/add 404 in 66ms (next.js: 5ms, application-code: 61ms)
+ GET /dashboard/vendor 200 in 116ms (next.js: 5ms, application-code: 111ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] User is not linked to a vendor account. (src/services/vendorService.ts:143:15)
+[browser] User is not linked to a vendor account. (src/services/vendorService.ts:143:15)
+ GET /dashboard/vendor/inventory 200 in 435ms (next.js: 412ms, application-code: 23ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+✓ Compiled in 82ms
+✓ Compiled in 62ms
+ GET /dashboard/vendor/inventory 200 in 81ms (next.js: 18ms, application-code: 63ms)
+✓ Compiled in 69ms
+✓ Compiled in 90ms
+ GET /dashboard/vendor/inventory 200 in 113ms (next.js: 24ms, application-code: 89ms)
+ GET /dashboard/vendor/inventory 200 in 40ms (next.js: 1276µs, application-code: 39ms)
+ GET /dashboard/vendor/inventory 200 in 46ms (next.js: 1917µs, application-code: 44ms)
+✓ Compiled in 137ms
+✓ Compiled in 270ms
+✓ Compiled in 42ms
+✓ Compiled in 186ms
+ GET /dashboard/vendor/inventory 200 in 157ms (next.js: 80ms, application-code: 77ms)
+ GET /dashboard/vendor/inventory 200 in 73ms (next.js: 38ms, application-code: 34ms)
+✓ Compiled in 66ms
+✓ Compiled in 104ms
+✓ Compiled in 61ms
+✓ Compiled in 58ms
+✓ Compiled in 227ms
+✓ Compiled in 54ms
+✓ Compiled in 176ms
+✓ Compiled in 222ms
+✓ Compiled in 134ms
+✓ Compiled in 178ms
+✓ Compiled in 46ms
+✓ Compiled in 56ms
+✓ Compiled in 450ms
+✓ Compiled in 50ms
+✓ Compiled in 88ms
+✓ Compiled in 61ms
+✓ Compiled in 37ms
+✓ Compiled in 45ms
+✓ Compiled in 72ms
+ GET /dashboard/vendor/inventory 200 in 279ms (next.js: 23ms, application-code: 256ms)
+ GET / 200 in 67ms (next.js: 31ms, application-code: 35ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 69ms
+✓ Compiled in 52ms
+✓ Compiled in 40ms
+ GET / 200 in 183ms (next.js: 25ms, application-code: 158ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "/placeholder.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+ GET /dashboard/vendor 200 in 45ms (next.js: 17ms, application-code: 28ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /products?category=Fitness+Equipment 200 in 1338ms (next.js: 1306ms, application-code: 32ms)
+ GET /dashboard/vendor/inventory 200 in 25ms (next.js: 6ms, application-code: 19ms)
+[browser] Uncaught TypeError: Cannot read properties of undefined (reading 'includes')
+    at isVideo (src/app/dashboard/vendor/inventory/page.tsx:29:76)
+    at <unknown> (src/app/dashboard/vendor/inventory/page.tsx:632:30)
+    at Array.map (<anonymous>)
+    at VendorInventoryPage (src/app/dashboard/vendor/inventory/page.tsx:630:53)
+  27 | ...
+  28 | ...
+> 29 | ... /\.(mp4|webm|mov|ogg)$/i.test(url) || url.includes('/video/upload/');
+     |                                               ^
+  30 | ...
+  31 | ...ventoryPage() {
+  32 | ...= React.useState<any[]>([])
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+✓ Compiled in 58ms
+ GET /dashboard/vendor 200 in 187ms (next.js: 26ms, application-code: 161ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] User is not linked to a vendor account. (src/services/vendorService.ts:143:15)
+[browser] User is not linked to a vendor account. (src/services/vendorService.ts:143:15)
+ GET /dashboard/vendor/inventory 200 in 51ms (next.js: 23ms, application-code: 28ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] An empty string ("") was passed to the src attribute. This may cause the browser to download the whole page again over the network. To fix this, either do not render the element at all or pass null to src instead of an empty string. 
+[browser] Image is missing required "src" property: [object HTMLImageElement] 
+[browser] Image is missing required "src" property: [object HTMLImageElement] 
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET / 200 in 59ms (next.js: 19ms, application-code: 41ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 95ms
+✓ Compiled in 61ms
+ GET /dashboard/vendor 200 in 44ms (next.js: 11ms, application-code: 33ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /dashboard/vendor/inventory 200 in 42ms (next.js: 15ms, application-code: 27ms)
+[browser] Image with src "/placeholder.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 234ms
+✓ Compiled in 64ms
+✓ Compiled in 64ms
+ GET /dashboard/vendor/inventory 200 in 117ms (next.js: 32ms, application-code: 85ms)
+[browser] Image with src "/placeholder.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 70ms (next.js: 29ms, application-code: 41ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET /dashboard/vendor 200 in 66ms (next.js: 19ms, application-code: 47ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /dashboard/vendor/inventory 200 in 23ms (next.js: 4ms, application-code: 19ms)
+ GET / 200 in 35ms (next.js: 6ms, application-code: 29ms)
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+ GET / 200 in 74ms (next.js: 1679µs, application-code: 72ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 85ms (next.js: 3ms, application-code: 82ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 103ms (next.js: 1059µs, application-code: 102ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 70ms (next.js: 1349µs, application-code: 69ms)
+[browser] Image with src "/logo.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 79ms (next.js: 1121µs, application-code: 78ms)
+[browser] Image with src "/logo.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 53ms (next.js: 1234µs, application-code: 52ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "/placeholder.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+ GET / 200 in 110ms (next.js: 14ms, application-code: 96ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 82ms (next.js: 1086µs, application-code: 81ms)
+ GET / 200 in 54ms (next.js: 1149µs, application-code: 52ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+ GET /dashboard/vendor 200 in 52ms (next.js: 13ms, application-code: 39ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /dashboard/vendor/inventory 200 in 36ms (next.js: 6ms, application-code: 30ms)
+[browser] Image with src "/placeholder.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 36ms (next.js: 7ms, application-code: 29ms)
+ GET / 200 in 85ms (next.js: 4ms, application-code: 81ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 76ms (next.js: 2ms, application-code: 74ms)
+ GET / 200 in 46ms (next.js: 1003µs, application-code: 45ms)
+ GET / 200 in 47ms (next.js: 1407µs, application-code: 46ms)
+[browser] Image with src "/logo.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 52ms (next.js: 1342µs, application-code: 50ms)
+ GET / 200 in 48ms (next.js: 1596µs, application-code: 47ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 53ms (next.js: 1260µs, application-code: 52ms)
+ GET / 200 in 46ms (next.js: 1550µs, application-code: 44ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 65ms (next.js: 3ms, application-code: 62ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 104ms (next.js: 10ms, application-code: 95ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "/placeholder.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+ GET /dashboard/vendor 200 in 37ms (next.js: 5ms, application-code: 31ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] User is not linked to a vendor account. (src/services/vendorService.ts:143:15)
+[browser] User is not linked to a vendor account. (src/services/vendorService.ts:143:15)
+ GET /dashboard/vendor/inventory 200 in 39ms (next.js: 7ms, application-code: 33ms)
+[browser] Image with src "/placeholder.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 56ms (next.js: 15ms, application-code: 40ms)
+ GET /products/test-1 200 in 1687ms (next.js: 1655ms, application-code: 31ms)
+ GET /products/test-1 200 in 28ms (next.js: 4ms, application-code: 24ms)
+[browser] Image is missing required "alt" property. Please add Alternative Text to describe the image for screen readers and search engines. 
+[browser] Image is missing required "alt" property. Please add Alternative Text to describe the image for screen readers and search engines. 
+ GET /dashboard/vendor 200 in 50ms (next.js: 16ms, application-code: 34ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /dashboard/vendor 200 in 69ms (next.js: 8ms, application-code: 61ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] User is not linked to a vendor account. (src/services/vendorService.ts:143:15)
+[browser] User is not linked to a vendor account. (src/services/vendorService.ts:143:15)
+ GET /dashboard/vendor/inventory 200 in 35ms (next.js: 5ms, application-code: 31ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Image with src "/placeholder.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 21ms (next.js: 5ms, application-code: 17ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 181ms
+ GET /dashboard/vendor 200 in 37ms (next.js: 18ms, application-code: 19ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /dashboard/vendor/inventory 200 in 42ms (next.js: 10ms, application-code: 32ms)
+ GET / 200 in 41ms (next.js: 13ms, application-code: 28ms)
+ GET /dashboard/vendor 200 in 38ms (next.js: 7ms, application-code: 31ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /dashboard/vendor/inventory 200 in 20ms (next.js: 5ms, application-code: 15ms)
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778487638/druxx/products/kku5ndevkxvb8mi0mbsc.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778487690/druxx/products/mffeqa6m4yxxv6uyfrwh.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 45ms (next.js: 9ms, application-code: 36ms)
+ GET /dashboard/vendor 200 in 65ms (next.js: 23ms, application-code: 42ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /dashboard/vendor/inventory 200 in 45ms (next.js: 8ms, application-code: 37ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /dashboard/vendor/inventory 200 in 58ms (next.js: 19ms, application-code: 38ms)
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778488040/druxx/products/kjigpoxz7skiadnmmtus.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 58ms (next.js: 23ms, application-code: 36ms)
+✓ Compiled in 716ms
+ GET / 200 in 401ms (next.js: 279ms, application-code: 122ms)
+ GET / 200 in 87ms (next.js: 1788µs, application-code: 85ms)
+ GET / 200 in 56ms (next.js: 3ms, application-code: 53ms)
+ GET / 200 in 22ms (next.js: 3ms, application-code: 19ms)
+ GET /products 200 in 93ms (next.js: 50ms, application-code: 42ms)
+ GET /dashboard/orders 200 in 683ms (next.js: 640ms, application-code: 43ms)
+ GET /products 200 in 51ms (next.js: 11ms, application-code: 40ms)
+ GET /products/test-2 200 in 71ms (next.js: 39ms, application-code: 32ms)
+[browser] Image is missing required "alt" property. Please add Alternative Text to describe the image for screen readers and search engines. 
+[browser] Image is missing required "alt" property. Please add Alternative Text to describe the image for screen readers and search engines. 
+ GET / 200 in 53ms (next.js: 19ms, application-code: 34ms)
+ GET / 200 in 374ms (next.js: 19ms, application-code: 354ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET /products/test-2 200 in 81ms (next.js: 20ms, application-code: 61ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /products/test-2 200 in 100ms (next.js: 5ms, application-code: 95ms)
+[browser] Image with src "/logo.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 29ms (next.js: 5ms, application-code: 24ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET /products/test-2 200 in 35ms (next.js: 11ms, application-code: 24ms)
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET /products/test-3 200 in 37ms (next.js: 7ms, application-code: 30ms)
+✓ Compiled in 84ms
+ GET / 200 in 41ms (next.js: 16ms, application-code: 25ms)
+✓ Compiled in 72ms
+ GET /products/test-3 200 in 55ms (next.js: 20ms, application-code: 35ms)
+ GET /products/test-3 200 in 103ms (next.js: 17ms, application-code: 86ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 128ms
+ GET /products/test-3 200 in 97ms (next.js: 29ms, application-code: 67ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 38ms (next.js: 9ms, application-code: 28ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET /dashboard/vendor 200 in 81ms (next.js: 35ms, application-code: 46ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] User is not linked to a vendor account. (src/services/vendorService.ts:143:15)
+[browser] User is not linked to a vendor account. (src/services/vendorService.ts:143:15)
+ GET /dashboard/vendor/inventory 200 in 59ms (next.js: 30ms, application-code: 28ms)
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778487690/druxx/products/mffeqa6m4yxxv6uyfrwh.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778487638/druxx/products/kku5ndevkxvb8mi0mbsc.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778488040/druxx/products/kjigpoxz7skiadnmmtus.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 68ms (next.js: 25ms, application-code: 43ms)
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+ GET / 200 in 122ms (next.js: 17ms, application-code: 105ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+✓ Compiled in 342ms
+✓ Compiled in 76ms
+✓ Compiled in 53ms
+ GET /products/test-2 200 in 79ms (next.js: 45ms, application-code: 34ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+✓ Compiled in 277ms
+✓ Compiled in 51ms
+✓ Compiled in 72ms
+✓ Compiled in 52ms
+✓ Compiled in 52ms
+✓ Compiled in 64ms
+ GET / 200 in 116ms (next.js: 24ms, application-code: 92ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 302ms
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ ReferenceError: inter is not defined
+    at RootLayout (src/app/layout.tsx:49:35)
+  47 | }>) {
+  48 |   return (
+> 49 |     <html lang="en" className={`${inter.variable} font-sans`} suppressHydrationWarning>
+     |                                   ^
+  50 |       <body className="min-h-screen flex flex-col bg-white text-gray-900 antialiased" supp...
+  51 |         <Suspense fallback={null}>
+  52 |           <main className="flex-1">{children}</main> {
+  digest: '1365874183'
+}
+✓ Compiled in 1049ms
+⨯ ReferenceError: inter is not defined
+    at RootLayout (src/app/layout.tsx:49:35)
+  47 | }>) {
+  48 |   return (
+> 49 |     <html lang="en" className={`${inter.variable} font-sans`} suppressHydrationWarning>
+     |                                   ^
+  50 |       <body className="min-h-screen flex flex-col bg-white text-gray-900 antialiased" supp...
+  51 |         <Suspense fallback={null}>
+  52 |           <main className="flex-1">{children}</main> {
+  digest: '1365874183'
+}
+⨯ ReferenceError: inter is not defined
+    at RootLayout (src/app/layout.tsx:49:35)
+  47 | }>) {
+  48 |   return (
+> 49 |     <html lang="en" className={`${inter.variable} font-sans`} suppressHydrationWarning>
+     |                                   ^
+  50 |       <body className="min-h-screen flex flex-col bg-white text-gray-900 antialiased" supp...
+  51 |         <Suspense fallback={null}>
+  52 |           <main className="flex-1">{children}</main> {
+  digest: '1365874183'
+}
+⨯ ReferenceError: inter is not defined
+    at RootLayout (src/app/layout.tsx:49:35)
+  47 | }>) {
+  48 |   return (
+> 49 |     <html lang="en" className={`${inter.variable} font-sans`} suppressHydrationWarning>
+     |                                   ^
+  50 |       <body className="min-h-screen flex flex-col bg-white text-gray-900 antialiased" supp...
+  51 |         <Suspense fallback={null}>
+  52 |           <main className="flex-1">{children}</main> {
+  digest: '1365874183'
+}
+ GET / 200 in 470ms (next.js: 111ms, application-code: 359ms)
+ GET / 200 in 39ms (next.js: 2ms, application-code: 37ms)
+ GET / 200 in 986ms (next.js: 322ms, application-code: 664ms)
+ GET / 500 in 507ms (next.js: 185ms, application-code: 322ms)
+ GET / 200 in 123ms (next.js: 20ms, application-code: 103ms)
+✓ Compiled in 298ms
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+⨯ ReferenceError: jakarta is not defined
+    at RootLayout (src/app/layout.tsx:49:35)
+  47 | }>) {
+  48 |   return (
+> 49 |     <html lang="en" className={`${jakarta.variable} font-sans`} suppressHydrationWarning>
+     |                                   ^
+  50 |       <body className="min-h-screen flex flex-col bg-white text-gray-900 antialiased" supp...
+  51 |         <Suspense fallback={null}>
+  52 |           <main className="flex-1">{children}</main> {
+  digest: '2671725649'
+}
+✓ Compiled in 746ms
+⨯ ReferenceError: jakarta is not defined
+    at RootLayout (src/app/layout.tsx:49:35)
+  47 | }>) {
+  48 |   return (
+> 49 |     <html lang="en" className={`${jakarta.variable} font-sans`} suppressHydrationWarning>
+     |                                   ^
+  50 |       <body className="min-h-screen flex flex-col bg-white text-gray-900 antialiased" supp...
+  51 |         <Suspense fallback={null}>
+  52 |           <main className="flex-1">{children}</main> {
+  digest: '2671725649'
+}
+⨯ ReferenceError: jakarta is not defined
+    at RootLayout (src/app/layout.tsx:49:35)
+  47 | }>) {
+  48 |   return (
+> 49 |     <html lang="en" className={`${jakarta.variable} font-sans`} suppressHydrationWarning>
+     |                                   ^
+  50 |       <body className="min-h-screen flex flex-col bg-white text-gray-900 antialiased" supp...
+  51 |         <Suspense fallback={null}>
+  52 |           <main className="flex-1">{children}</main> {
+  digest: '2671725649'
+}
+⨯ ReferenceError: jakarta is not defined
+    at RootLayout (src/app/layout.tsx:49:35)
+  47 | }>) {
+  48 |   return (
+> 49 |     <html lang="en" className={`${jakarta.variable} font-sans`} suppressHydrationWarning>
+     |                                   ^
+  50 |       <body className="min-h-screen flex flex-col bg-white text-gray-900 antialiased" supp...
+  51 |         <Suspense fallback={null}>
+  52 |           <main className="flex-1">{children}</main> {
+  digest: '2671725649'
+}
+⨯ ReferenceError: jakarta is not defined
+    at RootLayout (src/app/layout.tsx:49:35)
+  47 | }>) {
+  48 |   return (
+> 49 |     <html lang="en" className={`${jakarta.variable} font-sans`} suppressHydrationWarning>
+     |                                   ^
+  50 |       <body className="min-h-screen flex flex-col bg-white text-gray-900 antialiased" supp...
+  51 |         <Suspense fallback={null}>
+  52 |           <main className="flex-1">{children}</main> {
+  digest: '2671725649'
+}
+⨯ ReferenceError: jakarta is not defined
+    at RootLayout (src/app/layout.tsx:49:35)
+  47 | }>) {
+  48 |   return (
+> 49 |     <html lang="en" className={`${jakarta.variable} font-sans`} suppressHydrationWarning>
+     |                                   ^
+  50 |       <body className="min-h-screen flex flex-col bg-white text-gray-900 antialiased" supp...
+  51 |         <Suspense fallback={null}>
+  52 |           <main className="flex-1">{children}</main> {
+  digest: '2671725649'
+}
+ GET / 200 in 400ms (next.js: 79ms, application-code: 321ms)
+ GET / 200 in 29ms (next.js: 2ms, application-code: 26ms)
+ GET / 200 in 791ms (next.js: 264ms, application-code: 527ms)
+ GET / 200 in 75ms (next.js: 29ms, application-code: 46ms)
+ GET / 500 in 105ms (next.js: 1727µs, application-code: 103ms)
+ GET / 200 in 107ms (next.js: 9ms, application-code: 98ms)
+✓ Compiled in 197ms
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 107ms (next.js: 11ms, application-code: 95ms)
+ GET / 200 in 306ms (next.js: 56ms, application-code: 251ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 78ms (next.js: 5ms, application-code: 73ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 111ms (next.js: 9ms, application-code: 102ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068607/druxx/cms/w3vhrmzeeb9vtwe2pyyb.gif" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068639/druxx/cms/wm66fy0h1l6bobot8jsu.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482297/druxx/cms/crfqbtf9elh5ypjscqzu.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+✓ Compiled in 312ms
+✓ Compiled in 78ms
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+ GET /dashboard/vendor 200 in 109ms (next.js: 58ms, application-code: 50ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+ GET /dashboard/vendor/inventory 200 in 39ms (next.js: 21ms, application-code: 19ms)
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778487690/druxx/products/mffeqa6m4yxxv6uyfrwh.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778488040/druxx/products/kjigpoxz7skiadnmmtus.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778493083/druxx/products/l68tbyluzbvyfrgdcaph.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778487638/druxx/products/kku5ndevkxvb8mi0mbsc.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+⨯ The requested resource isn't a valid image for https://res.cloudinary.com/ds4btyew6/video/upload/v1778502228/druxx/products/jzvccppafyx9puhuxsku.mp4 received null
+✓ Compiled in 353ms
+✓ Compiled in 53ms
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/video/upload/so_auto/v1778502228/druxx/products/jzvccppafyx9puhuxsku.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 70ms
+✓ Compiled in 132ms
+ GET / 200 in 67ms (next.js: 34ms, application-code: 33ms)
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068372/druxx/cms/kljjuxh39sjlq6rpq8tq.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778068407/druxx/cms/i09mizlspr7e0kayo8d4.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778152909/druxx/cms/grf6egu7a26bq3z1y85r.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://res.cloudinary.com/ds4btyew6/image/upload/v1778482531/druxx/cms/xirfk19w0lfwdbut3p6g.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=Optimum%20Nutrition" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=MuscleBlaze" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.
+⨯ The requested resource "https://api.dicebear.com/7.x/initials/svg?seed=YogaBar" has type "image/svg+xml" but dangerouslyAllowSVG is disabled. Consider adding the "unoptimized" property to the <Image>.

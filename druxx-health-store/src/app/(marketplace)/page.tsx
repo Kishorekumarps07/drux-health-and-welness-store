@@ -26,6 +26,7 @@ import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import { VendorHighlights } from "@/components/home/VendorHighlights";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { AdvantageCarousel } from "@/components/home/AdvantageCarousel";
+import { OfferZone } from "@/components/home/OfferZone";
 import { motion } from "framer-motion";
 
 const fadeInUp = {
@@ -48,6 +49,11 @@ export default function HomePage() {
         <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-gray-200/50 overflow-hidden border border-gray-100">
            <FeaturedProducts />
         </div>
+      </motion.div>
+
+      {/* Offer Zone */}
+      <motion.div {...fadeInUp}>
+        <OfferZone />
       </motion.div>
 
       {/* The Drux Advantage Carousel */}

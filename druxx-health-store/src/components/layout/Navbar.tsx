@@ -102,6 +102,7 @@ export function Navbar() {
                     alt="Drux Health Store"
                     fill
                     className="object-contain"
+                    sizes="208px"
                     priority
                   />
                 </div>
@@ -136,6 +137,7 @@ export function Navbar() {
                   alt="Drux Health Store"
                   fill
                   className="object-contain"
+                  sizes="(max-width: 1024px) 224px, 320px"
                   priority
                 />
               </div>

@@ -13,8 +13,8 @@ const createStorage = (folder) => {
     cloudinary: cloudinary,
     params: {
       folder: `druxx/${folder}`,
-      allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'avif', 'gif'],
-      transformation: [{ width: 1000, height: 1000, crop: 'limit' }],
+      resource_type: 'auto', // Support images, videos, and raw files
+      allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'avif', 'gif', 'mp4', 'mov', 'webm'],
     },
   });
 };
@@ -23,11 +23,13 @@ const createStorage = (folder) => {
 const productUpload = multer({ storage: createStorage('products') });
 const cmsUpload = multer({ storage: createStorage('cms') });
 const avatarUpload = multer({ storage: createStorage('avatars') });
+const vendorUpload = multer({ storage: createStorage('vendors') });
 const manualUpload = multer({ storage: createStorage('manual') });
 
 module.exports = {
   productUpload,
   cmsUpload,
   avatarUpload,
+  vendorUpload,
   manualUpload,
 };

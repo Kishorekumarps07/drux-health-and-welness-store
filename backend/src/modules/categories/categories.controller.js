@@ -12,11 +12,13 @@ const getById = asyncHandler(async (req, res) => {
 });
 
 const create  = asyncHandler(async (req, res) => {
+  if (req.file) req.body.image = req.file.path;
   const category = await categoriesService.create(req.body);
   res.status(201).json({ status: 'success', data: { category } });
 });
 
 const update  = asyncHandler(async (req, res) => {
+  if (req.file) req.body.image = req.file.path;
   const category = await categoriesService.update(req.params.id, req.body);
   res.json({ status: 'success', data: { category } });
 });

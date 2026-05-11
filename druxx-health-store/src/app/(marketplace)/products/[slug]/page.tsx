@@ -52,7 +52,7 @@ export default function ProductDetailPage({ params }: PageProps) {
         
         // Fetch related products
         const relData = await productService.getAllProducts({
-          categoryId: data.categorySlug,
+          categoryId: data.categoryId,
           limit: 4
         });
         setRelated(relData.products.filter((p: any) => p.id !== data.id));
@@ -117,16 +117,28 @@ export default function ProductDetailPage({ params }: PageProps) {
             {/* Image gallery */}
             <div className="space-y-3">
               <div className="relative aspect-square rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
-                <Image
-                  src={product.images[selectedImage]}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  priority
-                />
+                {product.images && product.images.length > 0 && (/\.(mp4|webm|mov|ogg)$/i.test(product.images[selectedImage]) || product.images[selectedImage].includes('/video/upload/') || (product.images[selectedImage].includes('res.cloudinary.com') && product.images[selectedImage].includes('/video/'))) ? (
+                  <video
+                    src={product.images[selectedImage]}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    controls
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <Image
+                    src={product.images && product.images.length > 0 ? product.images[selectedImage] : "/placeholder.png"}
+                    alt={product.name || "Product Image"}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    priority
+                  />
+                )}
                 {product.discount > 0 && (
-                  <div className="absolute top-3 left-3">
+                  <div className="absolute top-3 left-3 z-10">
                     <Badge className="bg-[#FF7A00] text-white border-0 font-bold text-sm px-2">
                       -{product.discount}% OFF
                     </Badge>
@@ -135,7 +147,7 @@ export default function ProductDetailPage({ params }: PageProps) {
               </div>
 
               {/* Thumbnails */}
-              {product.images.length > 1 && (
+              {product.images && product.images.length > 1 && (
                 <div className="flex gap-2">
                   {product.images.map((img, i) => (
                     <button
@@ -147,7 +159,30 @@ export default function ProductDetailPage({ params }: PageProps) {
                           : "border-gray-100 hover:border-gray-300"
                       }`}
                     >
-                      <Image src={img} alt={`${product.name} view ${i + 1}`} fill className="object-cover" sizes="64px" />
+                      {img && (/\.(mp4|webm|mov|ogg)$/i.test(img) || img.includes('/video/upload/') || (img.includes('res.cloudinary.com') && img.includes('/video/'))) ? (
+                        <div className="relative w-full h-full">
+                          <Image 
+                            src={img.replace(/\.(mp4|webm|mov|ogg)$/i, ".jpg").replace('/video/upload/', '/video/upload/so_auto/')} 
+                            alt={(product.name || "Product") + ` video ${i + 1}`} 
+                            fill 
+                            className="object-cover" 
+                            sizes="64px" 
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                            <div className="w-4 h-4 rounded-full bg-white/80 flex items-center justify-center">
+                              <div className="w-0 h-0 border-t-[3px] border-t-transparent border-l-[5px] border-l-[#A6D608] border-b-[3px] border-b-transparent ml-0.5" />
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <Image 
+                          src={img || "/placeholder.png"} 
+                          alt={(product.name || "Product") + ` view ${i + 1}`} 
+                          fill 
+                          className="object-cover" 
+                          sizes="64px" 
+                        />
+                      )}
                     </button>
                   ))}
                 </div>

@@ -8,7 +8,7 @@ const productSchema = z.object({
   price: z.coerce.number().positive(),
   comparePrice: z.coerce.number().positive().optional(),
   stockQty: z.coerce.number().int().min(0).optional().default(0),
-  sku: z.string().min(1),
+  sku: z.string().min(1).optional(),
   status: z.enum(['ACTIVE', 'INACTIVE', 'OUT_OF_STOCK']).optional().default('ACTIVE'),
   isFeatured: z.coerce.boolean().optional().default(false),
   tags: z.array(z.string()).optional().default([]),

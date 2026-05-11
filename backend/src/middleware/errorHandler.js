@@ -48,6 +48,18 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
+  // ── Multer Errors ─────────────────────────────────────────────────────────
+  if (err.name === 'MulterError') {
+    statusCode = 400;
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      message = 'Image is too large. Maximum size allowed is 10MB.';
+    } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+      message = 'Unexpected file field. Please only upload images in the "images" field.';
+    } else {
+      message = `Upload error: ${err.message}`;
+    }
+  }
+
   // ── Non-operational (programming) errors ────────────────────────────────
   if (!err.isOperational || statusCode >= 500) {
     logger.error(`[CRITICAL] HTTP ${statusCode} | ${req.method} ${req.originalUrl}`, {

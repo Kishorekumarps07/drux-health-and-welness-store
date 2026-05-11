@@ -17,6 +17,7 @@ import {
   Loader2
 } from "lucide-react"
 import { vendorService } from "@/services/vendorService"
+import { productService } from "@/services/productService"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -25,8 +26,23 @@ import { toast } from "sonner"
 import Image from "next/image"
 import Link from "next/link"
 
+const isVideo = (url: string) => {
+  if (!url) return false;
+  return /\.(mp4|webm|mov|ogg)$/i.test(url) || url.includes('/video/upload/') || url.includes('res.cloudinary.com') && url.includes('/video/');
+};
+
+const getThumbnail = (url: string) => {
+  if (!url) return "/placeholder.png";
+  if (isVideo(url)) {
+    // Cloudinary video to thumbnail transformation
+    return url.replace(/\.(mp4|webm|mov|ogg)$/i, '.jpg').replace('/video/upload/', '/video/upload/so_auto/');
+  }
+  return url;
+};
+
 export default function VendorInventoryPage() {
   const [products, setProducts] = React.useState<any[]>([])
+  const [categories, setCategories] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [isAddingProduct, setIsAddingProduct] = React.useState(false)
@@ -34,10 +50,14 @@ export default function VendorInventoryPage() {
   const [imageFiles, setImageFiles] = React.useState<File[]>([])
   const [previews, setPreviews] = React.useState<string[]>([])
 
-  const categories = [
-    { id: 'b1bf4209-33a2-4038-b328-27a12b9f9e0e', name: 'Vitamins & Supplements' }, 
-    { id: 'b043cef3-510b-4b8f-8b21-ecc6e70e5571', name: 'Herbal & Ayurvedic' }
-  ]
+  const fetchCategories = React.useCallback(async () => {
+    try {
+      const cats = await productService.getCategories();
+      setCategories(cats);
+    } catch (error) {
+      console.error("Failed to load categories");
+    }
+  }, []);
 
   const fetchProducts = React.useCallback(async () => {
     setLoading(true)
@@ -52,8 +72,9 @@ export default function VendorInventoryPage() {
   }, [searchQuery])
 
   React.useEffect(() => {
+    fetchCategories()
     fetchProducts()
-  }, [fetchProducts])
+  }, [fetchCategories, fetchProducts])
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return
@@ -69,12 +90,24 @@ export default function VendorInventoryPage() {
   // New Product Form State
   const [newProduct, setNewProduct] = React.useState({
     name: "",
-    price: 0,
+    price: "" as any,
+    originalPrice: "" as any,
+    discount: "" as any,
     category: "",
-    stock: 0,
+    stock: "" as any,
     description: "",
     image: ""
   })
+
+  const calculateDiscount = (mrp: number, sale: number) => {
+    if (!mrp || !sale) return "";
+    return Math.round(((mrp - sale) / mrp) * 100);
+  }
+
+  const calculateSalePrice = (mrp: number, discount: number) => {
+    if (!mrp) return "";
+    return Math.round(mrp * (1 - (discount || 0) / 100));
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -97,11 +130,12 @@ export default function VendorInventoryPage() {
     setLoading(true)
     
     const formData = new FormData();
-    formData.append("title", editingProduct.title);
-    formData.append("price", editingProduct.price.toString());
-    formData.append("categoryId", categories.find(c => c.name === editingProduct.categoryName)?.id || editingProduct.categoryId);
-    formData.append("stockQty", editingProduct.stock.toString());
-    formData.append("description", editingProduct.description);
+    if (editingProduct.title) formData.append("title", editingProduct.title);
+    if (editingProduct.price !== undefined) formData.append("price", editingProduct.price.toString());
+    if (editingProduct.originalPrice !== undefined) formData.append("comparePrice", editingProduct.originalPrice.toString());
+    if (editingProduct.categoryId) formData.append("categoryId", editingProduct.categoryId);
+    if (editingProduct.stock !== undefined) formData.append("stockQty", editingProduct.stock.toString());
+    if (editingProduct.description) formData.append("description", editingProduct.description);
     
     if (imageFiles.length > 0) {
       imageFiles.forEach(file => formData.append("images", file));
@@ -124,13 +158,18 @@ export default function VendorInventoryPage() {
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!newProduct.category) {
+      toast.error("Please select a category");
+      return;
+    }
     setLoading(true)
 
     const formData = new FormData();
     formData.append("title", newProduct.name);
-    formData.append("price", newProduct.price.toString());
-    formData.append("categoryId", categories.find(c => c.name === newProduct.category)?.id || categories[0].id);
-    formData.append("stockQty", newProduct.stock.toString());
+    formData.append("price", (newProduct.price || 0).toString());
+    formData.append("comparePrice", (newProduct.originalPrice || 0).toString());
+    formData.append("categoryId", newProduct.category);
+    formData.append("stockQty", (newProduct.stock || 0).toString());
     formData.append("description", newProduct.description);
     formData.append("status", "ACTIVE");
     
@@ -142,7 +181,7 @@ export default function VendorInventoryPage() {
       await vendorService.createProduct(formData)
       toast.success("Product listed successfully!")
       setIsAddingProduct(false)
-      setNewProduct({ name: "", price: 0, category: "", stock: 0, description: "", image: "" })
+      setNewProduct({ name: "", price: "" as any, originalPrice: "" as any, discount: "" as any, category: "", stock: "" as any, description: "", image: "" })
       setImageFiles([])
       setPreviews([])
       fetchProducts()
@@ -171,40 +210,40 @@ export default function VendorInventoryPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-           <div className="bg-white p-6 rounded-[32px] border border-gray-100 flex items-center gap-4 hover:shadow-xl transition-all">
-              <div className="w-12 h-12 bg-[#A6D608]/10 rounded-2xl flex items-center justify-center">
-                 <Package className="w-6 h-6 text-[#A6D608]" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+           <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 flex items-center gap-4 hover:shadow-xl transition-all">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-[#A6D608]/10 rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0">
+                 <Package className="w-5 h-5 md:w-6 md:h-6 text-[#A6D608]" />
               </div>
-              <div>
-                 <p className="text-xs font-black text-gray-400 uppercase tracking-widest italic">Live Listings</p>
-                 <h3 className="text-2xl font-black text-gray-900">{products.length}</h3>
-              </div>
-           </div>
-           <div className="bg-white p-6 rounded-[32px] border border-gray-100 flex items-center gap-4 hover:shadow-xl transition-all">
-              <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center">
-                 <Check className="w-6 h-6 text-blue-500" />
-              </div>
-              <div>
-                 <p className="text-xs font-black text-gray-400 uppercase tracking-widest italic">In Stock</p>
-                 <h3 className="text-2xl font-black text-gray-900">{products.filter(p => p.stock > 0).length}</h3>
+              <div className="min-w-0">
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">Live Listings</p>
+                 <h3 className="text-xl md:text-2xl font-black text-gray-900 truncate">{products.length}</h3>
               </div>
            </div>
-           <div className="bg-white p-6 rounded-[32px] border border-gray-100 flex items-center gap-4 hover:shadow-xl transition-all">
-              <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center">
-                 <X className="w-6 h-6 text-red-500" />
+           <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 flex items-center gap-4 hover:shadow-xl transition-all">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-50 rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0">
+                 <Check className="w-5 h-5 md:w-6 md:h-6 text-blue-500" />
               </div>
-              <div>
-                 <p className="text-xs font-black text-gray-400 uppercase tracking-widest italic">Out of Stock</p>
-                 <h3 className="text-2xl font-black text-gray-900">{products.filter(p => p.stock === 0).length}</h3>
+              <div className="min-w-0">
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">In Stock</p>
+                 <h3 className="text-xl md:text-2xl font-black text-gray-900 truncate">{products.filter(p => p.stock > 0).length}</h3>
+              </div>
+           </div>
+           <div className="bg-white p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-gray-100 flex items-center gap-4 hover:shadow-xl transition-all sm:col-span-2 lg:col-span-1">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-red-50 rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0">
+                 <X className="w-5 h-5 md:w-6 md:h-6 text-red-500" />
+              </div>
+              <div className="min-w-0">
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">Out of Stock</p>
+                 <h3 className="text-xl md:text-2xl font-black text-gray-900 truncate">{products.filter(p => p.stock === 0).length}</h3>
               </div>
            </div>
         </div>
 
         {/* Inventory Table */}
-        <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 overflow-hidden relative group transition-all">
-          <div className="p-8 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
-             <div className="relative group max-w-sm w-full">
+        <div className="bg-white rounded-[32px] md:rounded-[40px] shadow-sm border border-gray-100 overflow-hidden relative group transition-all">
+          <div className="p-5 md:p-8 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
+             <div className="relative group w-full md:max-w-sm">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#A6D608] transition-colors" />
                 <input 
                   type="text" 
@@ -215,7 +254,7 @@ export default function VendorInventoryPage() {
                 />
              </div>
              <div className="flex items-center gap-3">
-                <Button variant="outline" className="rounded-xl border-gray-100 hover:bg-gray-50 italic font-bold gap-2">
+                <Button variant="outline" className="flex-1 md:flex-none rounded-xl border-gray-100 hover:bg-gray-50 italic font-bold gap-2 h-11">
                    <Filter className="w-4 h-4 text-gray-400" />
                    Filter
                 </Button>
@@ -240,8 +279,29 @@ export default function VendorInventoryPage() {
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden relative flex-shrink-0 flex items-center justify-center group-hover/row:scale-105 transition-transform duration-300">
-                          {product.images?.[0]?.url ? (
-                            <Image src={product.images[0].url} alt={product.title} fill className="object-cover" />
+                          {product.images?.[0] ? (
+                            isVideo(typeof product.images[0] === 'string' ? product.images[0] : product.images[0].url) ? (
+                              <div className="relative w-full h-full">
+                                <Image 
+                                  src={getThumbnail(typeof product.images[0] === 'string' ? product.images[0] : product.images[0].url)} 
+                                  alt={product.title} 
+                                  fill 
+                                  className="object-cover" 
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                  <div className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center">
+                                    <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[7px] border-l-[#A6D608] border-b-[4px] border-b-transparent ml-0.5" />
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <Image 
+                                src={typeof product.images[0] === 'string' ? product.images[0] : product.images[0].url} 
+                                alt={product.title} 
+                                fill 
+                                className="object-cover" 
+                              />
+                            )
                           ) : (
                             <Package className="w-6 h-6 text-gray-300" />
                           )}
@@ -281,6 +341,9 @@ export default function VendorInventoryPage() {
                            size="icon-sm" 
                            onClick={() => setEditingProduct({
                              ...product,
+                             originalPrice: product.comparePrice || product.price,
+                             price: product.price,
+                             discount: calculateDiscount(Number(product.comparePrice || product.price), Number(product.price)),
                              image: product.images?.[0]?.url || "",
                              categoryName: product.category?.name
                            })}
@@ -307,8 +370,8 @@ export default function VendorInventoryPage() {
 
         {/* Add Product Modal */}
         {isAddingProduct && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-md animate-in fade-in duration-300">
-             <div className="bg-white rounded-[40px] shadow-2xl max-w-2xl w-full p-10 relative overflow-hidden animate-in zoom-in-95 duration-300">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+             <div className="bg-white rounded-[32px] md:rounded-[40px] shadow-2xl max-w-2xl w-full p-6 md:p-10 relative overflow-hidden animate-in zoom-in-95 duration-300 max-h-[95vh] overflow-y-auto custom-scrollbar">
                 <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#A6D608] to-[#FF7A00]" />
                 <button 
                   onClick={() => setIsAddingProduct(false)}
@@ -322,7 +385,7 @@ export default function VendorInventoryPage() {
 
                 <form onSubmit={handleAddProduct} className="space-y-6">
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
+                      <div className="space-y-2 md:col-span-2">
                          <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Product Name</label>
                          <input 
                            required 
@@ -333,16 +396,63 @@ export default function VendorInventoryPage() {
                            placeholder="e.g. Organic Matcha Tea" 
                          />
                       </div>
-                      <div className="space-y-2">
-                         <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Regular Price (₹)</label>
-                         <input 
-                           required 
-                           type="number" 
-                           value={newProduct.price}
-                           onChange={(e) => setNewProduct({...newProduct, price: Number(e.target.value)})}
-                           className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
-                           placeholder="0.00" 
-                         />
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
+                        <div className="space-y-2">
+                           <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Original Price / MRP (₹)</label>
+                           <input 
+                             required 
+                             type="number" 
+                             value={newProduct.originalPrice}
+                             onChange={(e) => {
+                               const mrp = e.target.value === '' ? '' : Number(e.target.value);
+                               const discount = newProduct.discount;
+                               setNewProduct({
+                                 ...newProduct, 
+                                 originalPrice: mrp,
+                                 price: mrp === '' ? '' : calculateSalePrice(Number(mrp), Number(discount))
+                               })
+                             }}
+                             className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
+                             placeholder="0.00" 
+                           />
+                        </div>
+                        <div className="space-y-2">
+                           <label className="text-xs font-black text-[#FF7A00] uppercase tracking-widest italic ml-1">Discount (%)</label>
+                           <input 
+                             type="number" 
+                             value={newProduct.discount}
+                             onChange={(e) => {
+                               const discount = e.target.value === '' ? '' : Number(e.target.value);
+                               const mrp = newProduct.originalPrice;
+                               setNewProduct({
+                                 ...newProduct, 
+                                 discount: discount,
+                                 price: mrp === '' ? '' : calculateSalePrice(Number(mrp), Number(discount))
+                               })
+                             }}
+                             className="w-full px-4 py-3 bg-[#FF7A00]/5 border-2 border-[#FF7A00]/20 rounded-2xl text-sm font-black focus:ring-2 focus:ring-[#FF7A00]/20 transition-all" 
+                             placeholder="0" 
+                           />
+                        </div>
+                        <div className="space-y-2">
+                           <label className="text-xs font-black text-[#A6D608] uppercase tracking-widest italic ml-1 font-bold">Offer Selling Price (₹)</label>
+                           <input 
+                             required 
+                             type="number" 
+                             value={newProduct.price}
+                             onChange={(e) => {
+                               const price = e.target.value === '' ? '' : Number(e.target.value);
+                               const mrp = newProduct.originalPrice;
+                               setNewProduct({
+                                 ...newProduct, 
+                                 price: price,
+                                 discount: mrp === '' ? '' : calculateDiscount(Number(mrp), Number(price))
+                               })
+                             }}
+                             className="w-full px-4 py-3 bg-[#A6D608]/5 border-2 border-[#A6D608]/20 rounded-2xl text-sm font-black focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
+                             placeholder="0.00" 
+                           />
+                        </div>
                       </div>
                       <div className="space-y-2">
                          <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Category</label>
@@ -352,7 +462,7 @@ export default function VendorInventoryPage() {
                            className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all appearance-none"
                          >
                             <option value="">Select Category</option>
-                            {categories.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
+                            {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                          </select>
                       </div>
                       <div className="space-y-2">
@@ -361,7 +471,7 @@ export default function VendorInventoryPage() {
                            required 
                            type="number" 
                            value={newProduct.stock}
-                           onChange={(e) => setNewProduct({...newProduct, stock: Number(e.target.value)})}
+                           onChange={(e) => setNewProduct({...newProduct, stock: e.target.value === '' ? '' : Number(e.target.value)})}
                            className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
                            placeholder="0" 
                          />
@@ -379,35 +489,39 @@ export default function VendorInventoryPage() {
                       />
                    </div>
                    <div className="space-y-2">
-                      <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Product Images</label>
-                      <div className="grid grid-cols-4 gap-4">
-                        {previews.map((preview, idx) => (
-                          <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-50">
-                            <Image src={preview} alt="Preview" fill className="object-cover" />
-                            <button 
-                              type="button"
-                              onClick={() => removeImage(idx)}
-                              className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-md"
-                            >
-                              <X size={12} />
-                            </button>
-                          </div>
-                        ))}
-                        {previews.length < 5 && (
-                          <label className="flex flex-col items-center justify-center aspect-square rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50 hover:border-[#A6D608] hover:bg-[#A6D608]/5 transition-all cursor-pointer group">
-                            <Upload className="w-6 h-6 text-gray-300 group-hover:text-[#A6D608] transition-colors" />
-                            <input 
-                              type="file" 
-                              multiple 
-                              accept="image/*" 
-                              onChange={handleFileChange} 
-                              className="hidden" 
-                            />
-                          </label>
-                        )}
-                      </div>
-                      <p className="text-[10px] text-gray-400 font-bold mt-2 ml-1">Upload up to 5 images. First image will be primary.</p>
-                   </div>
+                       <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Product Images & Videos</label>
+                       <div className="grid grid-cols-4 gap-4">
+                         {previews.map((preview, idx) => (
+                           <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-50">
+                             {isVideo(imageFiles[idx]?.name || preview) ? (
+                               <video src={preview} className="w-full h-full object-cover" autoPlay muted loop />
+                             ) : (
+                               <Image src={preview} alt="Preview" fill className="object-cover" />
+                             )}
+                             <button 
+                               type="button"
+                               onClick={() => removeImage(idx)}
+                               className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-md"
+                             >
+                               <X size={12} />
+                             </button>
+                           </div>
+                         ))}
+                         {previews.length < 3 && (
+                           <label className="flex flex-col items-center justify-center aspect-square rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50 hover:border-[#A6D608] hover:bg-[#A6D608]/5 transition-all cursor-pointer group">
+                             <Upload className="w-6 h-6 text-gray-300 group-hover:text-[#A6D608] transition-colors" />
+                             <input 
+                               type="file" 
+                               multiple 
+                               accept="image/*,video/*" 
+                               onChange={handleFileChange} 
+                               className="hidden" 
+                             />
+                           </label>
+                         )}
+                       </div>
+                       <p className="text-[10px] text-gray-400 font-bold mt-2 ml-1">Upload up to 3 files (Images or Videos). First one is primary.</p>
+                    </div>
                    
                    <div className="pt-6">
                       <Button type="submit" className="w-full bg-[#A6D608] hover:bg-[#8ab506] text-white rounded-[20px] h-14 font-black shadow-xl shadow-[#A6D608]/20 transition-all text-lg" disabled={loading}>
@@ -421,8 +535,8 @@ export default function VendorInventoryPage() {
 
         {/* Edit Product Modal */}
         {editingProduct && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-md animate-in fade-in duration-300">
-             <div className="bg-white rounded-[40px] shadow-2xl max-w-2xl w-full p-10 relative overflow-hidden animate-in zoom-in-95 duration-300">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+             <div className="bg-white rounded-[32px] md:rounded-[40px] shadow-2xl max-w-2xl w-full p-6 md:p-10 relative overflow-hidden animate-in zoom-in-95 duration-300 max-h-[95vh] overflow-y-auto custom-scrollbar">
                 <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-[#A6D608]" />
                 <button 
                   onClick={() => setEditingProduct(null)}
@@ -436,7 +550,7 @@ export default function VendorInventoryPage() {
 
                 <form onSubmit={handleUpdateProduct} className="space-y-6">
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
+                      <div className="space-y-2 md:col-span-2">
                          <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Product Name</label>
                          <input 
                            required 
@@ -446,24 +560,69 @@ export default function VendorInventoryPage() {
                            className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
                          />
                       </div>
-                      <div className="space-y-2">
-                         <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Regular Price (₹)</label>
-                         <input 
-                           required 
-                           type="number" 
-                           value={editingProduct.price}
-                           onChange={(e) => setEditingProduct({...editingProduct, price: Number(e.target.value)})}
-                           className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
-                         />
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
+                        <div className="space-y-2">
+                           <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Original Price / MRP (₹)</label>
+                           <input 
+                             required 
+                             type="number" 
+                             value={editingProduct.originalPrice === 0 || editingProduct.originalPrice === "" ? "" : editingProduct.originalPrice}
+                             onChange={(e) => {
+                               const mrp = e.target.value === '' ? '' : Number(e.target.value);
+                               const discount = editingProduct.discount;
+                               setEditingProduct({
+                                 ...editingProduct, 
+                                 originalPrice: mrp,
+                                 price: mrp === '' ? '' : calculateSalePrice(Number(mrp), Number(discount))
+                               })
+                             }}
+                             className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
+                           />
+                        </div>
+                        <div className="space-y-2">
+                           <label className="text-xs font-black text-[#FF7A00] uppercase tracking-widest italic ml-1">Discount (%)</label>
+                           <input 
+                             type="number" 
+                             value={editingProduct.discount}
+                             onChange={(e) => {
+                               const discount = e.target.value === '' ? '' : Number(e.target.value);
+                               const mrp = editingProduct.originalPrice;
+                               setEditingProduct({
+                                 ...editingProduct, 
+                                 discount: discount,
+                                 price: mrp === '' ? '' : calculateSalePrice(Number(mrp), Number(discount))
+                               })
+                             }}
+                             className="w-full px-4 py-3 bg-[#FF7A00]/5 border-2 border-[#FF7A00]/20 rounded-2xl text-sm font-black focus:ring-2 focus:ring-[#FF7A00]/20 transition-all" 
+                           />
+                        </div>
+                        <div className="space-y-2">
+                           <label className="text-xs font-black text-[#A6D608] uppercase tracking-widest italic ml-1 font-bold">Offer Selling Price (₹)</label>
+                           <input 
+                             required 
+                             type="number" 
+                             value={editingProduct.price === 0 || editingProduct.price === "" ? "" : editingProduct.price}
+                             onChange={(e) => {
+                               const price = e.target.value === '' ? '' : Number(e.target.value);
+                               const mrp = editingProduct.originalPrice;
+                               setEditingProduct({
+                                 ...editingProduct, 
+                                 price: price,
+                                 discount: mrp === '' ? '' : calculateDiscount(Number(mrp), Number(price))
+                               })
+                             }}
+                             className="w-full px-4 py-3 bg-[#A6D608]/5 border-2 border-[#A6D608]/20 rounded-2xl text-sm font-black focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
+                           />
+                        </div>
                       </div>
                       <div className="space-y-2">
                          <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Category</label>
                          <select 
-                           value={editingProduct.categoryName}
-                           onChange={(e) => setEditingProduct({...editingProduct, categoryName: e.target.value})}
+                           value={editingProduct.categoryId}
+                           onChange={(e) => setEditingProduct({...editingProduct, categoryId: e.target.value})}
                            className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all appearance-none"
                          >
-                            {categories.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
+                            {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                          </select>
                       </div>
                       <div className="space-y-2">
@@ -471,8 +630,8 @@ export default function VendorInventoryPage() {
                          <input 
                            required 
                            type="number" 
-                           value={editingProduct.stock}
-                           onChange={(e) => setEditingProduct({...editingProduct, stock: Number(e.target.value)})}
+                           value={editingProduct.stock === 0 || editingProduct.stock === "" ? "" : editingProduct.stock}
+                           onChange={(e) => setEditingProduct({...editingProduct, stock: e.target.value === '' ? '' : Number(e.target.value)})}
                            className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
                          />
                       </div>
@@ -501,25 +660,33 @@ export default function VendorInventoryPage() {
                               <X size={12} />
                             </button>
                           </div>
-                        )) : editingProduct.images?.map((img: any, idx: number) => (
-                          <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-50">
-                            <Image src={img.url} alt="Current" fill className="object-cover opacity-80" />
-                          </div>
-                        ))}
-                        {previews.length < 5 && (
+                        )) : editingProduct.images?.map((img: any, idx: number) => {
+                          const imageUrl = typeof img === 'string' ? img : img?.url;
+                          if (!imageUrl) return null;
+                          return (
+                            <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-50">
+                              {isVideo(imageUrl) ? (
+                                <video src={imageUrl} className="w-full h-full object-cover opacity-80" />
+                              ) : (
+                                <Image src={imageUrl} alt="Current" fill className="object-cover opacity-80" />
+                              )}
+                            </div>
+                          );
+                        })}
+                        {previews.length < 3 && (
                           <label className="flex flex-col items-center justify-center aspect-square rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50 hover:border-[#A6D608] hover:bg-[#A6D608]/5 transition-all cursor-pointer group">
                             <Upload className="w-6 h-6 text-gray-300 group-hover:text-[#A6D608] transition-colors" />
                             <input 
                               type="file" 
                               multiple 
-                              accept="image/*" 
+                              accept="image/*,video/*" 
                               onChange={handleFileChange} 
                               className="hidden" 
                             />
                           </label>
                         )}
                       </div>
-                      <p className="text-[10px] text-gray-400 font-bold mt-2 ml-1">Selecting new images will replace existing ones.</p>
+                      <p className="text-[10px] text-gray-400 font-bold mt-2 ml-1">Upload up to 3 files. Selecting new files will replace existing ones.</p>
                    </div>
                    
                    <div className="pt-6">
