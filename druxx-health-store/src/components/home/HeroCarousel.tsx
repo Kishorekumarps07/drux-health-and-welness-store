@@ -34,7 +34,7 @@ export function HeroCarousel() {
 
   useEffect(() => {
     if (!mounted || isPaused || heroSlides.length === 0) return;
-    const timer = setInterval(next, 5000);
+    const timer = setInterval(next, 3000);
     return () => clearInterval(timer);
   }, [isPaused, next, heroSlides.length, mounted]);
 
@@ -47,13 +47,15 @@ export function HeroCarousel() {
       onMouseLeave={() => setIsPaused(false)}
       id="hero-carousel"
     >
-      {/* Slides */}
-      {heroSlides.map((s, i) => (
-        <div
-          key={s.id}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-            i === current ? "opacity-100 z-10" : "opacity-0 z-0"
-          }`}
+      {/* Slides with Horizontal Animation */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={heroSlides[current].id}
+          initial={{ x: "100%", opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: "-100%", opacity: 0 }}
+          transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
+          className="absolute inset-0 z-10"
         >
           <div className="relative w-full h-full bg-[#F9F9F9] overflow-hidden">
             
@@ -63,10 +65,10 @@ export function HeroCarousel() {
               <div className="absolute inset-0 bg-gradient-to-br from-white via-[#F3F4F6] to-[#E5E7EB]" />
               
               {/* Soft blurred accent of the image/video */}
-              {typeof s.image === 'string' && s.image.length > 0 ? (
-                isVideo(s.image) ? (
+              {typeof heroSlides[current].image === 'string' && heroSlides[current].image.length > 0 ? (
+                isVideo(heroSlides[current].image) ? (
                    <video
-                    src={s.image}
+                    src={heroSlides[current].image}
                     autoPlay
                     muted
                     loop
@@ -74,10 +76,11 @@ export function HeroCarousel() {
                   />
                 ) : (
                   <Image
-                    src={s.image}
+                    src={heroSlides[current].image}
                     alt=""
                     fill
                     className="object-cover blur-[140px] opacity-20 scale-150"
+                    sizes="100vw"
                   />
                 )
               ) : null}
@@ -93,18 +96,18 @@ export function HeroCarousel() {
                     Premium Quality
                   </span>
                   <h1 className={`font-black text-[#1A1A1A] leading-[0.9] mb-3 md:mb-6 tracking-tight uppercase ${
-                    s.title.length > 20 || (s.subtitle && s.subtitle.length > 80)
+                    heroSlides[current].title.length > 20 || (heroSlides[current].subtitle && heroSlides[current].subtitle.length > 80)
                       ? "text-3xl sm:text-4xl md:text-5xl lg:text-7xl"
                       : "text-5xl md:text-6xl lg:text-8xl"
                   }`}>
-                    {s.title}
+                    {heroSlides[current].title}
                   </h1>
                   <p className={`text-[#4A4A4A] mb-2 md:mb-10 leading-relaxed max-w-[280px] md:max-w-md font-medium tracking-wide ${
-                    s.subtitle && s.subtitle.length > 80
+                    heroSlides[current].subtitle && heroSlides[current].subtitle.length > 80
                       ? "text-xs sm:text-sm md:text-base line-clamp-3"
                       : "text-base md:text-xl line-clamp-4"
                   }`}>
-                    {s.subtitle}
+                    {heroSlides[current].subtitle}
                   </p>
                 </div>
               </div>
@@ -112,10 +115,10 @@ export function HeroCarousel() {
               {/* Product Visual */}
               <div className="w-full md:w-1/2 flex-1 md:h-[80%] min-h-[220px] relative flex items-center justify-center shrink-0 mt-2 md:mt-0 pb-6 md:pb-0">
                 <div className="relative w-full h-full p-0 md:p-8">
-                  {typeof s.image === 'string' && s.image.length > 0 && (
-                    isVideo(s.image) ? (
+                  {typeof heroSlides[current].image === 'string' && heroSlides[current].image.length > 0 && (
+                    isVideo(heroSlides[current].image) ? (
                       <video
-                        src={s.image}
+                        src={heroSlides[current].image}
                         autoPlay
                         muted
                         loop
@@ -124,11 +127,12 @@ export function HeroCarousel() {
                       />
                     ) : (
                       <Image
-                        src={s.image}
-                        alt={s.title}
+                        src={heroSlides[current].image}
+                        alt={heroSlides[current].title}
                         fill
                         className="object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.12)] animate-float"
-                        priority={i === 0}
+                        priority={true}
+                        sizes="(max-width: 768px) 100vw, 50vw"
                       />
                     )
                   )}
@@ -136,8 +140,8 @@ export function HeroCarousel() {
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        </motion.div>
+      </AnimatePresence>
 
       {/* Navigation Arrows (Light Glass Style) */}
       <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 z-30 hidden md:flex justify-between pointer-events-none">
