@@ -36,7 +36,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       productService.getReviews(product.id)
     ]);
 
-    const related = relatedRes.products.filter((p) => p.id !== product.id).slice(0, 4);
+    const related = relatedRes.products.filter((p: any) => p.id !== product.id).slice(0, 4);
 
     return (
       <ProductView 
