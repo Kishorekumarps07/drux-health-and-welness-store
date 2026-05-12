@@ -105,21 +105,22 @@ export function Navbar() {
         <div className="w-full flex md:flex-row items-center relative lg:h-24 px-0">
           {/* Mobile Grid Layout */}
           <div className="flex items-center justify-between w-full md:hidden h-14">
-            {/* Left: Hamburger/Back */}
-            <div className="flex items-center w-12">
-              {pathname !== "/" ? (
+            {/* Left: Hamburger & Back */}
+            <div className="flex items-center gap-1">
+              <button 
+                onClick={() => setMobileOpen(true)}
+                className="p-2 text-[#1E1E1E] hover:text-[#A6D608] transition-colors"
+                aria-label="Menu"
+              >
+                <Menu size={24} />
+              </button>
+              {pathname !== "/" && (
                 <button 
                   onClick={() => router.back()}
                   className="p-2 text-[#1E1E1E] hover:text-[#A6D608] transition-colors"
+                  aria-label="Back"
                 >
                   <ChevronLeft size={24} />
-                </button>
-              ) : (
-                <button 
-                  onClick={() => setMobileOpen(true)}
-                  className="p-2 text-[#1E1E1E] hover:text-[#A6D608] transition-colors"
-                >
-                  <Menu size={24} />
                 </button>
               )}
             </div>

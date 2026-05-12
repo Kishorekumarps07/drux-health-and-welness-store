@@ -98,21 +98,21 @@ export function ProductView({ product, related, reviews }: ProductViewProps) {
   return (
     <div className="min-h-screen bg-[#F7F7F7]">
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <nav className="flex items-center gap-1 text-xs text-gray-500">
-            <Link href="/" className="hover:text-[#A6D608] transition-colors">Home</Link>
-            <ChevronRight size={12} />
-            <Link href="/products" className="hover:text-[#A6D608] transition-colors">Products</Link>
-            <ChevronRight size={12} />
+      <div className="bg-white border-b border-gray-100 sticky top-[175px] md:top-[160px] z-30">
+        <div className="max-w-7xl mx-auto px-4 py-3 overflow-x-auto hide-scrollbar whitespace-nowrap">
+          <nav className="flex items-center gap-2 text-xs text-gray-500">
+            <Link href="/" className="hover:text-[#A6D608] transition-colors shrink-0">Home</Link>
+            <ChevronRight size={12} className="shrink-0" />
+            <Link href="/products" className="hover:text-[#A6D608] transition-colors shrink-0">Products</Link>
+            <ChevronRight size={12} className="shrink-0" />
             <Link
               href={`/products?category=${product.categorySlug}`}
-              className="hover:text-[#A6D608] transition-colors"
+              className="hover:text-[#A6D608] transition-colors shrink-0"
             >
               {product.category}
             </Link>
-            <ChevronRight size={12} />
-            <span className="text-gray-900 font-medium truncate max-w-[200px]">{product.name}</span>
+            <ChevronRight size={12} className="shrink-0" />
+            <span className="text-gray-900 font-medium truncate min-w-0">{product.name}</span>
           </nav>
         </div>
       </div>
@@ -354,21 +354,27 @@ export function ProductView({ product, related, reviews }: ProductViewProps) {
                 const rawDescription = product.description || "";
                 if (!rawDescription) return <p className="text-gray-500 italic">No description available.</p>;
                 return rawDescription.split(/\n+/).map((para, pIdx) => {
-                  const commas = (para.match(/,/g) || []).length;
-                  if (commas > 2 && para.length < 300) {
-                    const items = para.split(',').map(i => i.trim()).filter(i => i.length > 0);
+                  const trimmedPara = para.trim();
+                  if (!trimmedPara) return null;
+
+                  // If a line starts with a bullet-like character, treat it as a styled list item
+                  const isListItem = trimmedPara.startsWith('•') || trimmedPara.startsWith('-') || trimmedPara.startsWith('*');
+                  
+                  if (isListItem) {
+                    // Just remove the bullet character for our custom bullet styling
+                    const cleanPoint = trimmedPara.replace(/^[•\-*]\s*/, '');
                     return (
-                      <ul key={pIdx} className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8 mb-6 mt-2">
-                        {items.map((item, iIdx) => (
-                          <li key={iIdx} className="flex items-start gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-[#A6D608] mt-1.5 shrink-0" />
-                            <span>{item}</span>
-                          </li>
-                        ))}
+                      <ul key={pIdx} className="space-y-3 mb-4">
+                        <li className="flex items-start gap-3">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#A6D608] mt-2 shrink-0 shadow-[0_0_8px_rgba(166,214,8,0.4)]" />
+                          <span className="text-sm font-medium text-gray-700 leading-relaxed">{cleanPoint}</span>
+                        </li>
                       </ul>
                     );
                   }
-                  return <p key={pIdx} className="mb-4 whitespace-pre-line">{para}</p>;
+
+                  // Default paragraph rendering for normal text blocks
+                  return <p key={pIdx} className="mb-5 whitespace-pre-line leading-relaxed text-gray-700">{para}</p>;
                 });
               })()}
             </div>
@@ -380,13 +386,25 @@ export function ProductView({ product, related, reviews }: ProductViewProps) {
               {reviews.length > 0 ? (
                 reviews.map((review) => (
                   <div key={review.id} className="border-b border-gray-100 pb-4 last:border-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
-                        {review.user?.name ? review.user.name[0].toUpperCase() : "C"}
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-xs font-bold text-[#A6D608] border border-[#A6D608]/20 shadow-sm">
+                        {review.userName[0].toUpperCase()}
                       </div>
-                      <p className="font-semibold text-xs text-gray-900">{review.user?.name || "Customer"}</p>
+                      <div className="flex flex-col">
+                        <p className="font-bold text-[13px] text-gray-900 leading-none">{review.userName}</p>
+                        <div className="flex items-center gap-1 mt-1">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star key={s} size={10} className={s <= review.rating ? "fill-[#FFA41C] text-[#FFA41C]" : "fill-gray-200 text-gray-200"} />
+                          ))}
+                          {review.verified && (
+                            <span className="text-[9px] font-bold text-[#C45500] ml-2 flex items-center gap-1">
+                              <ShieldCheck size={10} /> Verified Purchase
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs text-gray-700 leading-relaxed font-medium">{review.comment}</p>
+                    <p className="text-xs text-gray-700 leading-relaxed font-medium pl-10">{review.comment}</p>
                   </div>
                 ))
               ) : (

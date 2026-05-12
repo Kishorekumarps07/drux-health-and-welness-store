@@ -28,13 +28,14 @@ export default async function ProductDetailPage({ params }: PageProps) {
     
     if (!product) notFound();
 
-    const [relatedRes, reviews] = await Promise.all([
+    const [relatedRes] = await Promise.all([
       productService.getAllProducts({
         categoryId: product.categoryId,
         limit: 5
-      }),
-      productService.getReviews(product.id)
+      })
     ]);
+    
+    const reviews = product.reviews || [];
 
     const related = relatedRes.products.filter((p: any) => p.id !== product.id).slice(0, 4);
 

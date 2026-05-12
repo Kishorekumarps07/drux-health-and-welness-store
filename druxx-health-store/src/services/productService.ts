@@ -51,6 +51,18 @@ const mapBackendProduct = (p: any): Product => {
     weight: "500g",
     shippingInfo: "Standard: 2-5 Days",
     metadata: p.metadata || {},
+    reviews: p.reviews?.map((r: any) => ({
+      id: r.id,
+      userId: r.userId,
+      userName: r.user?.name || "Customer",
+      userAvatar: r.user?.avatarUrl,
+      rating: r.rating,
+      title: r.title || "",
+      comment: r.comment || "",
+      date: r.createdAt,
+      verified: !!r.isVerified
+    })) || [],
+    reviewCount: p.reviewCount || 0,
   };
 };
 
@@ -90,7 +102,15 @@ export const productService = {
   },
 
   async getReviews(productId: string) {
-    return [];
+    // Currently, reviews are included in the product fetch
+    // But we can implement a separate fetch if we want to load more
+    try {
+      const response = await api.get(`/products/${productId}`);
+      const product = mapBackendProduct(response.data.data?.product || response.data);
+      return product.reviews || [];
+    } catch {
+      return [];
+    }
   },
 
   async getCategories() {

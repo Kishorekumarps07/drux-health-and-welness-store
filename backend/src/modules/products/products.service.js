@@ -2,6 +2,7 @@ const slugify = require('slugify');
 const prisma = require('../../lib/prisma');
 const AppError = require('../../lib/AppError');
 const { deleteImageByUrl } = require('../../utils/cloudinary');
+const { addRandomReviews } = require('../../utils/reviewHelper');
 
 const PRODUCT_INCLUDE = {
   images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] },
@@ -111,6 +112,11 @@ class ProductsService {
         }))
       });
     }
+
+    // Automatically add random reviews for new products (Tamil Style)
+    await addRandomReviews(product.id).catch(err => {
+      console.error('Failed to add automatic reviews:', err);
+    });
 
     return prisma.product.findUnique({
       where: { id: product.id },

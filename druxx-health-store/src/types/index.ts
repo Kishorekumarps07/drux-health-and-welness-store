@@ -29,6 +29,7 @@ export interface Product {
   dimensions?: string;
   shippingInfo: string;
   metadata?: any;
+  reviews?: Review[];
 }
 
 export interface Vendor {
