@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/store/cartStore";
 import { useState } from "react";
+import { SuggestedProducts } from "../cart/SuggestedProducts";
 
 export function CartDrawer() {
   const {
@@ -220,6 +221,9 @@ export function CartDrawer() {
                 )}
               </div>
             </div>
+
+            {/* Suggestions System */}
+            <SuggestedProducts />
 
             {/* Order summary footer */}
             <div className="border-t border-gray-100 bg-gray-50/50 px-5 pt-4 pb-safe space-y-2">

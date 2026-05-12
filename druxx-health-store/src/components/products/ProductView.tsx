@@ -90,7 +90,6 @@ export function ProductView({ product, related, reviews }: ProductViewProps) {
   const handleAddToCart = () => {
     addItem(product, quantity);
     setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
   };
 
   const isVideo = (url: string) => /\.(mp4|webm|mov|ogg)$/i.test(url) || url.includes('/video/upload/') || (url.includes('res.cloudinary.com') && url.includes('/video/'));
@@ -330,13 +329,22 @@ export function ProductView({ product, related, reviews }: ProductViewProps) {
                   </div>
                 </div>
                 <div className="space-y-2 pt-2">
-                  <Button
-                    onClick={handleAddToCart}
-                    className={`w-full h-10 rounded-full font-medium text-xs transition-all shadow-xs ${addedToCart ? "bg-green-600 hover:bg-green-700 text-white" : "bg-[#FFD814] hover:bg-[#F7CA00] text-gray-900"}`}
-                  >
-                    {addedToCart ? "✓ Added to Cart" : "Add to Cart"}
-                  </Button>
-                  <Button asChild className="w-full h-10 rounded-full font-medium text-xs bg-[#FFA41C] hover:bg-[#FA8900] text-gray-900 shadow-xs block text-center leading-10">
+                  {addedToCart ? (
+                    <Button
+                      asChild
+                      className="w-full h-10 rounded-full font-bold text-xs bg-green-600 hover:bg-green-700 text-white transition-all shadow-md flex items-center justify-center"
+                    >
+                      <Link href="/cart">Go to Cart</Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleAddToCart}
+                      className="w-full h-10 rounded-full font-bold text-xs bg-[#FFD814] hover:bg-[#F7CA00] text-gray-900 transition-all shadow-sm"
+                    >
+                      Add to Cart
+                    </Button>
+                  )}
+                  <Button asChild className="w-full h-10 rounded-full font-bold text-xs bg-[#FFA41C] hover:bg-[#FA8900] text-gray-900 shadow-sm block text-center leading-10">
                     <Link href="/checkout" onClick={() => addItem(product, quantity)}>Buy Now</Link>
                   </Button>
                 </div>

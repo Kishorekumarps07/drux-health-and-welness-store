@@ -142,9 +142,9 @@ export function Navbar() {
             </div>
 
             {/* Right: Cart */}
-            <div className="flex items-center justify-end w-12">
-              <button
-                onClick={toggleCart}
+            <div className="flex items-center w-12 justify-end">
+              <Link
+                href="/cart"
                 className="relative p-2"
               >
                 <ShoppingCart size={24} className="text-[#A6D608]" />
@@ -153,7 +153,7 @@ export function Navbar() {
                     {totalItemsCount}
                   </span>
                 )}
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -210,8 +210,8 @@ export function Navbar() {
 
 
               {/* Cart */}
-              <button
-                onClick={toggleCart}
+              <Link
+                href="/cart"
                 className="relative flex items-center gap-2 px-3 py-2 border border-transparent hover:border-black rounded transition-colors shrink-0"
               >
                 <div className="relative">
@@ -226,7 +226,7 @@ export function Navbar() {
                   <span className="text-[13px] font-black text-gray-900">Cart</span>
                   <span className="text-[11px] font-bold text-[#FF7A00]">₹{mounted ? subtotal.toLocaleString("en-IN") : "0"}</span>
                 </div>
-              </button>
+              </Link>
             </div>
           </div>
         </div>

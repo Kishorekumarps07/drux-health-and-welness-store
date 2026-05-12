@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, ShoppingBag, User, Grid, Heart } from "lucide-react";
+import { Home, Search, ShoppingBag, ShoppingCart, User, Grid, Heart } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 
@@ -73,13 +73,13 @@ export function BottomNav() {
         })}
 
         {/* Floating Cart Launcher in Nav */}
-        <button
-          onClick={toggleCart}
+        <Link
+          href="/cart"
           className="relative flex flex-col items-center justify-center gap-1.5 flex-1 h-14 transition-all active:scale-90"
         >
           <div className="relative z-10 flex flex-col items-center">
             <div className={`transition-all duration-300 ${totalItemsCount > 0 ? "text-[#FF7A00]" : "text-gray-500"}`}>
-              <ShoppingBag size={20} strokeWidth={totalItemsCount > 0 ? 3 : 2} />
+              <ShoppingCart size={20} strokeWidth={totalItemsCount > 0 ? 3 : 2} />
             </div>
             {totalItemsCount > 0 && (
               <span className="absolute -top-1.5 -right-2 h-4 w-4 bg-[#FF7A00] text-white text-[9px] font-black rounded-full flex items-center justify-center border border-[#1E1E1E] shadow-lg animate-bounce-subtle">
@@ -92,7 +92,7 @@ export function BottomNav() {
               Cart
             </span>
           </div>
-        </button>
+        </Link>
       </nav>
     </div>
   );

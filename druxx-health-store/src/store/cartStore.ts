@@ -63,7 +63,7 @@ export const useCartStore = create<CartState>()(
           updatedItems.push({ product, quantity });
         }
         
-        set({ items: updatedItems, isOpen: true });
+        set({ items: updatedItems });
         toast.success(`${product.name} added to cart`);
       },
 

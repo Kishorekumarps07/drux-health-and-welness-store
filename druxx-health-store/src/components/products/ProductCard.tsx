@@ -67,10 +67,6 @@ export function ProductCard({ product, className }: ProductCardProps) {
     
     addItem(product as any);
     setCartStatus("success");
-    
-    setTimeout(() => {
-      setCartStatus("idle");
-    }, 2000);
   };
 
   const toggleWishlist = (e: React.MouseEvent) => {
@@ -227,30 +223,35 @@ export function ProductCard({ product, className }: ProductCardProps) {
               </p>
             )}
             
-            <Button
-              onClick={handleAddToCart}
-              disabled={product.stock === 0 || cartStatus === "loading"}
-              className={cn(
-                "w-full h-9 sm:h-11 rounded-lg sm:rounded-xl font-black text-[11px] sm:text-[10px] uppercase tracking-[0.1em] transition-all duration-300 pointer-events-auto",
-                cartStatus === "success" 
-                  ? "bg-green-600 hover:bg-green-700 text-white" 
-                  : "bg-[#1E1E1E] hover:bg-[#A6D608] hover:text-[#1E1E1E] text-white shadow-lg"
-              )}
-            >
-              {cartStatus === "loading" ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : cartStatus === "success" ? (
-                <span className="flex items-center gap-1.5 sm:gap-2 animate-in zoom-in-95">
-                  <Check size={14} strokeWidth={3} className="sm:w-4" /> Added ✓
-                </span>
-              ) : product.stock === 0 ? (
-                "Sold Out"
-              ) : (
-                <span className="flex items-center gap-1.5 sm:gap-2">
-                  <ShoppingCart size={12} className="sm:w-3.5" /> Add
-                </span>
-              )}
-            </Button>
+            {cartStatus === "success" ? (
+              <Button
+                asChild
+                className="w-full h-9 sm:h-11 rounded-lg sm:rounded-xl font-black text-[11px] sm:text-[10px] uppercase tracking-[0.1em] bg-green-600 hover:bg-green-700 text-white shadow-lg pointer-events-auto"
+              >
+                <Link href="/cart" className="flex items-center justify-center gap-1.5 sm:gap-2">
+                  <Check size={14} strokeWidth={3} /> Go to Cart
+                </Link>
+              </Button>
+            ) : (
+              <Button
+                onClick={handleAddToCart}
+                disabled={product.stock === 0 || cartStatus === "loading"}
+                className={cn(
+                  "w-full h-9 sm:h-11 rounded-lg sm:rounded-xl font-black text-[11px] sm:text-[10px] uppercase tracking-[0.1em] transition-all duration-300 pointer-events-auto",
+                  "bg-[#1E1E1E] hover:bg-[#A6D608] hover:text-[#1E1E1E] text-white shadow-lg"
+                )}
+              >
+                {cartStatus === "loading" ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : product.stock === 0 ? (
+                  "Sold Out"
+                ) : (
+                  <span className="flex items-center gap-1.5 sm:gap-2">
+                    <ShoppingCart size={12} className="sm:w-3.5" /> Add
+                  </span>
+                )}
+              </Button>
+            )}
           </div>
         </div>
       </motion.div>
