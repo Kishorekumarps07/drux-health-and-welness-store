@@ -314,69 +314,43 @@ export default function ProductDetailPage({ params }: PageProps) {
                 );
               })()}
 
-              {/* Product Highlights (Dynamic or Default) */}
+              {/* Product Highlights (Professional Minimalist List) */}
               {(() => {
                 const highlights = product.metadata?.highlights?.filter((h: string) => h.trim().length > 0) || [];
-                const defaultHighlights = [
-                  { title: "✨ Premium Grade", desc: "Quality Assured" },
-                  { title: "🛡️ 100% Authentic", desc: "Verified Origin" },
-                  { title: "📦 Vendor Direct", desc: "Direct Fulfillment" },
-                  { title: "🌱 Eco-Sourced", desc: "Sustainable Choice" },
-                  { title: "⚡ Optimum Efficacy", desc: "High Performance" }
-                ];
-
-                const displayHighlights = highlights.length > 0 
-                  ? highlights.map((h: string) => ({ title: h, desc: "Verified Quality" }))
-                  : defaultHighlights;
+                
+                if (highlights.length === 0) return null;
 
                 return (
                   <div className="mt-4 pt-4 border-t border-gray-200">
-                    <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-2.5">Product Highlights</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {displayHighlights.map((highlight: { title: string; desc: string }, idx: number) => (
-                        <div 
-                          key={idx} 
-                          className={cn(
-                            "border border-gray-200 bg-gray-50/50 rounded-lg p-2 flex flex-col justify-center items-center text-center hover:border-[#007185] transition-colors",
-                            idx === 4 && displayHighlights.length === 5 ? "sm:col-span-1" : ""
-                          )}
-                        >
-                          <span className="text-[11px] font-bold text-gray-900 block leading-tight truncate w-full">{highlight.title}</span>
-                          <span className="text-[9px] text-gray-500 block truncate w-full">{highlight.desc}</span>
-                        </div>
-                      ))}
+                    <h3 className="text-[10px] font-black text-[#1E1E1E] uppercase tracking-[0.2em] mb-4">Highlights</h3>
+                    <div className="space-y-3">
+                      {highlights.map((h: string, idx: number) => {
+                        const hasEmoji = h.match(/^\p{Emoji}/u);
+                        const emoji = hasEmoji ? h.split(' ')[0] : null;
+                        const text = emoji ? h.split(' ').slice(1).join(' ') : h;
+
+                        return (
+                          <div 
+                            key={idx} 
+                            className="relative pl-5 py-0.5 border-l-2 border-[#A6D608]/30 hover:border-[#A6D608] transition-colors group"
+                          >
+                            <div className="flex flex-col">
+                              <span className="text-[13px] font-bold text-gray-900 leading-tight flex items-center gap-2">
+                                {emoji && <span className="text-sm">{emoji}</span>}
+                                {text}
+                              </span>
+                              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                Guaranteed Quality
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
               })()}
 
-              {/* About this item / Bullets */}
-              {(() => {
-                let narrative = product.description || product.shortDescription || "";
-                const ksIdx = narrative.indexOf("Product details");
-                if (ksIdx > 30) {
-                  narrative = narrative.substring(0, ksIdx).trim();
-                } else if (ksIdx !== -1) {
-                  narrative = narrative.replace(/^Product details\s*/i, "").trim();
-                }
-                if (!narrative) return null;
-                // split into nice scannable bullet points
-                const sentences = narrative.split(/\.(?=\s|[A-Z])/).map(s => s.trim()).filter(s => s.length > 10);
-                return (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-2">About this item</h3>
-                    <ul className="list-disc pl-4 space-y-1 text-xs text-gray-800 leading-relaxed font-medium">
-                      {sentences.length > 0 ? (
-                        sentences.map((sentence, idx) => (
-                          <li key={idx}>{sentence + (sentence.endsWith(".") ? "" : ".")}</li>
-                        ))
-                      ) : (
-                        <li>{narrative}</li>
-                      )}
-                    </ul>
-                  </div>
-                );
-              })()}
             </div>
 
             {/* Right Column: Amazon Action Buybox Card (lg:col-span-3) */}
@@ -444,16 +418,37 @@ export default function ProductDetailPage({ params }: PageProps) {
           {/* Section 1: Product Description */}
           <div>
             <h2 className="text-base font-bold text-[#C45500] mb-3 uppercase tracking-wider">Product Description</h2>
-            <div className="text-xs sm:text-sm text-gray-800 leading-relaxed max-w-4xl space-y-3 font-medium whitespace-pre-line">
+            <div className="text-sm text-gray-800 leading-relaxed max-w-4xl font-medium">
               {(() => {
-                let narrative = product.description || "";
-                const ksIdx = narrative.indexOf("Product details");
-                if (ksIdx > 30) {
-                  narrative = narrative.substring(0, ksIdx).trim();
-                } else if (ksIdx !== -1) {
-                  narrative = narrative.replace(/^Product details\s*/i, "").trim();
-                }
-                return narrative ? <p>{narrative}</p> : <p className="text-gray-500 italic">Product description provided directly by authorized store {product.vendor.name}.</p>;
+                const rawDescription = product.description || "";
+                if (!rawDescription) return <p className="text-gray-500 italic">No description available for this item.</p>;
+
+                // Split into paragraphs
+                const paragraphs = rawDescription.split(/\n+/);
+
+                return paragraphs.map((para, pIdx) => {
+                  // If paragraph has many commas, it's likely a feature list
+                  const commas = (para.match(/,/g) || []).length;
+                  if (commas > 2 && para.length < 300) {
+                    const items = para.split(',').map(i => i.trim()).filter(i => i.length > 0);
+                    return (
+                      <ul key={pIdx} className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8 mb-6 mt-2">
+                        {items.map((item, iIdx) => (
+                          <li key={iIdx} className="flex items-start gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#A6D608] mt-1.5 shrink-0" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    );
+                  }
+
+                  return (
+                    <p key={pIdx} className="mb-4 whitespace-pre-line">
+                      {para}
+                    </p>
+                  );
+                });
               })()}
             </div>
           </div>

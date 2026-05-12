@@ -95,9 +95,9 @@ export default function VendorInventoryPage() {
     discount: "" as any,
     category: "",
     stock: "" as any,
-    description: "",
+    descriptionPoints: ["", "", "", "", ""],
     image: "",
-    highlights: ["", "", "", "", ""]
+    highlights: [""]
   })
 
   const calculateDiscount = (mrp: number, sale: number) => {
@@ -136,7 +136,7 @@ export default function VendorInventoryPage() {
     if (editingProduct.originalPrice !== undefined) formData.append("comparePrice", editingProduct.originalPrice.toString());
     if (editingProduct.categoryId) formData.append("categoryId", editingProduct.categoryId);
     if (editingProduct.stock !== undefined) formData.append("stockQty", editingProduct.stock.toString());
-    if (editingProduct.description) formData.append("description", editingProduct.description);
+    formData.append("description", editingProduct.descriptionPoints.filter((p: string) => p.trim()).join('\n'));
     
     formData.append("metadata", JSON.stringify({
       ...editingProduct.metadata,
@@ -176,7 +176,7 @@ export default function VendorInventoryPage() {
     formData.append("comparePrice", (newProduct.originalPrice || 0).toString());
     formData.append("categoryId", newProduct.category);
     formData.append("stockQty", (newProduct.stock || 0).toString());
-    formData.append("description", newProduct.description);
+    formData.append("description", newProduct.descriptionPoints.filter(p => p.trim()).join('\n'));
     formData.append("status", "ACTIVE");
     formData.append("metadata", JSON.stringify({ highlights: newProduct.highlights }));
     
@@ -195,9 +195,9 @@ export default function VendorInventoryPage() {
         discount: "" as any, 
         category: "", 
         stock: "" as any, 
-        description: "", 
+        descriptionPoints: ["", "", "", "", ""], 
         image: "",
-        highlights: ["", "", "", "", ""] 
+        highlights: [""] 
       })
       setImageFiles([])
       setPreviews([])
@@ -356,15 +356,20 @@ export default function VendorInventoryPage() {
                          <Button 
                            variant="ghost" 
                            size="icon-sm" 
-                           onClick={() => setEditingProduct({
-                             ...product,
-                             originalPrice: product.comparePrice || product.price,
-                             price: product.price,
-                             discount: calculateDiscount(Number(product.comparePrice || product.price), Number(product.price)),
-                             image: product.images?.[0]?.url || "",
-                             categoryName: product.category?.name,
-                             highlights: product.metadata?.highlights || ["", "", "", "", ""]
-                           })}
+                           onClick={() => {
+                             const desc = product.description || "";
+                             const points = desc.split('\n').filter((p: string) => p.trim().length > 0);
+                             setEditingProduct({
+                               ...product,
+                               originalPrice: product.comparePrice || product.price,
+                               price: product.price,
+                               discount: calculateDiscount(Number(product.comparePrice || product.price), Number(product.price)),
+                               image: product.images?.[0]?.url || "",
+                               categoryName: product.category?.name,
+                               highlights: product.metadata?.highlights || [""],
+                               descriptionPoints: points.length > 0 ? points : ["", "", "", "", ""]
+                             })
+                           }}
                            className="rounded-lg hover:bg-white hover:text-[#A6D608] transition-all hover:shadow-sm"
                          >
                             <Edit2 className="w-4 h-4" />
@@ -495,39 +500,96 @@ export default function VendorInventoryPage() {
                          />
                       </div>
                    </div>
-                   <div className="space-y-2">
-                      <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Product Description</label>
-                      <textarea 
-                        required 
-                        rows={3}
-                        value={newProduct.description}
-                        onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
-                        className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all resize-none" 
-                        placeholder="Tell customers about your product..." 
-                      />
-                   </div>
-
-                    <div className="space-y-4 pt-4 border-t border-gray-100">
-                      <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Product Highlights (Key selling points)</label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {newProduct.highlights.map((highlight, idx) => (
-                          <div key={idx} className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] font-black">#{idx + 1}</span>
-                            <input 
-                              type="text"
-                              value={highlight}
-                              onChange={(e) => {
-                                const newHighlights = [...newProduct.highlights];
-                                newHighlights[idx] = e.target.value;
-                                setNewProduct({ ...newProduct, highlights: newHighlights });
-                              }}
-                              className="w-full pl-10 pr-4 py-3 bg-gray-50 border-none rounded-2xl text-xs font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
-                              placeholder={`Highlight ${idx + 1}`}
-                            />
+                   
+                   <div className="space-y-4 pt-4 border-t border-gray-100">
+                      <div className="flex items-center justify-between ml-1">
+                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic">Product Description Points (Features/Details)</label>
+                        <button 
+                          type="button"
+                          onClick={() => setNewProduct({ ...newProduct, descriptionPoints: [...newProduct.descriptionPoints, ""] })}
+                          className="text-[10px] font-black text-[#A6D608] hover:underline uppercase tracking-widest"
+                        >
+                          + Add More
+                        </button>
+                      </div>
+                      <div className="space-y-3">
+                        {newProduct.descriptionPoints.map((point, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                              <div className="absolute left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#A6D608]" />
+                              <input 
+                                type="text"
+                                value={point}
+                                onChange={(e) => {
+                                  const newPoints = [...newProduct.descriptionPoints];
+                                  newPoints[idx] = e.target.value;
+                                  setNewProduct({ ...newProduct, descriptionPoints: newPoints });
+                                }}
+                                className="w-full pl-8 pr-4 py-3 bg-gray-50 border-none rounded-2xl text-xs font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
+                                placeholder={`Feature point ${idx + 1}...`}
+                              />
+                            </div>
+                            {newProduct.descriptionPoints.length > 1 && (
+                              <button 
+                                type="button"
+                                onClick={() => {
+                                  const newPoints = newProduct.descriptionPoints.filter((_, i) => i !== idx);
+                                  setNewProduct({ ...newProduct, descriptionPoints: newPoints });
+                                }}
+                                className="p-2 text-gray-300 hover:text-red-500 transition-colors"
+                              >
+                                <X size={14} />
+                              </button>
+                            )}
                           </div>
                         ))}
                       </div>
-                      <p className="text-[10px] text-gray-400 font-bold ml-1">These will appear as visual boxes on the product page.</p>
+                    </div>
+
+                    <div className="space-y-4 pt-4 border-t border-gray-100">
+                      <div className="flex items-center justify-between ml-1">
+                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic">Product Highlights (Key selling points)</label>
+                        <button 
+                          type="button"
+                          onClick={() => setNewProduct({ ...newProduct, highlights: [...newProduct.highlights, ""] })}
+                          className="text-[10px] font-black text-[#A6D608] hover:underline uppercase tracking-widest"
+                        >
+                          + Add More
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {newProduct.highlights.map((highlight, idx) => (
+                          <div key={idx} className="relative flex items-center gap-2">
+                            <div className="relative flex-1">
+                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] font-black">#{idx + 1}</span>
+                              <input 
+                                type="text"
+                                value={highlight}
+                                onChange={(e) => {
+                                  const newHighlights = [...newProduct.highlights];
+                                  newHighlights[idx] = e.target.value;
+                                  setNewProduct({ ...newProduct, highlights: newHighlights });
+                                }}
+                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border-none rounded-2xl text-xs font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
+                                placeholder={`Highlight ${idx + 1}`}
+                              />
+                            </div>
+                            {newProduct.highlights.length > 1 && (
+                              <button 
+                                type="button"
+                                onClick={() => {
+                                  const newHighlights = newProduct.highlights.filter((_, i) => i !== idx);
+                                  setNewProduct({ ...newProduct, highlights: newHighlights });
+                                }}
+                                className="p-2 text-gray-300 hover:text-red-500 transition-colors"
+                              >
+                                <X size={14} />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-[10px] text-gray-400 font-bold ml-1">These will appear as professional bullet points on the product page.</p>
                     </div>
 
                    <div className="space-y-2">
@@ -677,91 +739,152 @@ export default function VendorInventoryPage() {
                            className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
                          />
                       </div>
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Product Description</label>
-                      <textarea 
-                        required 
-                        rows={3}
-                        value={editingProduct.description}
-                        onChange={(e) => setEditingProduct({...editingProduct, description: e.target.value})}
-                        className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all resize-none" 
-                      />
-                   </div>
-
-                    <div className="space-y-4 pt-4 border-t border-gray-100">
-                      <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Product Highlights</label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {editingProduct.highlights.map((highlight: string, idx: number) => (
-                          <div key={idx} className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] font-black">#{idx + 1}</span>
-                            <input 
-                              type="text"
-                              value={highlight}
-                              onChange={(e) => {
-                                const newHighlights = [...editingProduct.highlights];
-                                newHighlights[idx] = e.target.value;
-                                setEditingProduct({ ...editingProduct, highlights: newHighlights });
-                              }}
-                              className="w-full pl-10 pr-4 py-3 bg-gray-50 border-none rounded-2xl text-xs font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
-                              placeholder={`Highlight ${idx + 1}`}
-                            />
+                    </div>
+                   <div className="space-y-4 pt-4 border-t border-gray-100">
+                      <div className="flex items-center justify-between ml-1">
+                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic">Product Description Points</label>
+                        <button 
+                          type="button"
+                          onClick={() => setEditingProduct({ ...editingProduct, descriptionPoints: [...editingProduct.descriptionPoints, ""] })}
+                          className="text-[10px] font-black text-[#A6D608] hover:underline uppercase tracking-widest"
+                        >
+                          + Add More
+                        </button>
+                      </div>
+                      <div className="space-y-3">
+                        {editingProduct.descriptionPoints?.map((point: string, idx: number) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                              <div className="absolute left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#A6D608]" />
+                              <input 
+                                type="text"
+                                value={point}
+                                onChange={(e) => {
+                                  const newPoints = [...editingProduct.descriptionPoints];
+                                  newPoints[idx] = e.target.value;
+                                  setEditingProduct({ ...editingProduct, descriptionPoints: newPoints });
+                                }}
+                                className="w-full pl-8 pr-4 py-3 bg-gray-50 border-none rounded-2xl text-xs font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
+                                placeholder={`Feature point ${idx + 1}...`}
+                              />
+                            </div>
+                            {editingProduct.descriptionPoints.length > 1 && (
+                              <button 
+                                type="button"
+                                onClick={() => {
+                                  const newPoints = editingProduct.descriptionPoints.filter((_: any, i: number) => i !== idx);
+                                  setEditingProduct({ ...editingProduct, descriptionPoints: newPoints });
+                                }}
+                                className="p-2 text-gray-300 hover:text-red-500 transition-colors"
+                              >
+                                <X size={14} />
+                              </button>
+                            )}
                           </div>
                         ))}
                       </div>
                     </div>
 
-                   <div className="space-y-2">
-                      <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Update Images</label>
-                      <div className="grid grid-cols-4 gap-4">
-                        {previews.length > 0 ? previews.map((preview, idx) => (
-                          <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-50">
-                            <Image src={preview} alt="Preview" fill className="object-cover" />
-                            <button 
-                              type="button"
-                              onClick={() => removeImage(idx)}
-                              className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-md"
-                            >
-                              <X size={12} />
-                            </button>
-                          </div>
-                        )) : editingProduct.images?.map((img: any, idx: number) => {
-                          const imageUrl = typeof img === 'string' ? img : img?.url;
-                          if (!imageUrl) return null;
-                          return (
-                            <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-50">
-                              {isVideo(imageUrl) ? (
-                                <video src={imageUrl} className="w-full h-full object-cover opacity-80" />
-                              ) : (
-                                <Image src={imageUrl} alt="Current" fill className="object-cover opacity-80" />
-                              )}
-                            </div>
-                          );
-                        })}
-                        {previews.length < 3 && (
-                          <label className="flex flex-col items-center justify-center aspect-square rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50 hover:border-[#A6D608] hover:bg-[#A6D608]/5 transition-all cursor-pointer group">
-                            <Upload className="w-6 h-6 text-gray-300 group-hover:text-[#A6D608] transition-colors" />
-                            <input 
-                              type="file" 
-                              multiple 
-                              accept="image/*,video/*" 
-                              onChange={handleFileChange} 
-                              className="hidden" 
-                            />
-                          </label>
-                        )}
+                    <div className="space-y-4 pt-4 border-t border-gray-100">
+                      <div className="flex items-center justify-between ml-1">
+                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic">Product Highlights</label>
+                        <button 
+                          type="button"
+                          onClick={() => setEditingProduct({ ...editingProduct, highlights: [...editingProduct.highlights, ""] })}
+                          className="text-[10px] font-black text-[#A6D608] hover:underline uppercase tracking-widest"
+                        >
+                          + Add More
+                        </button>
                       </div>
-                      <p className="text-[10px] text-gray-400 font-bold mt-2 ml-1">Upload up to 3 files. Selecting new files will replace existing ones.</p>
-                   </div>
-                   
-                   <div className="pt-6">
-                      <Button type="submit" className="w-full bg-[#1E1E1E] hover:bg-black text-white rounded-[20px] h-14 font-black shadow-xl transition-all text-lg" disabled={loading}>
-                         {loading ? "Updating..." : "Save Changes"}
-                      </Button>
-                   </div>
-                </form>
-             </div>
-          </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {editingProduct.highlights.map((highlight: string, idx: number) => (
+                          <div key={idx} className="relative flex items-center gap-2">
+                            <div className="relative flex-1">
+                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] font-black">#{idx + 1}</span>
+                              <input 
+                                type="text"
+                                value={highlight}
+                                onChange={(e) => {
+                                  const newHighlights = [...editingProduct.highlights];
+                                  newHighlights[idx] = e.target.value;
+                                  setEditingProduct({ ...editingProduct, highlights: newHighlights });
+                                }}
+                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border-none rounded-2xl text-xs font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
+                                placeholder={`Highlight ${idx + 1}`}
+                              />
+                            </div>
+                            {editingProduct.highlights.length > 1 && (
+                              <button 
+                                type="button"
+                                onClick={() => {
+                                  const newHighlights = editingProduct.highlights.filter((_: any, i: number) => i !== idx);
+                                  setEditingProduct({ ...editingProduct, highlights: newHighlights });
+                                }}
+                                className="p-2 text-gray-300 hover:text-red-500 transition-colors"
+                              >
+                                <X size={14} />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                       <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Update Images</label>
+                       <div className="grid grid-cols-4 gap-4">
+                         {previews.length > 0 ? (
+                           previews.map((preview, idx) => (
+                             <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-50">
+                               <Image src={preview} alt="Preview" fill className="object-cover" />
+                               <button 
+                                 type="button"
+                                 onClick={() => removeImage(idx)}
+                                 className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-md"
+                               >
+                                 <X size={12} />
+                               </button>
+                             </div>
+                           ))
+                         ) : (
+                           editingProduct.images?.map((img: any, idx: number) => {
+                             const imageUrl = typeof img === 'string' ? img : img?.url;
+                             if (!imageUrl) return null;
+                             return (
+                               <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-50">
+                                 {isVideo(imageUrl) ? (
+                                   <video src={imageUrl} className="w-full h-full object-cover opacity-80" />
+                                 ) : (
+                                   <Image src={imageUrl} alt="Current" fill className="object-cover opacity-80" />
+                                 )}
+                               </div>
+                             );
+                           })
+                         )}
+                         {previews.length < 3 && (
+                           <label className="flex flex-col items-center justify-center aspect-square rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50 hover:border-[#A6D608] hover:bg-[#A6D608]/5 transition-all cursor-pointer group">
+                             <Upload className="w-6 h-6 text-gray-300 group-hover:text-[#A6D608] transition-colors" />
+                             <input 
+                               type="file" 
+                               multiple 
+                               accept="image/*,video/*" 
+                               onChange={handleFileChange} 
+                               className="hidden" 
+                             />
+                           </label>
+                         )}
+                       </div>
+                       <p className="text-[10px] text-gray-400 font-bold mt-2 ml-1">Upload up to 3 files. Selecting new files will replace existing ones.</p>
+                    </div>
+                    
+                    <div className="pt-6">
+                       <Button type="submit" className="w-full bg-[#1E1E1E] hover:bg-black text-white rounded-[20px] h-14 font-black shadow-xl transition-all text-lg" disabled={loading}>
+                          {loading ? "Updating..." : "Save Changes"}
+                       </Button>
+                    </div>
+                 </form>
+              </div>
+           </div>
         )}
       </div>
     </ProtectedRoute>
