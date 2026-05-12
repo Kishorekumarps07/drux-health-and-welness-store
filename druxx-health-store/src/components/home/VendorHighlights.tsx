@@ -7,24 +7,7 @@ import { VendorCard } from "@/components/products/VendorCard";
 import { vendorService } from "@/services/vendorService";
 import { Vendor } from "@/types";
 
-export function VendorHighlights() {
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchFeatured = async () => {
-      try {
-        const { vendors: data } = await vendorService.getAllVendors({ limit: 3 });
-        setVendors(data);
-      } catch (error) {
-        console.error("Failed to fetch featured vendors", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchFeatured();
-  }, []);
-
+export function VendorHighlights({ vendors, loading = false }: { vendors: Vendor[]; loading?: boolean }) {
   return (
     <section className="py-16 md:py-24 px-4 bg-gray-50/30 font-sans">
       <div className="max-w-7xl mx-auto">

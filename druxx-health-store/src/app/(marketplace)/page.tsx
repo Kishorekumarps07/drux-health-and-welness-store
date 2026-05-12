@@ -9,12 +9,13 @@ import api from "@/lib/api";
 
 export default async function HomePage() {
   // Fetch all home data in parallel on the server
-  const [fRes, bRes, nRes, heroRes, advRes] = await Promise.all([
+  const [fRes, bRes, nRes, heroRes, advRes, vRes] = await Promise.all([
     productService.getFeatured(),
     productService.getBestSellers(),
     productService.getNewArrivals(),
     api.get('/cms/hero').catch(() => ({ data: { data: [] } })),
-    api.get('/cms/advantages').catch(() => ({ data: { data: [] } }))
+    api.get('/cms/advantages').catch(() => ({ data: { data: [] } })),
+    api.get('/vendors', { params: { limit: 3, orderBy: 'latest' } }).catch(() => ({ data: { vendors: [] } }))
   ]);
 
   const heroSlides = heroRes.data?.data || [];
@@ -24,6 +25,24 @@ export default async function HomePage() {
     desc: a.description,
     image: a.image,
     iconType: a.icon_type
+  }));
+
+  const vendors = (vRes.data?.vendors || []).map((bv: any) => ({
+    id: bv.id,
+    name: bv.storeName,
+    slug: bv.storeSlug,
+    logo: bv.storeLogo || `https://api.dicebear.com/7.x/identicon/svg?seed=${bv.storeName}`,
+    banner: bv.storeBanner || "https://images.unsplash.com/photo-1506784919140-50cf144ad310?q=80&w=2000",
+    description: bv.storeDescription || "A trusted wellness brand on Druxx Health Store.",
+    rating: parseFloat(bv.rating) || 0,
+    reviewCount: 0,
+    productCount: bv._count?.products || 0,
+    location: "India",
+    isVerified: bv.approvalStatus === "ACTIVE",
+    isTopSeller: parseFloat(bv.rating) >= 4.5,
+    deliveryPerformance: 99,
+    joinedDate: bv.createdAt,
+    specialties: ["Health", "Wellness"]
   }));
 
   return (
@@ -49,7 +68,7 @@ export default async function HomePage() {
         <AdvantageCarousel advantages={advantages} />
 
         {/* Vendor highlights */}
-        <VendorHighlights />
+        <VendorHighlights vendors={vendors} />
       </HomeAnimations>
 
       {/* Newsletter section */}

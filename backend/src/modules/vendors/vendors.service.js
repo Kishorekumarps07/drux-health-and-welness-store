@@ -112,8 +112,10 @@ class VendorsService {
       ...(search && { storeName: { contains: search, mode: 'insensitive' } }),
     };
 
+    const orderBy = query.orderBy === 'latest' ? { createdAt: 'desc' } : { rating: 'desc' };
+
     const [vendors, total] = await prisma.$transaction([
-      prisma.vendor.findMany({ where, skip, take, select: VENDOR_SELECT, orderBy: { rating: 'desc' } }),
+      prisma.vendor.findMany({ where, skip, take, select: VENDOR_SELECT, orderBy }),
       prisma.vendor.count({ where }),
     ]);
 

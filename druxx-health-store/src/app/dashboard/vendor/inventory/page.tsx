@@ -113,10 +113,11 @@ export default function VendorInventoryPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      setImageFiles(files);
+      // Append new files to existing ones, limit to 5
+      setImageFiles(prev => [...prev, ...files].slice(0, 5));
       
       const newPreviews = files.map(file => URL.createObjectURL(file));
-      setPreviews(newPreviews);
+      setPreviews(prev => [...prev, ...newPreviews].slice(0, 5));
     }
   };
 
@@ -611,7 +612,7 @@ export default function VendorInventoryPage() {
                              </button>
                            </div>
                          ))}
-                         {previews.length < 3 && (
+                         {previews.length < 5 && (
                            <label className="flex flex-col items-center justify-center aspect-square rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50 hover:border-[#A6D608] hover:bg-[#A6D608]/5 transition-all cursor-pointer group">
                              <Upload className="w-6 h-6 text-gray-300 group-hover:text-[#A6D608] transition-colors" />
                              <input 
@@ -861,7 +862,7 @@ export default function VendorInventoryPage() {
                              );
                            })
                          )}
-                         {previews.length < 3 && (
+                         {previews.length < 5 && (
                            <label className="flex flex-col items-center justify-center aspect-square rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50 hover:border-[#A6D608] hover:bg-[#A6D608]/5 transition-all cursor-pointer group">
                              <Upload className="w-6 h-6 text-gray-300 group-hover:text-[#A6D608] transition-colors" />
                              <input 
