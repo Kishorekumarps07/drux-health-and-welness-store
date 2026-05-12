@@ -35,7 +35,7 @@ export const orderService = {
     if (orderError) throw orderError;
 
     // 2. Insert Order Items
-    const orderItems = data.items.map(item => ({
+    const orderItems = data.items.map((item: any) => ({
       order_id: order.id,
       product_id: item.product.id,
       vendor_id: item.product.vendor?.id || null,
@@ -83,7 +83,7 @@ export const orderService = {
     }
 
     // Map the Supabase order data to the UI format
-    const formattedOrders = data.map(order => ({
+    const formattedOrders = data.map((order: any) => ({
       id: order.id,
       status: order.status,
       subtotal: Number(order.subtotal),

@@ -18,15 +18,6 @@ const getBySlug        = asyncHandler(async (req, res) => {
 });
 
 const create           = asyncHandler(async (req, res) => {
-  console.log('----------------------------------------------------');
-  console.log('NEW PRODUCT CREATE REQUEST');
-  console.log('Files received:', req.files ? req.files.length : 'NONE');
-  if (req.files) {
-    req.files.forEach((f, i) => console.log(`File ${i}: ${f.fieldname} -> ${f.path}`));
-  }
-  console.log('Body:', req.body);
-  console.log('----------------------------------------------------');
-
   const data = { ...req.body };
   
   if (req.files && req.files.length > 0) {

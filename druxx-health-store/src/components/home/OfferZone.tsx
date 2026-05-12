@@ -18,7 +18,7 @@ export function OfferZone() {
         // Fetch products and filter those with discounts > 0 on frontend for now
         // or we could add a specific 'offers' flag in backend if needed.
         const result = await productService.getAllProducts({ limit: 8 });
-        const offerProducts = result.products.filter(p => p.originalPrice && p.originalPrice > p.price);
+        const offerProducts = result.products.filter((p: any) => p.originalPrice && p.originalPrice > p.price);
         setProducts(offerProducts);
       } catch (error) {
         console.error("Failed to fetch offers:", error);

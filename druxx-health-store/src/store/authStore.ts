@@ -140,7 +140,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ loading: false, isLoading: false, initialized: true });
     }
 
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    supabase.auth.onAuthStateChange(async (event: any, session: any) => {
       await syncUser(session?.user ?? null, session);
     });
   },

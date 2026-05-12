@@ -16,6 +16,7 @@ export interface Product {
   images: string[];
   category: string;
   categorySlug: string;
+  categoryId?: string;
   vendor: Vendor;
   stock: number;
   tags: string[];
