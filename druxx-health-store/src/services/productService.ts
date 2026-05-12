@@ -20,7 +20,6 @@ const mapBackendProduct = (p: any): Product => {
     originalPrice: comparePrice,
     discount,
     rating: Number(p.averageRating) || 0,
-    reviewCount: 0,
     images: p.images && p.images.length > 0 ? p.images.map((img: any) => img.url) : ["/placeholder.png"],
     category: p.category?.name || "Uncategorized",
     categorySlug: p.category?.slug || "uncategorized",
