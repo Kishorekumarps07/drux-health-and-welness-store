@@ -53,7 +53,7 @@ export function VendorHighlights() {
         </div>
 
         {/* Vendor Grid / Scroll Container */}
-        <div className="flex gap-6 overflow-x-auto hide-scrollbar pb-8 snap-x-mandatory px-4 -mx-4 md:mx-0 md:px-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-8">
+        <div className="flex gap-6 overflow-x-auto touch-pan-x hide-scrollbar pb-8 snap-x-mandatory px-4 -mx-4 md:mx-0 md:px-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-8">
           {loading ? (
             [1, 2, 3].map((i) => (
               <div key={i} className="h-96 rounded-[2rem] bg-white border border-gray-100 animate-pulse" />

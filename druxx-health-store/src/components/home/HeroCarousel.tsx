@@ -42,7 +42,7 @@ export function HeroCarousel() {
 
   return (
     <div
-      className="relative w-full overflow-hidden aspect-[4/5] md:aspect-[21/8] lg:aspect-[21/7] rounded-[2rem] md:rounded-[3rem] shadow-xl border border-gray-100"
+      className="relative w-full overflow-hidden aspect-[3/4] md:aspect-[21/8] lg:aspect-[21/7] rounded-[2rem] md:rounded-[3rem] shadow-xl border border-gray-100"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       id="hero-carousel"
@@ -84,26 +84,34 @@ export function HeroCarousel() {
             </div>
 
             {/* Content Layout */}
-            <div className="relative z-10 w-full h-full max-w-[1400px] mx-auto flex flex-col md:flex-row items-center px-8 md:px-16">
+            <div className="relative z-10 w-full h-full max-w-[1400px] mx-auto flex flex-col md:flex-row items-center px-8 md:px-16 pt-6 md:pt-0">
               
               {/* Text Area (Deep Charcoal Typography) */}
-              <div className="w-full md:w-1/2 flex flex-col justify-center text-left pt-12 md:pt-0">
+              <div className="w-full md:w-1/2 flex flex-col justify-center text-left pt-6 md:pt-0 shrink-0 md:shrink">
                 <div className="animate-fade-slide">
-                  <span className="inline-block px-3 py-1 rounded-full bg-black/5 text-black/40 text-[10px] font-bold tracking-[0.2em] mb-6 uppercase border border-black/5">
+                  <span className="inline-block px-3 py-1 rounded-full bg-black/5 text-black/40 text-[10px] font-bold tracking-[0.2em] mb-3 md:mb-6 uppercase border border-black/5">
                     Premium Quality
                   </span>
-                  <h1 className="font-heading font-black text-[#1A1A1A] text-5xl md:text-6xl lg:text-8xl leading-[0.9] mb-6 tracking-tighter uppercase italic">
+                  <h1 className={`font-black text-[#1A1A1A] leading-[0.9] mb-3 md:mb-6 tracking-tight uppercase ${
+                    s.title.length > 20 || (s.subtitle && s.subtitle.length > 80)
+                      ? "text-3xl sm:text-4xl md:text-5xl lg:text-7xl"
+                      : "text-5xl md:text-6xl lg:text-8xl"
+                  }`}>
                     {s.title}
                   </h1>
-                  <p className="text-[#4A4A4A] text-base md:text-xl mb-10 leading-relaxed max-w-[280px] md:max-w-md font-medium tracking-wide">
+                  <p className={`text-[#4A4A4A] mb-2 md:mb-10 leading-relaxed max-w-[280px] md:max-w-md font-medium tracking-wide ${
+                    s.subtitle && s.subtitle.length > 80
+                      ? "text-xs sm:text-sm md:text-base line-clamp-3"
+                      : "text-base md:text-xl line-clamp-4"
+                  }`}>
                     {s.subtitle}
                   </p>
                 </div>
               </div>
 
               {/* Product Visual */}
-              <div className="w-full md:w-1/2 h-[50%] md:h-[80%] relative flex items-center justify-center">
-                <div className="relative w-full h-full p-4 md:p-8">
+              <div className="w-full md:w-1/2 flex-1 md:h-[80%] min-h-[220px] relative flex items-center justify-center shrink-0 mt-2 md:mt-0 pb-6 md:pb-0">
+                <div className="relative w-full h-full p-0 md:p-8">
                   {typeof s.image === 'string' && s.image.length > 0 && (
                     isVideo(s.image) ? (
                       <video

@@ -28,6 +28,7 @@ export interface Product {
   weight: string;
   dimensions?: string;
   shippingInfo: string;
+  metadata?: any;
 }
 
 export interface Vendor {

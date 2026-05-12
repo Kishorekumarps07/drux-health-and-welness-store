@@ -20,6 +20,15 @@ const getBySlug        = asyncHandler(async (req, res) => {
 const create           = asyncHandler(async (req, res) => {
   const data = { ...req.body };
   
+  // Parse metadata if it's a string (FormData)
+  if (data.metadata && typeof data.metadata === 'string') {
+    try {
+      data.metadata = JSON.parse(data.metadata);
+    } catch (e) {
+      console.warn("Metadata parsing failed", e);
+    }
+  }
+
   if (req.files && req.files.length > 0) {
     data.images = req.files.map((file, index) => ({
       url: file.path,
@@ -29,13 +38,22 @@ const create           = asyncHandler(async (req, res) => {
   }
 
   const product = await productsService.create(req.user.id, data);
-  await clearCacheKeys('/products*');
+  await clearCacheKeys('*products*');
   res.status(201).json({ status: 'success', data: { product } });
 });
 
 const update           = asyncHandler(async (req, res) => {
   const data = { ...req.body };
   
+  // Parse metadata if it's a string (FormData)
+  if (data.metadata && typeof data.metadata === 'string') {
+    try {
+      data.metadata = JSON.parse(data.metadata);
+    } catch (e) {
+      console.warn("Metadata parsing failed", e);
+    }
+  }
+
   if (req.files && req.files.length > 0) {
     data.images = req.files.map((file, index) => ({
       url: file.path,
@@ -45,13 +63,13 @@ const update           = asyncHandler(async (req, res) => {
   }
 
   const product = await productsService.update(req.user.id, req.params.id, data);
-  await clearCacheKeys('/products*');
+  await clearCacheKeys('*products*');
   res.json({ status: 'success', data: { product } });
 });
 
 const remove           = asyncHandler(async (req, res) => {
   await productsService.delete(req.user.id, req.params.id);
-  await clearCacheKeys('/products*');
+  await clearCacheKeys('*products*');
   res.status(204).send();
 });
 

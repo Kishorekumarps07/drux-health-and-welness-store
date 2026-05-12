@@ -50,6 +50,7 @@ const mapBackendProduct = (p: any): Product => {
     sku: p.sku || "",
     weight: "500g",
     shippingInfo: "Standard: 2-5 Days",
+    metadata: p.metadata || {},
   };
 };
 

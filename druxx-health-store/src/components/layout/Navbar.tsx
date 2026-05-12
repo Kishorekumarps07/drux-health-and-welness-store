@@ -40,7 +40,7 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const { location, categories, fetchCategories } = useMarketplaceStore();
+  const { location, setLocation, categories, fetchCategories } = useMarketplaceStore();
   
   const totalItemsCount = useCartStore((s) => s.totalItems());
   const toggleCart = useCartStore((s) => s.toggleCart);
@@ -52,7 +52,38 @@ export function Navbar() {
     if (categories.length === 0) {
       fetchCategories();
     }
-  }, [fetchCategories, categories.length]);
+
+    // Automatic Geolocation Tracker on webapp load
+    if (typeof window !== "undefined" && navigator.geolocation && !sessionStorage.getItem("druxx_location_detected")) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            sessionStorage.setItem("druxx_location_detected", "true");
+            const { latitude, longitude } = position.coords;
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+            const data = await res.json();
+            if (data && data.address) {
+              const addr = data.address;
+              const exactArea = addr.suburb || addr.neighbourhood || addr.residential || addr.city_district || addr.road;
+              const baseCity = addr.city || addr.town || addr.village || addr.state_district;
+              const detectedCity = exactArea && baseCity && exactArea !== baseCity 
+                ? `${exactArea}, ${baseCity}` 
+                : exactArea || baseCity || "Current Location";
+              const detectedPincode = addr.postcode || "560001";
+              setLocation({ city: detectedCity, pincode: detectedPincode });
+            }
+          } catch (err) {
+            console.error("Auto location tracking failed:", err);
+          }
+        },
+        (error) => {
+          console.warn("Geolocation permission denied or error:", error);
+          sessionStorage.setItem("druxx_location_detected", "true");
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
+    }
+  }, [fetchCategories, categories.length, setLocation]);
 
   const handleScroll = useCallback(() => {
     setScrolled(window.scrollY > 10);
@@ -177,13 +208,7 @@ export function Navbar() {
                 </div>
               </div>
 
-              {/* Orders */}
-              <Link href="/orders" className="flex items-center gap-1.5 px-3 py-2 border border-transparent hover:border-black rounded transition-colors group/orders shrink-0">
-                <div className="flex flex-col text-left">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase leading-none">Returns</span>
-                  <span className="text-[13px] font-black text-gray-900">& Orders</span>
-                </div>
-              </Link>
+
 
               {/* Cart */}
               <button
@@ -208,9 +233,27 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Search Row */}
-      <div className="md:hidden px-3 pb-2">
+      {/* Mobile Search Row & Location */}
+      <div className="md:hidden px-3 pb-2 flex flex-col gap-2">
         <SearchBar />
+        
+        {/* Mobile Location Display / Trigger */}
+        <button 
+          onClick={() => setShowLocationModal(true)}
+          className="flex items-center justify-between w-full px-3 py-2 bg-gray-50/80 hover:bg-gray-100 rounded-xl border border-gray-100/80 transition-all text-left group active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <MapPin size={15} className="text-[#A6D608] shrink-0" />
+            <div className="flex items-center gap-1.5 truncate text-xs">
+              <span className="font-bold text-gray-400 uppercase text-[10px] tracking-tight shrink-0">Deliver to:</span>
+              <span className="font-black text-gray-800 truncate">{location.city}</span>
+              {location.pincode && location.pincode !== "560001" && (
+                <span className="font-bold text-gray-400 text-[10px]">({location.pincode})</span>
+              )}
+            </div>
+          </div>
+          <ChevronRight size={14} className="text-gray-400 shrink-0" />
+        </button>
       </div>
 
       {/* Bottom Row: Dense Nav */}

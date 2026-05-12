@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Search, ChevronRight, Check } from "lucide-react";
+import { MapPin, Search, ChevronRight, Check, Navigation } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,47 @@ export function LocationModal({ open, onOpenChange }: LocationModalProps) {
   const { location, setLocation } = useMarketplaceStore();
   const [pincode, setPincode] = useState("");
   const [error, setError] = useState("");
+  const [isDetecting, setIsDetecting] = useState(false);
+
+  const handleAutoDetect = () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser.");
+      return;
+    }
+    setIsDetecting(true);
+    setError("");
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const data = await res.json();
+          if (data && data.address) {
+            const addr = data.address;
+            const exactArea = addr.suburb || addr.neighbourhood || addr.residential || addr.city_district || addr.road;
+            const baseCity = addr.city || addr.town || addr.village || addr.state_district;
+            const detectedCity = exactArea && baseCity && exactArea !== baseCity 
+              ? `${exactArea}, ${baseCity}` 
+              : exactArea || baseCity || "Current Location";
+            const detectedPincode = addr.postcode || "560001";
+            setLocation({ city: detectedCity, pincode: detectedPincode });
+            onOpenChange(false);
+          } else {
+            setError("Could not determine address from location.");
+          }
+        } catch (err) {
+          setError("Failed to fetch location details.");
+        } finally {
+          setIsDetecting(false);
+        }
+      },
+      (err) => {
+        setError("Location access denied. Please enable permissions.");
+        setIsDetecting(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  };
 
   const handleApplyPincode = () => {
     if (pincode.length !== 6 || !/^\d+$/.test(pincode)) {
@@ -63,6 +104,26 @@ export function LocationModal({ open, onOpenChange }: LocationModalProps) {
         </div>
 
         <div className="p-8 space-y-8 bg-white">
+          {/* Auto Detect Location Button */}
+          <Button
+            type="button"
+            onClick={handleAutoDetect}
+            disabled={isDetecting}
+            className="w-full h-12 bg-[#A6D608]/10 hover:bg-[#A6D608]/20 text-[#1E1E1E] border border-[#A6D608]/30 font-black rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
+          >
+            {isDetecting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-[#1E1E1E] border-t-transparent rounded-full animate-spin" />
+                <span>Detecting Current Location...</span>
+              </>
+            ) : (
+              <>
+                <Navigation size={18} className="text-[#A6D608] fill-[#A6D608]" />
+                <span>Auto-Detect Current Location</span>
+              </>
+            )}
+          </Button>
+
           {/* PIN Code Input */}
           <div className="space-y-3">
              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Deliver to PIN Code</label>

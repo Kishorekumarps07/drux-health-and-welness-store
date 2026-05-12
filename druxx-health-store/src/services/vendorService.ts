@@ -294,7 +294,8 @@ export const vendorService = {
         images: p.images && p.images.length > 0 ? p.images.map((img: any) => img.url) : ["/placeholder.png"],
         category: p.category?.name || "Uncategorized",
         categoryId: p.categoryId,
-        sku: p.sku || `PRD-${p.id.substring(0, 5).toUpperCase()}`
+        sku: p.sku || `PRD-${p.id.substring(0, 5).toUpperCase()}`,
+        metadata: p.metadata || {}
       })), 
       total, 
       pages, 

@@ -96,7 +96,8 @@ export default function VendorInventoryPage() {
     category: "",
     stock: "" as any,
     description: "",
-    image: ""
+    image: "",
+    highlights: ["", "", "", "", ""]
   })
 
   const calculateDiscount = (mrp: number, sale: number) => {
@@ -137,6 +138,11 @@ export default function VendorInventoryPage() {
     if (editingProduct.stock !== undefined) formData.append("stockQty", editingProduct.stock.toString());
     if (editingProduct.description) formData.append("description", editingProduct.description);
     
+    formData.append("metadata", JSON.stringify({
+      ...editingProduct.metadata,
+      highlights: editingProduct.highlights
+    }));
+
     if (imageFiles.length > 0) {
       imageFiles.forEach(file => formData.append("images", file));
     }
@@ -172,6 +178,7 @@ export default function VendorInventoryPage() {
     formData.append("stockQty", (newProduct.stock || 0).toString());
     formData.append("description", newProduct.description);
     formData.append("status", "ACTIVE");
+    formData.append("metadata", JSON.stringify({ highlights: newProduct.highlights }));
     
     if (imageFiles.length > 0) {
       imageFiles.forEach(file => formData.append("images", file));
@@ -181,7 +188,17 @@ export default function VendorInventoryPage() {
       await vendorService.createProduct(formData)
       toast.success("Product listed successfully!")
       setIsAddingProduct(false)
-      setNewProduct({ name: "", price: "" as any, originalPrice: "" as any, discount: "" as any, category: "", stock: "" as any, description: "", image: "" })
+      setNewProduct({ 
+        name: "", 
+        price: "" as any, 
+        originalPrice: "" as any, 
+        discount: "" as any, 
+        category: "", 
+        stock: "" as any, 
+        description: "", 
+        image: "",
+        highlights: ["", "", "", "", ""] 
+      })
       setImageFiles([])
       setPreviews([])
       fetchProducts()
@@ -345,7 +362,8 @@ export default function VendorInventoryPage() {
                              price: product.price,
                              discount: calculateDiscount(Number(product.comparePrice || product.price), Number(product.price)),
                              image: product.images?.[0]?.url || "",
-                             categoryName: product.category?.name
+                             categoryName: product.category?.name,
+                             highlights: product.metadata?.highlights || ["", "", "", "", ""]
                            })}
                            className="rounded-lg hover:bg-white hover:text-[#A6D608] transition-all hover:shadow-sm"
                          >
@@ -488,6 +506,30 @@ export default function VendorInventoryPage() {
                         placeholder="Tell customers about your product..." 
                       />
                    </div>
+
+                    <div className="space-y-4 pt-4 border-t border-gray-100">
+                      <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Product Highlights (Key selling points)</label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {newProduct.highlights.map((highlight, idx) => (
+                          <div key={idx} className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] font-black">#{idx + 1}</span>
+                            <input 
+                              type="text"
+                              value={highlight}
+                              onChange={(e) => {
+                                const newHighlights = [...newProduct.highlights];
+                                newHighlights[idx] = e.target.value;
+                                setNewProduct({ ...newProduct, highlights: newHighlights });
+                              }}
+                              className="w-full pl-10 pr-4 py-3 bg-gray-50 border-none rounded-2xl text-xs font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
+                              placeholder={`Highlight ${idx + 1}`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-[10px] text-gray-400 font-bold ml-1">These will appear as visual boxes on the product page.</p>
+                    </div>
+
                    <div className="space-y-2">
                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Product Images & Videos</label>
                        <div className="grid grid-cols-4 gap-4">
@@ -646,6 +688,29 @@ export default function VendorInventoryPage() {
                         className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all resize-none" 
                       />
                    </div>
+
+                    <div className="space-y-4 pt-4 border-t border-gray-100">
+                      <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Product Highlights</label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {editingProduct.highlights.map((highlight: string, idx: number) => (
+                          <div key={idx} className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] font-black">#{idx + 1}</span>
+                            <input 
+                              type="text"
+                              value={highlight}
+                              onChange={(e) => {
+                                const newHighlights = [...editingProduct.highlights];
+                                newHighlights[idx] = e.target.value;
+                                setEditingProduct({ ...editingProduct, highlights: newHighlights });
+                              }}
+                              className="w-full pl-10 pr-4 py-3 bg-gray-50 border-none rounded-2xl text-xs font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
+                              placeholder={`Highlight ${idx + 1}`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
                    <div className="space-y-2">
                       <label className="text-xs font-black text-gray-400 uppercase tracking-widest italic ml-1">Update Images</label>
                       <div className="grid grid-cols-4 gap-4">

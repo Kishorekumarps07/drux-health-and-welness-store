@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, ChevronDown, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useMarketplaceStore } from "@/store/marketplaceStore";
 
 export function SearchBar() {
@@ -27,10 +27,7 @@ export function SearchBar() {
     }
   }, [fetchCategories, categories.length]);
 
-  const CATEGORY_OPTIONS = [
-    { label: "All Categories", value: "All" },
-    ...categories.map((c) => ({ label: c.name, value: c.name })),
-  ];
+
 
   const [localQuery, setLocalQuery] = useState(searchQuery);
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -75,12 +72,10 @@ export function SearchBar() {
     setSearchQuery(localQuery);
     setCategory(selectedCategory);
     
-    if (window.location.pathname !== "/products") {
-      const params = new URLSearchParams();
-      if (localQuery) params.set("q", localQuery);
-      if (selectedCategory !== "All") params.set("category", selectedCategory);
-      router.push(`/products?${params.toString()}`);
-    }
+    const params = new URLSearchParams();
+    if (localQuery) params.set("q", localQuery);
+    if (selectedCategory !== "All") params.set("category", selectedCategory);
+    router.push(`/products?${params.toString()}`);
     
     setShowSuggestions(false);
     inputRef.current?.blur();
@@ -92,8 +87,7 @@ export function SearchBar() {
     setShowSuggestions(false);
   };
 
-  const selectedCategoryLabel =
-    CATEGORY_OPTIONS.find((c) => c.value === selectedCategory)?.label ?? "All";
+
 
   const [placeholder, setPlaceholder] = useState("Search health products...");
 
@@ -109,49 +103,7 @@ export function SearchBar() {
           showSuggestions && suggestions.length > 0 ? "shadow-xl border-gray-300" : ""
         }`}
       >
-        {/* Category selector - Left (Desktop only) */}
-        <div className="relative hidden lg:block h-full group/cat border-r border-gray-100">
-          <button
-            type="button"
-            onClick={() => {
-              setShowCategoryDropdown((p) => !p);
-              setShowSuggestions(false);
-            }}
-            className="flex items-center justify-between gap-1 h-full px-5 bg-gray-50/50 text-[11px] font-black uppercase tracking-widest text-gray-500 hover:bg-gray-100 transition-all min-w-[140px] rounded-l-[1.9rem]"
-          >
-            <span className="truncate">{selectedCategoryLabel}</span>
-            <ChevronDown size={14} className={`transition-transform duration-200 text-gray-400 ${showCategoryDropdown ? "rotate-180" : ""}`} />
-          </button>
-          
-          {showCategoryDropdown && (
-            <div className="absolute top-[calc(100%+8px)] left-0 w-64 bg-white border border-gray-100 rounded-2xl shadow-2xl z-[60] py-2 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-50 mb-1">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Shop by Category</p>
-              </div>
-              <div className="max-h-80 overflow-y-auto custom-scrollbar">
-                {CATEGORY_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => {
-                      setSelectedCategory(opt.value);
-                      setShowCategoryDropdown(false);
-                      inputRef.current?.focus();
-                    }}
-                    className={`w-full text-left px-5 py-3 text-sm transition-all flex items-center justify-between group/opt ${
-                      selectedCategory === opt.value
-                        ? "text-[#A6D608] font-bold bg-[#A6D608]/5"
-                        : "text-gray-700 hover:bg-gray-50 hover:text-[#1E1E1E]"
-                    }`}
-                  >
-                    {opt.label}
-                    {selectedCategory === opt.value && <div className="w-1.5 h-1.5 rounded-full bg-[#A6D608]" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+
 
         {/* Input - Middle */}
         <div className="relative flex-1 h-full">

@@ -12,6 +12,7 @@ const productSchema = z.object({
   status: z.enum(['ACTIVE', 'INACTIVE', 'OUT_OF_STOCK']).optional().default('ACTIVE'),
   isFeatured: z.coerce.boolean().optional().default(false),
   tags: z.array(z.string()).optional().default([]),
+  metadata: z.any().optional(),
 });
 
 const updateProductSchema = productSchema.partial();

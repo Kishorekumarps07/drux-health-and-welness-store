@@ -73,7 +73,7 @@ export function FeaturedProducts() {
 
         {/* Tabs */}
         <Tabs defaultValue="featured" className="w-full">
-          <div className="w-full overflow-x-auto hide-scrollbar mb-8 sm:mb-12">
+          <div className="w-full overflow-x-auto touch-pan-x hide-scrollbar mb-8 sm:mb-12">
             <TabsList className="bg-gray-100/50 p-1 rounded-2xl flex w-fit min-w-full sm:min-w-0">
               <TabsTrigger
                 value="featured"
