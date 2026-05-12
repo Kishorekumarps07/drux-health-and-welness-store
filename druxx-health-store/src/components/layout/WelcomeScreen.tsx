@@ -5,41 +5,49 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
 export function WelcomeScreen() {
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    // Check if we've already shown it this session
     const shown = sessionStorage.getItem("drux_welcome_shown");
     if (shown) {
-      setShow(false);
       return;
     }
 
-    // Progress counter animation
-    const duration = 2500; // 2.5 seconds
-    const interval = 20; // 20ms update
-    const increment = 100 / (duration / interval);
-    
-    const progressTimer = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(progressTimer);
-          return 100;
-        }
-        return prev + increment;
-      });
-    }, interval);
+    setShow(true);
 
-    const exitTimer = setTimeout(() => {
-      setShow(false);
-      sessionStorage.setItem("drux_welcome_shown", "true");
-    }, duration + 500);
+    // Progress counter animation
+    const duration = 3000; // 3 seconds minimum
+    const interval = 30; // 30ms update
+    const steps = duration / interval;
+    const increment = 100 / steps;
+    
+    let currentProgress = 0;
+    const progressTimer = setInterval(() => {
+      currentProgress += increment;
+      if (currentProgress >= 100) {
+        setProgress(100);
+        clearInterval(progressTimer);
+        
+        // Final exit delay after reaching 100
+        setTimeout(() => {
+          setShow(false);
+          sessionStorage.setItem("drux_welcome_shown", "true");
+        }, 500);
+      } else {
+        setProgress(currentProgress);
+      }
+    }, interval);
 
     return () => {
       clearInterval(progressTimer);
-      clearTimeout(exitTimer);
     };
   }, []);
+
+  if (!mounted) return null;
 
   return (
     <AnimatePresence>
@@ -48,12 +56,12 @@ export function WelcomeScreen() {
           initial={{ opacity: 1 }}
           exit={{ 
             y: "-100%",
-            transition: { duration: 1, ease: [0.76, 0, 0.24, 1] }
+            transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] }
           }}
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white"
         >
           {/* Ambient Background Glow */}
-          <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#A6D608]/5 blur-[150px] rounded-full" />
           </div>
 
@@ -63,7 +71,7 @@ export function WelcomeScreen() {
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.8 }}
-              className="relative w-48 h-24 mb-8"
+              className="relative w-48 h-24 mb-12"
             >
               <Image 
                 src="/logo.png" 
@@ -71,6 +79,7 @@ export function WelcomeScreen() {
                 fill 
                 className="object-contain" 
                 priority
+                sizes="(max-width: 768px) 192px, 256px"
               />
             </motion.div>
 
