@@ -333,7 +333,7 @@ export default function ProductDetailPage({ params }: PageProps) {
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-2.5">Product Highlights</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {displayHighlights.map((highlight, idx) => (
+                      {displayHighlights.map((highlight: { title: string; desc: string }, idx: number) => (
                         <div 
                           key={idx} 
                           className={cn(

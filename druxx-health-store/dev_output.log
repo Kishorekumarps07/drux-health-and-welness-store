@@ -912,3 +912,4 @@ Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
  GET /products/test6-testing-continue 200 in 33ms (next.js: 10ms, application-code: 23ms)
 ✓ Compiled in 193ms
  GET /products/test6-testing-continue 200 in 71ms (next.js: 33ms, application-code: 38ms)
+[?25h
