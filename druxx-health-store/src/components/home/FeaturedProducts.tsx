@@ -1,14 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
-
+import { ArrowRight } from "lucide-react";
 import { ProductCard } from "@/components/products/ProductCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Product } from "@/types";
-import { productService } from "@/services/productService";
-import { ProductSkeleton } from "@/components/products/ProductSkeleton";
 
 interface ProductGridProps {
   products: Product[];
@@ -24,33 +20,13 @@ function ProductGrid({ products }: ProductGridProps) {
   );
 }
 
-export function FeaturedProducts() {
-  const [featured, setFeatured] = useState<Product[]>([]);
-  const [bestSellers, setBestSellers] = useState<Product[]>([]);
-  const [newArrivals, setNewArrivals] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+interface FeaturedProductsProps {
+  featured: Product[];
+  bestSellers: Product[];
+  newArrivals: Product[];
+}
 
-  useEffect(() => {
-    const fetchAll = async () => {
-      setLoading(true);
-      try {
-        const [fRes, bRes, nRes] = await Promise.all([
-          productService.getFeatured(),
-          productService.getBestSellers(),
-          productService.getNewArrivals(),
-        ]);
-        setFeatured(fRes.products);
-        setBestSellers(bRes.products);
-        setNewArrivals(nRes.products);
-      } catch (error) {
-        console.error("Failed to fetch featured products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAll();
-  }, []);
-
+export function FeaturedProducts({ featured, bestSellers, newArrivals }: FeaturedProductsProps) {
   return (
     <section className="py-10 sm:py-12 px-1 sm:px-10">
       <div className="w-full">
@@ -69,7 +45,6 @@ export function FeaturedProducts() {
             All <ArrowRight size={14} className="transform group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
-
 
         {/* Tabs */}
         <Tabs defaultValue="featured" className="w-full">
@@ -97,26 +72,16 @@ export function FeaturedProducts() {
           </div>
 
           <TabsContent value="featured" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-             {loading ? <SkeletonGrid /> : <ProductGrid products={featured} />}
+             <ProductGrid products={featured} />
            </TabsContent>
            <TabsContent value="bestsellers" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-             {loading ? <SkeletonGrid /> : <ProductGrid products={bestSellers} />}
+             <ProductGrid products={bestSellers} />
            </TabsContent>
            <TabsContent value="new" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-             {loading ? <SkeletonGrid /> : <ProductGrid products={newArrivals} />}
+             <ProductGrid products={newArrivals} />
            </TabsContent>
          </Tabs>
       </div>
     </section>
-  );
-}
-
-function SkeletonGrid() {
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <ProductSkeleton key={i} />
-      ))}
-    </div>
   );
 }

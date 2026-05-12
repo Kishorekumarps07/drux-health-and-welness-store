@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ShieldCheck, Smartphone, Zap, ChevronLeft, ChevronRight, Target, Heart } from "lucide-react";
-import { useCMSStore } from "@/store/cmsStore";
+import { AdvantageItem } from "@/store/cmsStore";
 
 const iconMap: Record<string, any> = {
   shield: <ShieldCheck size={32} className="text-[#A6D608]" />,
@@ -13,36 +13,37 @@ const iconMap: Record<string, any> = {
   heart: <Heart size={32} className="text-[#D6085A]" />,
 };
 
-export function AdvantageCarousel() {
-  const advantages = useCMSStore((state) => state.advantages);
-  const fetchCMSData = useCMSStore((state) => state.fetchCMSData);
+interface AdvantageCarouselProps {
+  advantages: AdvantageItem[];
+}
+
+export function AdvantageCarousel({ advantages }: AdvantageCarouselProps) {
   const [current, setCurrent] = useState(0);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    if (advantages.length === 0) {
-      fetchCMSData();
-    }
-  }, [fetchCMSData, advantages.length]);
+  }, []);
 
   const next = useCallback(() => {
-    if (advantages.length === 0) return;
+    if (!advantages || advantages.length === 0) return;
     setCurrent((c) => (c + 1) % advantages.length);
-  }, [advantages.length]);
+  }, [advantages]);
 
   const prev = useCallback(() => {
-    if (advantages.length === 0) return;
+    if (!advantages || advantages.length === 0) return;
     setCurrent((c) => (c - 1 + advantages.length) % advantages.length);
-  }, [advantages.length]);
+  }, [advantages]);
 
   useEffect(() => {
-    if (!mounted || advantages.length === 0) return;
+    if (!mounted || !advantages || advantages.length === 0) return;
     const timer = setInterval(next, 6000);
     return () => clearInterval(timer);
-  }, [next, advantages.length, mounted]);
+  }, [next, advantages, mounted]);
 
-  if (!mounted || advantages.length === 0) return <div className="w-full h-[500px] bg-[#1E1E1E] animate-pulse" />;
+  if (!mounted || !advantages || advantages.length === 0) {
+    return <div className="w-full h-[500px] bg-[#1E1E1E] animate-pulse" />;
+  }
 
   return (
     <section className="py-24 bg-[#1E1E1E] overflow-hidden relative">
@@ -55,22 +56,11 @@ export function AdvantageCarousel() {
             </h2>
           </div>
           <div className="flex items-center gap-4">
-             <button 
-               onClick={prev}
-               className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/5 transition-all"
-             >
-               <ChevronLeft size={20} />
-             </button>
-             <button 
-               onClick={next}
-               className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/5 transition-all"
-             >
-               <ChevronRight size={20} />
-             </button>
+             <button onClick={prev} className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/5 transition-all"><ChevronLeft size={20} /></button>
+             <button onClick={next} className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/5 transition-all"><ChevronRight size={20} /></button>
           </div>
         </div>
 
-        {/* Carousel Content */}
         <div className="relative min-h-[450px] md:min-h-[550px]">
           {advantages.map((item, i) => (
             <div
@@ -80,47 +70,28 @@ export function AdvantageCarousel() {
               }`}
             >
               <div className="w-full md:w-2/3 h-[450px] md:h-[550px] rounded-[3rem] border border-white/5 relative overflow-hidden group shadow-2xl">
-                 {/* Background Image */}
-                 {typeof item.image === 'string' && item.image.length > 0 ? (
-                   <Image 
-                     src={item.image} 
-                     alt={item.title} 
-                     fill 
-                     className="object-cover transition-transform duration-700 group-hover:scale-105"
-                     sizes="(max-width: 768px) 100vw, 66vw"
-                   />
+                 {item.image ? (
+                   <Image src={item.image} alt={item.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 66vw" />
                  ) : (
-                   <div className="absolute inset-0 bg-gray-900 flex items-center justify-center text-white/10 italic">
-                     No Image Available
-                   </div>
+                   <div className="absolute inset-0 bg-gray-900 flex items-center justify-center text-white/10 italic">No Image</div>
                  )}
-                 {/* Dark Overlay Gradient */}
-                 <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent`} />
-                 <div className={`absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent`} />
-                 
+                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent" />
                  <div className="absolute inset-0 p-8 md:p-16 flex flex-col justify-end">
                     <div className="mb-6 p-4 w-fit rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
                        {iconMap[item.iconType] || <ShieldCheck size={32} className="text-[#A6D608]" />}
                     </div>
-                    <h3 className="text-3xl md:text-5xl font-black text-white mb-4 uppercase tracking-tighter leading-none">
-                      {item.title}
-                    </h3>
-                    <p className="text-white/70 text-base md:text-xl font-medium leading-relaxed max-w-xl">
-                      {item.desc}
-                    </p>
+                    <h3 className="text-3xl md:text-5xl font-black text-white mb-4 uppercase tracking-tighter leading-none">{item.title}</h3>
+                    <p className="text-white/70 text-base md:text-xl font-medium leading-relaxed max-w-xl">{item.desc}</p>
                  </div>
               </div>
 
               <div className="hidden md:flex flex-col gap-6 w-1/3">
                  <p className="text-[#A6D608] font-black text-xs uppercase tracking-widest opacity-50">Up Next</p>
-                 {advantages.filter((_, idx) => idx !== current).slice(0, 2).map((other, idx) => (
+                 {advantages.filter((_, idx) => idx !== current).slice(0, 2).map((other) => (
                    <div key={other.id} className="p-8 rounded-[2.5rem] bg-white/5 border border-white/5 flex items-center gap-6 group hover:bg-white/10 transition-all cursor-pointer" onClick={() => setCurrent(advantages.indexOf(other))}>
                       <div className="w-16 h-16 rounded-2xl overflow-hidden relative shrink-0">
-                         {typeof other.image === 'string' && other.image.length > 0 ? (
-                           <Image src={other.image} alt={other.title} fill className="object-cover opacity-60 group-hover:opacity-100 transition-opacity" sizes="64px" />
-                         ) : (
-                           <div className="absolute inset-0 bg-gray-800" />
-                         )}
+                         {other.image ? <Image src={other.image} alt={other.title} fill className="object-cover opacity-60 group-hover:opacity-100 transition-opacity" sizes="64px" /> : <div className="absolute inset-0 bg-gray-800" />}
                       </div>
                       <div>
                         <h4 className="text-white font-black uppercase text-sm tracking-tight mb-1">{other.title}</h4>
@@ -133,14 +104,9 @@ export function AdvantageCarousel() {
           ))}
         </div>
 
-        {/* Indicators */}
         <div className="flex items-center gap-3 mt-12">
            {advantages.map((_, i) => (
-             <button 
-               key={i}
-               onClick={() => setCurrent(i)}
-               className={`h-1 transition-all duration-500 rounded-full ${i === current ? 'w-12 bg-[#A6D608]' : 'w-4 bg-white/10'}`}
-             />
+             <button key={i} onClick={() => setCurrent(i)} className={`h-1 transition-all duration-500 rounded-full ${i === current ? 'w-12 bg-[#A6D608]' : 'w-4 bg-white/10'}`} />
            ))}
         </div>
       </div>

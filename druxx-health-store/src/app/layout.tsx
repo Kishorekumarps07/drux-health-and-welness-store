@@ -8,6 +8,7 @@ import { CartDrawer } from "@/components/layout/CartDrawer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SessionManager } from "@/components/auth/SessionManager";
 import { Toaster } from "sonner";
+import { WelcomeScreen } from "@/components/layout/WelcomeScreen";
 
 const lexend = Lexend({
   variable: "--font-lexend",
@@ -50,6 +51,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${lexend.variable} font-sans`} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col bg-white text-gray-900 antialiased" suppressHydrationWarning>
+        <WelcomeScreen />
         <Suspense fallback={null}>
           <ScrollToTop />
           <main className="flex-1">{children}</main>
