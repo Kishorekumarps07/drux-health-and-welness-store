@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/store/cartStore";
+import { useMarketplaceStore } from "@/store/marketplaceStore";
 import { useState } from "react";
 import { SuggestedProducts } from "@/components/cart/SuggestedProducts";
+import { LocationModal } from "@/components/layout/navbar/LocationModal";
 
 export default function CartPage() {
   const {
@@ -27,9 +29,11 @@ export default function CartPage() {
     clearCart,
   } = useCartStore();
 
+  const { location, setLocation } = useMarketplaceStore();
   const [couponInput, setCouponInput] = useState("");
   const [couponError, setCouponError] = useState("");
   const [couponSuccess, setCouponSuccess] = useState("");
+  const [showLocationModal, setShowLocationModal] = useState(false);
 
   const subTotal = subtotal();
   const shipCost = shipping();
@@ -73,6 +77,8 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-[#F1F3F6] pb-24 md:pb-12">
+      <LocationModal open={showLocationModal} onOpenChange={setShowLocationModal} />
+      
       {/* Flipkart Header Style Navigation (Optional but good for context) */}
       <div className="max-w-[1248px] mx-auto px-2 md:px-4 py-4 md:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
@@ -83,9 +89,14 @@ export default function CartPage() {
               {/* Delivery Header */}
               <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-gray-900">Check Delivery Services</span>
+                  <span className="text-sm font-medium text-gray-900">From Saved Addresses</span>
                 </div>
-                <div className="text-xs text-[#2874F0] font-bold cursor-pointer">Enter Pincode</div>
+                <button 
+                  onClick={() => setShowLocationModal(true)}
+                  className="text-xs text-[#2874F0] font-bold cursor-pointer border border-gray-200 px-4 py-2 rounded-sm shadow-sm hover:bg-gray-50"
+                >
+                  Deliver to: <span className="text-gray-900">{location.city} - {location.pincode}</span>
+                </button>
               </div>
 
               {/* Items */}
