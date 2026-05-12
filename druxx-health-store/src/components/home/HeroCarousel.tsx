@@ -71,13 +71,13 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
               )}
             </div>
 
-            <div className="relative z-10 w-full h-full max-w-[1400px] mx-auto flex flex-col md:flex-row items-center px-8 md:px-16 pt-6 md:pt-0">
-              <div className="w-full md:w-1/2 flex flex-col justify-center text-left pt-6 md:pt-0 shrink-0 md:shrink">
-                <span className="inline-block px-3 py-1 rounded-full bg-black/5 text-black/40 text-[10px] font-bold tracking-[0.2em] mb-3 md:mb-6 uppercase border border-black/5">Premium Quality</span>
-                <h1 className={`font-black text-[#1A1A1A] leading-[0.9] mb-3 md:mb-6 tracking-tight uppercase ${currentSlide.title.length > 20 ? "text-3xl sm:text-4xl md:text-5xl lg:text-7xl" : "text-5xl md:text-6xl lg:text-8xl"}`}>
+            <div className="relative z-10 w-full h-full max-w-[1400px] mx-auto flex flex-col md:flex-row items-center px-4 md:px-16 pt-10 md:pt-0">
+              <div className="w-full md:w-1/2 flex flex-col justify-center text-center md:text-left shrink-0 md:shrink">
+                <span className="inline-block px-3 py-1 rounded-full bg-black/5 text-black/40 text-[9px] font-bold tracking-[0.2em] mb-4 md:mb-6 uppercase border border-black/5 w-fit mx-auto md:mx-0">Premium Quality</span>
+                <h1 className={`font-black text-[#1A1A1A] leading-[0.9] mb-4 md:mb-6 tracking-tight uppercase break-words ${currentSlide.title.length > 20 ? "text-3xl md:text-5xl lg:text-7xl" : "text-4xl md:text-6xl lg:text-8xl"}`}>
                   {currentSlide.title}
                 </h1>
-                <p className="text-[#4A4A4A] mb-2 md:mb-10 leading-relaxed max-w-[280px] md:max-w-md font-medium tracking-wide text-base md:text-xl line-clamp-4">
+                <p className="text-[#4A4A4A] mb-2 md:mb-10 leading-relaxed max-w-[280px] md:max-w-md font-medium tracking-wide text-sm md:text-xl line-clamp-3 mx-auto md:mx-0">
                   {currentSlide.subtitle}
                 </p>
               </div>

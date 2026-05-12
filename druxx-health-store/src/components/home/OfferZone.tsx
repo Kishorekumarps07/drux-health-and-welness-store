@@ -61,13 +61,13 @@ export function OfferZone() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-6">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="aspect-[4/5] bg-gray-100 animate-pulse rounded-3xl" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-6">
             {products.map((product, idx) => (
               <motion.div
                 key={product.id}

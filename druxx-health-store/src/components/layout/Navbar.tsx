@@ -103,21 +103,21 @@ export function Navbar() {
       {/* Top Row: Main Navigation Hub */}
       <div className="text-[#1E1E1E] px-4 py-2 border-b border-gray-100/50">
         <div className="w-full flex md:flex-row items-center relative lg:h-24 px-0">
-          {/* Mobile Grid Layout - only for small screens */}
-          <div className="grid grid-cols-3 items-center w-full md:hidden h-14">
-            {/* Left: Hamburger */}
-            <div className="flex items-center">
+          {/* Mobile Grid Layout */}
+          <div className="flex items-center justify-between w-full md:hidden h-14">
+            {/* Left: Hamburger/Back */}
+            <div className="flex items-center w-12">
               {pathname !== "/" ? (
                 <button 
                   onClick={() => router.back()}
-                  className="p-2 -ml-2 text-[#1E1E1E] hover:text-[#A6D608] transition-colors flex items-center gap-1 active:scale-90"
+                  className="p-2 text-[#1E1E1E] hover:text-[#A6D608] transition-colors"
                 >
                   <ChevronLeft size={24} />
                 </button>
               ) : (
                 <button 
                   onClick={() => setMobileOpen(true)}
-                  className="p-2 -ml-2 text-[#1E1E1E] hover:text-[#A6D608] transition-colors"
+                  className="p-2 text-[#1E1E1E] hover:text-[#A6D608] transition-colors"
                 >
                   <Menu size={24} />
                 </button>
@@ -125,15 +125,15 @@ export function Navbar() {
             </div>
 
             {/* Center: Logo */}
-            <div className="flex justify-center">
-              <Link href="/" className="flex items-center gap-2 p-0.5 border border-transparent hover:border-black rounded transition-colors group">
-                <div className="relative w-52 h-13">
+            <div className="flex-1 flex justify-center px-2">
+              <Link href="/" className="flex items-center group">
+                <div className="relative w-36 h-9">
                   <Image
                     src="/logo.png"
                     alt="Drux Health Store"
                     fill
                     className="object-contain"
-                    sizes="208px"
+                    sizes="144px"
                     priority
                   />
                 </div>
@@ -141,20 +141,18 @@ export function Navbar() {
             </div>
 
             {/* Right: Cart */}
-            <div className="flex items-center justify-end">
-              <div className="relative">
-                <button
-                  onClick={toggleCart}
-                  className="relative p-2 border border-transparent hover:border-black rounded transition-colors"
-                >
-                  <ShoppingCart size={24} className="text-[#A6D608]" />
-                  {mounted && (
-                    <span className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center text-[10px] font-black bg-[#FF7A00] text-white border-2 border-white rounded-full">
-                      {totalItemsCount}
-                    </span>
-                  )}
-                </button>
-              </div>
+            <div className="flex items-center justify-end w-12">
+              <button
+                onClick={toggleCart}
+                className="relative p-2"
+              >
+                <ShoppingCart size={24} className="text-[#A6D608]" />
+                {mounted && totalItemsCount > 0 && (
+                  <span className="absolute top-1 right-1 h-4 w-4 flex items-center justify-center text-[9px] font-black bg-[#FF7A00] text-white border-2 border-white rounded-full">
+                    {totalItemsCount}
+                  </span>
+                )}
+              </button>
             </div>
           </div>
 

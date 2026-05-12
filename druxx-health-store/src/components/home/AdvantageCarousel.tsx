@@ -46,30 +46,30 @@ export function AdvantageCarousel({ advantages }: AdvantageCarouselProps) {
   }
 
   return (
-    <section className="py-24 bg-[#1E1E1E] overflow-hidden relative">
+    <section className="py-12 md:py-24 bg-[#1E1E1E] overflow-hidden relative">
       <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 md:mb-16">
           <div>
-            <p className="text-[#A6D608] font-black uppercase tracking-[0.3em] text-[10px] mb-4">The Drux Advantage</p>
-            <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-[0.85]">
+            <p className="text-[#A6D608] font-black uppercase tracking-[0.3em] text-[8px] md:text-[10px] mb-3 md:mb-4">The Drux Advantage</p>
+            <h2 className="text-3xl md:text-6xl font-black text-white uppercase tracking-tighter leading-[0.85]">
               More Than Just <br />A Store.
             </h2>
           </div>
           <div className="flex items-center gap-4">
-             <button onClick={prev} className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/5 transition-all"><ChevronLeft size={20} /></button>
-             <button onClick={next} className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/5 transition-all"><ChevronRight size={20} /></button>
+             <button onClick={prev} className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/5 transition-all"><ChevronLeft size={18} /></button>
+             <button onClick={next} className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/5 transition-all"><ChevronRight size={18} /></button>
           </div>
         </div>
 
-        <div className="relative min-h-[450px] md:min-h-[550px]">
+        <div className="relative min-h-[500px] md:min-h-[550px]">
           {advantages.map((item, i) => (
             <div
               key={item.id}
-              className={`absolute inset-0 transition-all duration-1000 flex flex-col md:flex-row items-center gap-10 ${
+              className={`absolute inset-0 transition-all duration-1000 flex flex-col md:flex-row items-center gap-6 md:gap-10 ${
                 i === current ? "opacity-100 translate-x-0 z-10 scale-100" : "opacity-0 translate-x-12 z-0 scale-95"
               }`}
             >
-              <div className="w-full md:w-2/3 h-[450px] md:h-[550px] rounded-[3rem] border border-white/5 relative overflow-hidden group shadow-2xl">
+              <div className="w-full md:w-2/3 h-[400px] md:h-[550px] rounded-[2rem] md:rounded-[3rem] border border-white/5 relative overflow-hidden group shadow-2xl">
                  {item.image ? (
                    <Image src={item.image} alt={item.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 66vw" />
                  ) : (
@@ -77,12 +77,12 @@ export function AdvantageCarousel({ advantages }: AdvantageCarouselProps) {
                  )}
                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent" />
-                 <div className="absolute inset-0 p-8 md:p-16 flex flex-col justify-end">
-                    <div className="mb-6 p-4 w-fit rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
-                       {iconMap[item.iconType] || <ShieldCheck size={32} className="text-[#A6D608]" />}
+                 <div className="absolute inset-0 p-6 md:p-16 flex flex-col justify-end">
+                    <div className="mb-4 md:mb-6 p-3 md:p-4 w-fit rounded-xl md:rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
+                       {iconMap[item.iconType] || <ShieldCheck size={24} className="text-[#A6D608] md:w-8 md:h-8" />}
                     </div>
-                    <h3 className="text-3xl md:text-5xl font-black text-white mb-4 uppercase tracking-tighter leading-none">{item.title}</h3>
-                    <p className="text-white/70 text-base md:text-xl font-medium leading-relaxed max-w-xl">{item.desc}</p>
+                    <h3 className="text-2xl md:text-5xl font-black text-white mb-3 md:mb-4 uppercase tracking-tighter leading-none">{item.title}</h3>
+                    <p className="text-white/70 text-sm md:text-xl font-medium leading-relaxed max-w-xl line-clamp-3 md:line-clamp-none">{item.desc}</p>
                  </div>
               </div>
 
