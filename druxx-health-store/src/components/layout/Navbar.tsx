@@ -128,13 +128,13 @@ export function Navbar() {
             {/* Center: Logo */}
             <div className="flex-1 flex justify-center px-2">
               <Link href="/" className="flex items-center group">
-                <div className="relative w-36 h-9">
+                <div className="relative w-48 h-13">
                   <Image
                     src="/logo.png"
                     alt="Drux Health Store"
                     fill
                     className="object-contain"
-                    sizes="144px"
+                    sizes="176px"
                     priority
                   />
                 </div>
@@ -161,13 +161,13 @@ export function Navbar() {
           <div className="hidden md:flex items-center w-full gap-4 lg:gap-8">
             {/* Logo */}
             <Link href="/" className="flex-shrink-0 flex items-center gap-2 p-1 border border-transparent hover:border-black rounded transition-colors group">
-              <div className="relative w-56 h-14 lg:w-80 lg:h-20">
+              <div className="relative w-64 h-16 lg:w-96 lg:h-24">
                 <Image
                   src="/logo.png"
                   alt="Drux Health Store"
                   fill
                   className="object-contain"
-                  sizes="(max-width: 1024px) 224px, 320px"
+                  sizes="(max-width: 1024px) 256px, 384px"
                   priority
                 />
               </div>
