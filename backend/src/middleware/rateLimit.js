@@ -18,8 +18,8 @@ const globalLimiter = rateLimit({
 
 // Strict limiter for authentication routes (Login, Register)
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: nodeEnv === 'production' ? 10 : 100, // 10 attempts per 15 minutes in prod
+  windowMs: 15 * 60 * 1000,
+  max: nodeEnv === 'production' ? 20 : 100, // 20 attempts per 15 minutes in prod
   standardHeaders: true,
   legacyHeaders: false,
   store: (nodeEnv === 'production' && process.env.REDIS_URL) ? new RedisStore({

@@ -3,60 +3,72 @@ import { useAuthStore } from "@/store/authStore";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1",
+  timeout: 15000, // 15s timeout — prevents hanging requests
 });
 
-import { supabase } from "@/lib/supabase";
-
-// Request interceptor: Attach JWT token if available
+// ── Request interceptor ──────────────────────────────────────────────────────
+// Reads the cached accessToken from Zustand state.
+// Does NOT call supabase.auth.getSession() per-request (would add 200-500ms latency).
+// The token is kept fresh automatically by onAuthStateChange in authStore.
 api.interceptors.request.use(
-  async (config) => {
-    // Try to get token from state first (fast)
-    let token = (useAuthStore.getState() as any).accessToken;
-    
-    // If not in state, try Supabase session (slower)
-    if (!token) {
-      const { data: { session } } = await supabase.auth.getSession();
-      token = session?.access_token;
-    }
-
+  (config) => {
+    const token = (useAuthStore.getState() as any).accessToken;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor: Handle 401 errors (auto logout)
+// ── Debounced 401 redirect ───────────────────────────────────────────────────
+// Prevents multiple concurrent 401s from firing multiple window.location redirects.
+let _redirectTimeout: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleAuthRedirect() {
+  if (typeof window === "undefined") return;
+  if (_redirectTimeout) return; // already scheduled
+  _redirectTimeout = setTimeout(() => {
+    _redirectTimeout = null;
+    // Use replaceState so the browser back-button doesn't loop back to the
+    // broken page. The redirect param lets the login page redirect back after login.
+    const current = window.location.pathname + window.location.search;
+    window.location.replace(`/login?expired=true&redirect=${encodeURIComponent(current)}`);
+  }, 100);
+}
+
+// ── Response interceptor ─────────────────────────────────────────────────────
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle 401 Unauthorized errors
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      
-      // Clear auth state and redirect to login
+    // ── 401 Unauthorized: session expired ────────────────────────────────────
+    if (error.response?.status === 401 && !originalRequest._authRetried) {
+      originalRequest._authRetried = true;
+
+      // Sign out from Supabase and clear local state
       useAuthStore.getState().logout();
-      
+
+      // Only redirect if we're actually on a page that requires auth.
+      // Avoid redirecting on public API calls (e.g. product listings).
+      const protectedPaths = ["/dashboard", "/checkout", "/cart"];
       if (typeof window !== "undefined") {
-        window.location.href = "/login?expired=true";
+        const isProtected = protectedPaths.some((p) =>
+          window.location.pathname.startsWith(p)
+        );
+        if (isProtected) scheduleAuthRedirect();
       }
     }
 
-    // Handle 429 Too Many Requests errors with exponential backoff
-    if (error.response?.status === 429 && !originalRequest._retryCount) {
-      originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
+    // ── 429 Too Many Requests: exponential backoff ───────────────────────────
+    if (error.response?.status === 429) {
+      originalRequest._retryCount = (originalRequest._retryCount ?? 0) + 1;
       const maxRetries = 3;
-      
       if (originalRequest._retryCount <= maxRetries) {
-        const backoff = Math.pow(2, originalRequest._retryCount) * 1000 + Math.random() * 1000;
-        await new Promise(resolve => setTimeout(resolve, backoff));
+        const backoff =
+          Math.pow(2, originalRequest._retryCount) * 1000 + Math.random() * 500;
+        await new Promise((resolve) => setTimeout(resolve, backoff));
         return api(originalRequest);
       }
     }

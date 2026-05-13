@@ -6,190 +6,201 @@ interface AuthState {
   user: any | null;
   supabaseUser: User | null;
   profile: any | null;
+  /** True while the initial session check is running. False forever after. */
   loading: boolean;
-  isLoading: boolean;
   initialized: boolean;
   isAuthenticated: boolean;
   accessToken: string | null;
+  mismatchError?: any;
 
   initialize: () => Promise<void>;
   logout: () => Promise<void>;
   login: (email: string, password: string, requiredRole?: string) => Promise<boolean>;
   register: (name: string, email: string, password: string, forceRole?: string) => Promise<boolean>;
-  mismatchError?: any;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+// Guard so initialize() is truly idempotent across React StrictMode double-invocations
+let _initStarted = false;
+// Hold the unsubscribe callback to prevent listener leaks on re-init
+let _authListenerUnsub: (() => void) | null = null;
+
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   supabaseUser: null,
   profile: null,
   loading: true,
-  isLoading: true,
   initialized: false,
   isAuthenticated: false,
   accessToken: null,
   mismatchError: null,
 
   initialize: async () => {
+    // ── Idempotency guard ────────────────────────────────────────────────────
+    if (_initStarted) return;
+    _initStarted = true;
+
+    // ── Unsubscribe stale listener from previous hot-reload ─────────────────
+    if (_authListenerUnsub) {
+      _authListenerUnsub();
+      _authListenerUnsub = null;
+    }
+
     const syncUser = async (sUser: User | null, session?: any) => {
-      const accessToken = session?.access_token || null;
-      if (sUser) {
-        try {
-          if (sUser.email === 'infopromptix@gmail.com') {
-            set({
-              supabaseUser: sUser,
-              accessToken,
-              profile: { role: "ADMIN" },
-              isAuthenticated: true,
-              mismatchError: null,
-              user: {
-                id: sUser.id,
-                name: "Admin",
-                email: sUser.email,
-                avatar: "",
-                roles: ["CUSTOMER", "ADMIN"],
-                activeRole: "ADMIN",
-                isAdmin: true,
-                isVendor: false,
-                addresses: []
-              }
-            });
-            return;
-          }
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', sUser.id)
-            .maybeSingle();
-          
-          if (profile) {
-            set({ 
-              supabaseUser: sUser,
-              accessToken,
-              profile,
-              isAuthenticated: true,
-              user: {
-                id: sUser.id,
-                name: profile.full_name || sUser.email?.split('@')[0] || "User",
-                email: sUser.email || "",
-                avatar: profile.avatar_url || "",
-                roles: profile.role ? ["CUSTOMER", profile.role] : ["CUSTOMER"],
-                activeRole: profile.role || "CUSTOMER",
-                isAdmin: profile.role === 'ADMIN',
-                isVendor: profile.role === 'VENDOR',
-                addresses: []
-              }
-            });
-          } else {
-            // Fallback to metadata if profile fetch fails (e.g. RLS)
-            const metaRole = sUser.user_metadata?.role || "CUSTOMER";
-            set({ 
-              supabaseUser: sUser,
-              accessToken,
-              isAuthenticated: true,
-              user: {
-                id: sUser.id,
-                name: sUser.user_metadata?.full_name || sUser.email?.split('@')[0] || "User",
-                email: sUser.email || "",
-                roles: ["CUSTOMER", metaRole],
-                activeRole: metaRole,
-                isAdmin: metaRole === 'ADMIN',
-                isVendor: metaRole === 'VENDOR',
-                addresses: []
-              }
-            });
-          }
-        } catch (err) {
-          console.error("Error syncing user:", err);
-          // Fallback to basic user info if profile fetch fails
-          set({ 
-            supabaseUser: sUser,
-            accessToken,
-            isAuthenticated: true,
-            user: {
-              id: sUser.id,
-              name: sUser.email?.split('@')[0] || "User",
-              email: sUser.email || "",
-              roles: ["CUSTOMER"],
-              isAdmin: false,
-              isVendor: false,
-              addresses: []
-            }
-          });
-        }
-      } else {
-        set({ isAuthenticated: false, user: null, supabaseUser: null, profile: null, accessToken: null });
+      const accessToken = session?.access_token ?? null;
+
+      if (!sUser) {
+        set({
+          isAuthenticated: false,
+          user: null,
+          supabaseUser: null,
+          profile: null,
+          accessToken: null,
+        });
+        return;
+      }
+
+      // ── Hardcoded admin bypass ─────────────────────────────────────────────
+      if (sUser.email === "infopromptix@gmail.com") {
+        set({
+          supabaseUser: sUser,
+          accessToken,
+          profile: { role: "ADMIN" },
+          isAuthenticated: true,
+          mismatchError: null,
+          user: {
+            id: sUser.id,
+            name: "Admin",
+            email: sUser.email,
+            avatar: "",
+            roles: ["CUSTOMER", "ADMIN"],
+            activeRole: "ADMIN",
+            isAdmin: true,
+            isVendor: false,
+            addresses: [],
+          },
+        });
+        return;
+      }
+
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", sUser.id)
+          .maybeSingle();
+
+        // Use profile from DB, or fall back to user_metadata (set during register)
+        const metaRole = sUser.user_metadata?.role ?? "CUSTOMER";
+        const role = profile?.role ?? metaRole;
+
+        set({
+          supabaseUser: sUser,
+          accessToken,
+          profile: profile ?? null,
+          isAuthenticated: true,
+          mismatchError: null,
+          user: {
+            id: sUser.id,
+            name: profile?.full_name ?? sUser.user_metadata?.full_name ?? sUser.email?.split("@")[0] ?? "User",
+            email: sUser.email ?? "",
+            avatar: profile?.avatar_url ?? "",
+            roles: ["CUSTOMER", role].filter((r, i, a) => a.indexOf(r) === i),
+            activeRole: role,
+            isAdmin: role === "ADMIN",
+            isVendor: role === "VENDOR",
+            addresses: [],
+          },
+        });
+      } catch (err) {
+        // Graceful fallback — never leave the user in a broken state
+        const metaRole = sUser.user_metadata?.role ?? "CUSTOMER";
+        set({
+          supabaseUser: sUser,
+          accessToken,
+          isAuthenticated: true,
+          user: {
+            id: sUser.id,
+            name: sUser.user_metadata?.full_name ?? sUser.email?.split("@")[0] ?? "User",
+            email: sUser.email ?? "",
+            avatar: "",
+            roles: ["CUSTOMER", metaRole].filter((r, i, a) => a.indexOf(r) === i),
+            activeRole: metaRole,
+            isAdmin: metaRole === "ADMIN",
+            isVendor: metaRole === "VENDOR",
+            addresses: [],
+          },
+        });
       }
     };
 
+    // ── Initial session check ────────────────────────────────────────────────
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
-      
+
       if (error) {
-        console.warn("Auth initialization warning:", error.message);
+        // Stale refresh token — sign out silently
         if (error.message.includes("Refresh Token Not Found") || error.status === 400) {
           await supabase.auth.signOut();
-          await syncUser(null, null);
+          await syncUser(null);
         }
       } else {
         await syncUser(session?.user ?? null, session);
       }
-    } catch (error) {
-      console.error("Critical Auth init error:", error);
+    } catch (err) {
+      console.error("Auth init error:", err);
     } finally {
-      set({ loading: false, isLoading: false, initialized: true });
+      set({ loading: false, initialized: true });
     }
 
-    supabase.auth.onAuthStateChange(async (event: any, session: any) => {
-      await syncUser(session?.user ?? null, session);
-    });
+    // ── Subscribe to future auth events (exactly once) ───────────────────────
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        await syncUser(session?.user ?? null, session);
+      }
+    );
+    _authListenerUnsub = () => subscription.unsubscribe();
   },
 
   login: async (email, password, requiredRole) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    
-    // Once signed in, the onAuthStateChange listener updates the store state,
-    // but we can manually verify the role before returning true.
+
     if (requiredRole && data.user) {
-      if (data.user.email === 'infopromptix@gmail.com') {
+      if (data.user.email === "infopromptix@gmail.com") {
         set({ mismatchError: null });
         return true;
       }
 
-      // 1. Try metadata first (fast, bypasses RLS)
-      const metadataRole = data.user.user_metadata?.role;
-      
-      // 2. Try Database profile
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
-      const finalRole = profile?.role || metadataRole || 'CUSTOMER';
+      // Use metadata (already set at registration) — no extra DB query needed
+      const metaRole = data.user.user_metadata?.role ?? "CUSTOMER";
 
-      if (finalRole !== requiredRole && finalRole !== 'ADMIN') {
+      if (metaRole !== requiredRole && metaRole !== "ADMIN") {
         await supabase.auth.signOut();
-        set({ 
+        set({
           mismatchError: {
-            message: `This account is a ${finalRole}. You need a ${requiredRole} account to login here.`,
-            link: requiredRole === 'VENDOR' ? '/vendor/register' : '/login',
-            cta: requiredRole === 'VENDOR' ? 'Create a Customer Login' : 'Go to Customer Login'
-          } 
+            message: `This account is a ${metaRole}. You need a ${requiredRole} account to login here.`,
+            link: requiredRole === "VENDOR" ? "/vendor/register" : "/login",
+            cta: requiredRole === "VENDOR" ? "Create a Vendor Account" : "Go to Customer Login",
+          },
         });
         throw new Error("Role mismatch");
       }
     }
+
     set({ mismatchError: null });
     return true;
   },
 
   register: async (name, email, password, forceRole) => {
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           full_name: name,
-          role: forceRole || 'CUSTOMER'
-        }
-      }
+          role: forceRole ?? "CUSTOMER",
+        },
+      },
     });
     if (error) throw error;
     return true;
@@ -197,6 +208,13 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     await supabase.auth.signOut();
-    set({ user: null, supabaseUser: null, profile: null, isAuthenticated: false, mismatchError: null });
-  }
+    set({
+      user: null,
+      supabaseUser: null,
+      profile: null,
+      isAuthenticated: false,
+      accessToken: null,
+      mismatchError: null,
+    });
+  },
 }));
