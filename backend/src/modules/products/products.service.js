@@ -1,6 +1,7 @@
 const slugify = require('slugify');
 const prisma = require('../../lib/prisma');
 const AppError = require('../../lib/AppError');
+const logger = require('../../config/logger');
 const { deleteImageByUrl } = require('../../utils/cloudinary');
 const { addRandomReviews } = require('../../utils/reviewHelper');
 
@@ -15,7 +16,8 @@ const { getPagination, getPagingData } = require('../../lib/pagination.util');
 class ProductsService {
   async list(query) {
     const { skip, take, page, limit } = getPagination(query);
-    const { search, categoryId, vendorId, minPrice, maxPrice, rating, status, sort = 'createdAt', order = 'desc', tags } = query;
+    let { search, categoryId, category, vendorId, minPrice, maxPrice, rating, status, sort = 'createdAt', order = 'desc', tags } = query;
+    if (category) category = category.trim();
 
     const where = {
       status: status || 'ACTIVE',
@@ -25,13 +27,27 @@ class ProductsService {
         { description: { contains: search, mode: 'insensitive' } },
       ]}),
       ...(categoryId && { categoryId }),
+      ...(category && {
+        category: {
+          OR: [
+            { name: { equals: category, mode: 'insensitive' } },
+            { slug: { equals: category, mode: 'insensitive' } }
+          ]
+        }
+      }),
       ...(vendorId && { vendorId }),
-      ...(minPrice !== undefined || maxPrice !== undefined) && {
-        price: { gte: minPrice ? parseFloat(minPrice) : undefined, lte: maxPrice ? parseFloat(maxPrice) : undefined },
+      ...( (minPrice && parseFloat(minPrice) > 0) || (maxPrice && parseFloat(maxPrice) < 5000) ) && {
+        price: { 
+          gte: minPrice ? parseFloat(minPrice) : undefined, 
+          lte: maxPrice ? parseFloat(maxPrice) : undefined 
+        },
       },
       ...(rating && { averageRating: { gte: parseFloat(rating) } }),
       ...(tags && tags.length > 0 && { tags: { hasSome: tags } }),
     };
+
+    logger.info('--- PRODUCT LIST WHERE ---');
+    logger.info(JSON.stringify(where, null, 2));
 
     let orderBy = { createdAt: 'desc' }; // Default
     if (sort === 'featured') orderBy = { isFeatured: 'desc' };
@@ -167,10 +183,17 @@ class ProductsService {
 
     const productImages = await prisma.productImage.findMany({ where: { productId } });
     for (const img of productImages) {
-      await deleteImageByUrl(img.url);
+      await deleteImageByUrl(img.url).catch(() => {});
     }
 
-    await prisma.product.delete({ where: { id: productId } });
+    // Safely delete all associated records in a transaction to ensure data integrity
+    await prisma.$transaction([
+      prisma.orderItem.deleteMany({ where: { productId } }),
+      prisma.productImage.deleteMany({ where: { productId } }),
+      prisma.review.deleteMany({ where: { productId } }),
+      prisma.cartItem.deleteMany({ where: { productId } }),
+      prisma.product.delete({ where: { id: productId } })
+    ]);
   }
 
   async getVendorProducts(userId, query) {

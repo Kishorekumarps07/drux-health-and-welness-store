@@ -47,6 +47,8 @@ export default function VendorInventoryPage() {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [isAddingProduct, setIsAddingProduct] = React.useState(false)
   const [editingProduct, setEditingProduct] = React.useState<any | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = React.useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = React.useState(false)
   const [imageFiles, setImageFiles] = React.useState<File[]>([])
   const [previews, setPreviews] = React.useState<string[]>([])
 
@@ -77,13 +79,16 @@ export default function VendorInventoryPage() {
   }, [fetchCategories, fetchProducts])
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this product?")) return
+    setIsDeleting(true)
     try {
       await vendorService.deleteProduct(id)
       toast.success("Product deleted successfully")
+      setConfirmDeleteId(null)
       fetchProducts()
     } catch (error) {
       toast.error("Failed to delete product")
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -331,7 +336,9 @@ export default function VendorInventoryPage() {
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <span className="text-xs font-black text-gray-500 uppercase tracking-tighter italic">{product.category?.name}</span>
+                      <span className="text-xs font-black text-gray-500 uppercase tracking-tighter italic">
+                        {typeof product.category === 'object' ? product.category?.name : product.category}
+                      </span>
                     </td>
                     <td className="px-8 py-6">
                       <span className="text-sm font-black text-gray-900 tracking-tight">₹{product.price.toLocaleString()}</span>
@@ -366,7 +373,7 @@ export default function VendorInventoryPage() {
                                price: product.price,
                                discount: calculateDiscount(Number(product.comparePrice || product.price), Number(product.price)),
                                image: product.images?.[0]?.url || "",
-                               categoryName: product.category?.name,
+                               categoryName: typeof product.category === 'object' ? product.category?.name : product.category,
                                highlights: product.metadata?.highlights || [""],
                                descriptionPoints: points.length > 0 ? points : ["", "", "", "", ""]
                              })
@@ -376,13 +383,13 @@ export default function VendorInventoryPage() {
                             <Edit2 className="w-4 h-4" />
                          </Button>
                          <Button 
-                           variant="ghost" 
-                           size="icon-sm" 
-                           onClick={() => handleDelete(product.id)}
-                           className="rounded-lg hover:bg-white hover:text-red-500 transition-all hover:shadow-sm"
-                         >
-                            <Trash2 className="w-4 h-4" />
-                         </Button>
+                            variant="ghost" 
+                            size="icon-sm" 
+                            onClick={() => setConfirmDeleteId(product.id)}
+                            className="rounded-lg hover:bg-white hover:text-red-500 transition-all hover:shadow-sm"
+                          >
+                             {isDeleting && confirmDeleteId === product.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                          </Button>
                       </div>
                     </td>
                   </tr>
@@ -886,6 +893,37 @@ export default function VendorInventoryPage() {
                  </form>
               </div>
            </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {confirmDeleteId && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+             <div className="bg-white rounded-[32px] shadow-2xl max-w-sm w-full p-8 relative overflow-hidden animate-in zoom-in-95 duration-300">
+                <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mb-6">
+                   <Trash2 className="w-8 h-8 text-red-500" />
+                </div>
+                <h2 className="text-2xl font-black text-gray-900 mb-2">Delete Listing?</h2>
+                <p className="text-gray-500 font-medium italic mb-8">This action cannot be undone. All product data and images will be permanently removed.</p>
+                
+                <div className="flex gap-3">
+                   <Button 
+                     variant="outline" 
+                     className="flex-1 rounded-xl h-12 font-bold"
+                     onClick={() => setConfirmDeleteId(null)}
+                     disabled={isDeleting}
+                   >
+                     Cancel
+                   </Button>
+                   <Button 
+                     className="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-xl h-12 font-black shadow-lg shadow-red-500/20 transition-all"
+                     onClick={() => handleDelete(confirmDeleteId)}
+                     disabled={isDeleting}
+                   >
+                     {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirm Delete"}
+                   </Button>
+                </div>
+             </div>
+          </div>
         )}
       </div>
     </ProtectedRoute>

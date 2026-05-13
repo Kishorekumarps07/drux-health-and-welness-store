@@ -76,9 +76,9 @@ function ProductsContent() {
     const q = searchParams.get("q") || "";
     const cat = searchParams.get("category") || "All";
     
-    if (q !== searchQuery) setSearchQuery(q);
-    if (cat !== category) setCategory(cat);
-  }, [searchParams, mounted, searchQuery, category, setSearchQuery, setCategory]);
+    setSearchQuery(q);
+    setCategory(cat);
+  }, [searchParams, mounted]);
 
   // Fetch when filters change
   useEffect(() => {
@@ -382,6 +382,16 @@ function FilterSidebar({
 }) {
   const { setCategory, categories: storeCategories } = useMarketplaceStore();
   const categories = storeCategories.length > 0 ? storeCategories : [];
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleCatClick = (catName: string) => {
+    setCategory(catName);
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.set("category", catName);
+    params.delete("page");
+    router.push(`/products?${params.toString()}`, { scroll: false });
+  };
 
   return (
     <div className="space-y-8">
@@ -393,7 +403,7 @@ function FilterSidebar({
           {categories.map((cat: any) => (
             <button
               key={cat.id}
-              onClick={() => setCategory(cat.name)}
+              onClick={() => handleCatClick(cat.name)}
               className={`flex items-center justify-between w-full p-2 rounded-xl transition-colors text-sm ${
                 selectedCategory === cat.name 
                   ? "bg-[#A6D608]/10 text-[#A6D608] font-bold" 

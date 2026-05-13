@@ -286,7 +286,7 @@ export function Navbar() {
             {categories.slice(0, 6).map((cat) => (
               <Link
                 key={cat.id}
-                href={`/products?category=${cat.name}`}
+                href={`/products?category=${encodeURIComponent(cat.name)}`}
                 className="px-2 py-1 text-[10px] font-bold hover:border hover:border-black rounded transition-all whitespace-nowrap opacity-90 hover:opacity-100 uppercase tracking-tight"
               >
                 {cat.name}

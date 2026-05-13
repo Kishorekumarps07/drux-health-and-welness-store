@@ -9,14 +9,19 @@ import api from "@/lib/api";
 
 export default async function HomePage() {
   // Fetch all home data in parallel on the server
-  const [fRes, bRes, nRes, heroRes, advRes, vRes] = await Promise.all([
-    productService.getFeatured(),
-    productService.getBestSellers(),
-    productService.getNewArrivals(),
+  // Fetch home data sequentially to avoid hitting rate limits (429)
+  const fRes = await productService.getFeatured();
+  const bRes = await productService.getBestSellers();
+  const nRes = await productService.getNewArrivals();
+  const oRes = await productService.getAllProducts({ limit: 12 });
+  
+  const [heroRes, advRes, vRes] = await Promise.all([
     api.get('/cms/hero').catch(() => ({ data: { data: [] } })),
     api.get('/cms/advantages').catch(() => ({ data: { data: [] } })),
     api.get('/vendors', { params: { limit: 3, orderBy: 'latest' } }).catch(() => ({ data: { vendors: [] } }))
   ]);
+
+  const offerProducts = oRes.products.filter((p: any) => p.originalPrice && p.originalPrice > p.price);
 
   const heroSlides = heroRes.data?.data || [];
   const advantages = (advRes.data?.data || []).map((a: any) => ({
@@ -62,7 +67,7 @@ export default async function HomePage() {
         </div>
 
         {/* Offer Zone */}
-        <OfferZone />
+        <OfferZone products={offerProducts} />
 
         {/* The Drux Advantage Carousel */}
         <AdvantageCarousel advantages={advantages} />

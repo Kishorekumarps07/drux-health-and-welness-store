@@ -65,16 +65,29 @@ const mapBackendProduct = (p: any): Product => {
   };
 };
 
+const cache: Record<string, { data: any, timestamp: number }> = {};
+const CACHE_TTL = 60 * 1000; // 60 seconds
+
 export const productService = {
   async getAllProducts(params: any = {}) {
+    const cacheKey = JSON.stringify(params);
+    const now = Date.now();
+    
+    if (cache[cacheKey] && (now - cache[cacheKey].timestamp < CACHE_TTL)) {
+      return cache[cacheKey].data;
+    }
+
     try {
       const response = await api.get('/products', { params });
       const products = response.data.products || [];
-      return {
+      const result = {
         products: products.map(mapBackendProduct),
         total: response.data.total || products.length,
         pages: response.data.pages || 1,
       };
+      
+      cache[cacheKey] = { data: result, timestamp: now };
+      return result;
     } catch (err: any) {
       console.error("Product Fetch Error:", err);
       return { products: [], total: 0, pages: 1 };

@@ -7,7 +7,21 @@ class CategoriesService {
     return prisma.category.findMany({
       where: { isActive: true },
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
-      include: { children: { where: { isActive: true }, orderBy: { sortOrder: 'asc' } } },
+      include: { 
+        _count: {
+          select: {
+            products: {
+              where: {
+                status: 'ACTIVE',
+                vendor: { 
+                  approvalStatus: { in: ['APPROVED', 'ACTIVE'] } 
+                }
+              }
+            }
+          }
+        },
+        children: { where: { isActive: true }, orderBy: { sortOrder: 'asc' } } 
+      },
     });
   }
 

@@ -8,8 +8,8 @@ const { productSchema, updateProductSchema } = require('./products.validation');
 
 const router = Router();
 
-// Public (Cached for 5 minutes)
-router.get('/',           cacheResponse(300), list);
+// Public (Cache disabled temporarily for real-time testing)
+router.get('/',           list);
 router.get('/slug/:slug', cacheResponse(300), getBySlug);
 router.get('/:id',        cacheResponse(300), getById);
 

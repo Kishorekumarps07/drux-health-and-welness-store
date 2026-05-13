@@ -49,6 +49,18 @@ api.interceptors.response.use(
       }
     }
 
+    // Handle 429 Too Many Requests errors with exponential backoff
+    if (error.response?.status === 429 && !originalRequest._retryCount) {
+      originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
+      const maxRetries = 3;
+      
+      if (originalRequest._retryCount <= maxRetries) {
+        const backoff = Math.pow(2, originalRequest._retryCount) * 1000 + Math.random() * 1000;
+        await new Promise(resolve => setTimeout(resolve, backoff));
+        return api(originalRequest);
+      }
+    }
+
     return Promise.reject(error);
   }
 );

@@ -8,16 +8,24 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export function OfferZone() {
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+interface OfferZoneProps {
+  products?: any[];
+}
+
+export function OfferZone({ products: initialProducts = [] }: OfferZoneProps) {
+  const [products, setProducts] = useState<any[]>(initialProducts);
+  const [loading, setLoading] = useState(initialProducts.length === 0);
 
   useEffect(() => {
+    if (initialProducts.length > 0) {
+      setProducts(initialProducts);
+      setLoading(false);
+      return;
+    }
+
     const fetchOffers = async () => {
       try {
-        // Fetch products and filter those with discounts > 0 on frontend for now
-        // or we could add a specific 'offers' flag in backend if needed.
-        const result = await productService.getAllProducts({ limit: 8 });
+        const result = await productService.getAllProducts({ limit: 12 });
         const offerProducts = result.products.filter((p: any) => p.originalPrice && p.originalPrice > p.price);
         setProducts(offerProducts);
       } catch (error) {
@@ -27,7 +35,7 @@ export function OfferZone() {
       }
     };
     fetchOffers();
-  }, []);
+  }, [initialProducts]);
 
   if (products.length === 0 && !loading) return null;
 

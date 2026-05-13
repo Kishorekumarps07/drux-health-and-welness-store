@@ -19,7 +19,8 @@ import {
   History,
   Activity,
   ChevronRight,
-  Monitor
+  Monitor,
+  LayoutGrid
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ interface NavItem {
 const ADMIN_NAV: NavItem[] = [
   { name: 'Overview', href: '/dashboard/admin', icon: LayoutDashboard },
   { name: 'Vendors Hub', href: '/dashboard/admin/vendors', icon: Store },
+  { name: 'Category Manager', href: '/dashboard/admin/categories', icon: LayoutGrid },
   { name: 'Global Orders', href: '/dashboard/admin/orders', icon: ShoppingBag },
   { name: 'Platform Users', href: '/dashboard/admin/users', icon: Users },
   { name: 'CMS Management', href: '/dashboard/admin/cms', icon: Monitor },
