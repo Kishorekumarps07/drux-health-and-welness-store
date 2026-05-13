@@ -1,149 +1,84 @@
-import { Order, OrderItem } from "@/types";
-import { supabase } from "@/lib/supabase";
+import api from "@/lib/api";
+import { Order } from "@/types";
 
 export const orderService = {
-  async placeOrder(data: { 
-    addressId: string; 
-    paymentMethod: string; 
+  /**
+   * Place a COD order via the backend API.
+   * This ensures stock management and vendor logic are processed.
+   */
+  async placeOrder(data: {
+    addressId: string;
+    paymentMethod: string;
     notes?: string;
-    items: any[];
-    subtotal: number;
-    shipping: number;
-    total: number;
-    address: any;
   }) {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) throw new Error("Must be logged in to place order");
-
-    // 1. Insert Order
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert({
-        user_id: session.user.id,
-        status: 'PENDING',
-        subtotal: data.subtotal,
-        shipping_charge: data.shipping,
-        total: data.total,
-        payment_method: data.paymentMethod,
-        payment_status: 'PENDING',
-        address: data.address,
-        notes: data.notes
-      })
-      .select()
-      .single();
-
-    if (orderError) throw orderError;
-
-    // 2. Insert Order Items
-    const orderItems = data.items.map((item: any) => ({
-      order_id: order.id,
-      product_id: item.product.id,
-      vendor_id: item.product.vendor?.id || null,
-      title: item.product.name,
-      price: item.product.price,
-      quantity: item.quantity,
-      total: item.product.price * item.quantity
-    }));
-
-    const { error: itemsError } = await supabase
-      .from('order_items')
-      .insert(orderItems);
-
-    if (itemsError) {
-      console.error("Failed to insert order items", itemsError);
-      // In a real production app, we would rollback the order here or use a database function
+    const response = await api.post("/orders", data);
+    if (response.data.status === "success") {
+      return response.data.data.order;
     }
-
-    return order as any;
+    throw new Error(response.data.message || "Failed to place order");
   },
 
+  /**
+   * Create a Razorpay Order ID on the backend.
+   */
   async createPaymentIntent() {
-    console.log("Mock createPaymentIntent");
-    return { razorpayOrder: {} };
-  },
-
-  async verifyAndCreateOrder(data: any) {
-    console.log("Mock verifyAndCreateOrder", data);
-    return {} as Order;
-  },
-
-  async getMyOrders(params = {}) {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) return { status: "error", orders: [], total: 0, pages: 1 };
-
-    const { data, error, count } = await supabase
-      .from('orders')
-      .select('*, items:order_items(*)', { count: 'exact' })
-      .eq('user_id', session.user.id)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error(`Failed to fetch orders: ${error.message || JSON.stringify(error)}`, error);
-      return { status: "error", orders: [], total: 0, pages: 1 };
+    const response = await api.post("/payments/create-intent");
+    if (response.data.status === "success") {
+      // The backend returns { data: { razorpayOrder: ... } }
+      return { razorpayOrder: response.data.data.razorpayOrder };
     }
-
-    // Map the Supabase order data to the UI format
-    const formattedOrders = data.map((order: any) => ({
-      id: order.id,
-      status: order.status,
-      subtotal: Number(order.subtotal),
-      shippingCharge: Number(order.shipping_charge),
-      total: Number(order.total),
-      paymentStatus: order.payment_status,
-      paymentMethod: order.payment_method,
-      createdAt: order.created_at,
-      address: order.address,
-      items: order.items.map((item: any) => ({
-        id: item.id,
-        productId: item.product_id,
-        vendorId: item.vendor_id,
-        title: item.title,
-        price: Number(item.price),
-        quantity: item.quantity,
-        total: Number(item.total),
-        // Product image could be joined, but we'll mock or leave blank for now as the dashboard handles it
-      }))
-    }));
-
-    return { status: "success", orders: formattedOrders, total: count || 0, pages: 1 };
+    throw new Error(response.data.message || "Failed to initialize payment");
   },
 
+  /**
+   * Verify signature and create order atomically on the backend.
+   */
+  async verifyAndCreateOrder(data: {
+    razorpayOrderId: string;
+    razorpayPaymentId: string;
+    razorpaySignature: string;
+    addressId: string;
+    notes?: string;
+  }) {
+    const response = await api.post("/payments/verify-and-create", data);
+    if (response.data.status === "success") {
+      return response.data.data.order;
+    }
+    throw new Error(response.data.message || "Payment verification failed");
+  },
+
+  /**
+   * Fetch my orders from the backend.
+   */
+  async getMyOrders(params = {}) {
+    const response = await api.get("/orders", { params });
+    if (response.data.status === "success") {
+      return {
+        status: "success",
+        orders: response.data.orders,
+        total: response.data.total,
+        pages: response.data.pages,
+      };
+    }
+    return { status: "error", orders: [], total: 0, pages: 1 };
+  },
+
+  /**
+   * Fetch a single order.
+   */
   async getOrder(id: string) {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) throw new Error("Unauthorized");
-
-    const { data: order, error } = await supabase
-      .from('orders')
-      .select('*, items:order_items(*)')
-      .eq('id', id)
-      .eq('user_id', session.user.id)
-      .single();
-
-    if (error) throw error;
-
-    return {
-      id: order.id,
-      status: order.status,
-      subtotal: Number(order.subtotal),
-      shippingCharge: Number(order.shipping_charge),
-      total: Number(order.total),
-      paymentStatus: order.payment_status,
-      paymentMethod: order.payment_method,
-      createdAt: order.created_at,
-      address: order.address,
-      items: order.items.map((item: any) => ({
-        id: item.id,
-        productId: item.product_id,
-        vendorId: item.vendor_id,
-        title: item.title,
-        price: Number(item.price),
-        quantity: item.quantity,
-        total: Number(item.total),
-      }))
-    };
+    const response = await api.get(`/orders/${id}`);
+    if (response.data.status === "success") {
+      return response.data.data;
+    }
+    throw new Error("Failed to fetch order details");
   },
 
   async cancelOrder(id: string) {
-    return {} as Order;
+    const response = await api.patch(`/orders/${id}/cancel`);
+    if (response.data.status === "success") {
+      return response.data.data;
+    }
+    throw new Error("Failed to cancel order");
   },
 };

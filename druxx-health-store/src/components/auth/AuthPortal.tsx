@@ -8,11 +8,13 @@ import { toast } from "sonner";
 import { LogIn, UserPlus, Mail, Lock, Loader2, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
 
 export function AuthPortal() {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { login, register } = useAuthStore();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -26,24 +28,11 @@ export function AuthPortal() {
 
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: {
-            data: {
-              full_name: formData.fullName,
-            }
-          }
-        });
-        if (error) throw error;
+        await register(formData.fullName, formData.email, formData.password);
         toast.success("Welcome! Check your email to confirm registration.");
         setMode("login");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-        });
-        if (error) throw error;
+        await login(formData.email, formData.password);
         toast.success("Logged in successfully!");
         router.push("/dashboard");
       }

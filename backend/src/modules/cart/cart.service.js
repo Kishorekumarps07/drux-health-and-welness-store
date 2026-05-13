@@ -71,6 +71,31 @@ class CartService {
     await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
   }
 
+  async syncCart(userId, items) {
+    const cart = await this.getOrCreate(userId);
+
+    // Simplistic merge: clear and replace or update existing?
+    // Let's go with "merge": if item exists, use max(quantity).
+    for (const item of items) {
+      const existing = await prisma.cartItem.findUnique({
+        where: { cartId_productId: { cartId: cart.id, productId: item.productId } }
+      });
+
+      if (existing) {
+        await prisma.cartItem.update({
+          where: { id: existing.id },
+          data: { quantity: Math.max(existing.quantity, item.quantity) }
+        });
+      } else {
+        await prisma.cartItem.create({
+          data: { cartId: cart.id, productId: item.productId, quantity: item.quantity }
+        });
+      }
+    }
+
+    return this.getOrCreate(userId);
+  }
+
   async calculateTotals(userId) {
     const cart = await prisma.cart.findUnique({
       where: { userId },

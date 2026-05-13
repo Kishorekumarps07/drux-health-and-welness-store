@@ -12,7 +12,6 @@ interface CartResponse {
 const mapBackendCartItem = (item: any): CartItem => {
   const p = item.product;
   
-  // Minimal mapping for cart display, reused from productService logic
   const product: Product = {
     id: p.id,
     name: p.title,
@@ -25,7 +24,7 @@ const mapBackendCartItem = (item: any): CartItem => {
     rating: Number(p.averageRating) || 0,
     reviewCount: p.reviewCount || 0,
     images: p.images?.length > 0 ? p.images.map((img: any) => img.url) : ["/placeholder.png"],
-    category: "Uncategorized", // Not included in cart fetch usually
+    category: "Uncategorized",
     categorySlug: "uncategorized",
     vendor: {
       id: p.vendor?.id || "",
@@ -63,23 +62,47 @@ const mapBackendCartItem = (item: any): CartItem => {
 
 export const cartService = {
   async getCart() {
+    const response = await api.get("/cart");
+    if (response.data.status === "success" && response.data.data) {
+      return response.data.data.items.map(mapBackendCartItem);
+    }
     return [];
   },
 
   async addItem(productId: string, quantity: number) {
-    // Zustand persist handles local storage, so we just return success
-    return []; 
+    const response = await api.post("/cart/items", { productId, quantity });
+    if (response.data.status === "success" && response.data.data) {
+      return response.data.data.items.map(mapBackendCartItem);
+    }
+    return [];
+  },
+
+  async syncCart(items: { productId: string; quantity: number }[]) {
+    const response = await api.post("/cart/sync", { items });
+    if (response.data.status === "success" && response.data.data) {
+      return response.data.data.items.map(mapBackendCartItem);
+    }
+    return [];
   },
 
   async updateItem(cartItemId: string, quantity: number) {
+    const response = await api.put(`/cart/items/${cartItemId}`, { quantity });
+    if (response.data.status === "success" && response.data.data) {
+      return response.data.data.items.map(mapBackendCartItem);
+    }
     return [];
   },
 
   async removeItem(cartItemId: string) {
+    const response = await api.delete(`/cart/items/${cartItemId}`);
+    if (response.data.status === "success" && response.data.data) {
+      return response.data.data.items.map(mapBackendCartItem);
+    }
     return [];
   },
 
   async clearCart() {
+    await api.delete("/cart");
     return true;
   },
 };

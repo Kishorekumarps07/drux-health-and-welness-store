@@ -26,4 +26,9 @@ const clearCart  = asyncHandler(async (req, res) => {
   res.status(204).send();
 });
 
-module.exports = { getCart, addItem, updateItem, removeItem, clearCart };
+const syncCart   = asyncHandler(async (req, res) => {
+  const cart = await cartService.syncCart(req.user.id, req.body.items);
+  res.json({ status: 'success', data: cart });
+});
+
+module.exports = { getCart, addItem, updateItem, removeItem, clearCart, syncCart };

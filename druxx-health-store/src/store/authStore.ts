@@ -133,6 +133,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     };
 
+    // Expose syncUser for use in login method to avoid race conditions
+    (get() as any)._syncUser = syncUser;
+
     // ── Initial session check ────────────────────────────────────────────────
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
@@ -164,6 +167,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (email, password, requiredRole) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
+
+    // Sync user immediately before resolving to prevent race conditions in UI redirects
+    if ((get() as any)._syncUser) {
+      await (get() as any)._syncUser(data.user, data.session);
+    }
 
     if (requiredRole && data.user) {
       if (data.user.email === "infopromptix@gmail.com") {
