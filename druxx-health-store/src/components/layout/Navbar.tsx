@@ -60,18 +60,9 @@ export function Navbar() {
           try {
             sessionStorage.setItem("druxx_location_detected", "true");
             const { latitude, longitude } = position.coords;
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-            const data = await res.json();
-            if (data && data.address) {
-              const addr = data.address;
-              const exactArea = addr.suburb || addr.neighbourhood || addr.residential || addr.city_district || addr.road;
-              const baseCity = addr.city || addr.town || addr.village || addr.state_district;
-              const detectedCity = exactArea && baseCity && exactArea !== baseCity 
-                ? `${exactArea}, ${baseCity}` 
-                : exactArea || baseCity || "Current Location";
-              const detectedPincode = addr.postcode || "560001";
-              setLocation({ city: detectedCity, pincode: detectedPincode });
-            }
+            const { reverseGeocode } = await import("@/lib/geocode");
+            const result = await reverseGeocode(latitude, longitude);
+            setLocation(result);
           } catch (err) {
             console.error("Auto location tracking failed:", err);
           }
@@ -183,12 +174,23 @@ export function Navbar() {
               {/* Location */}
               <button 
                 onClick={() => setShowLocationModal(true)}
-                className="flex items-center gap-1.5 px-3 py-2 border border-transparent hover:border-black rounded transition-all text-left group shrink-0"
+                className="flex items-center gap-1.5 px-3 py-2 border border-transparent hover:border-black rounded transition-all text-left group shrink-0 min-w-0"
               >
-                <MapPin size={18} className="text-gray-500 group-hover:text-[#A6D608]" />
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase leading-none">Deliver to</span>
-                  <span className="text-[13px] font-black text-gray-900">{location.city}</span>
+                <MapPin size={18} className={`shrink-0 transition-colors ${location.city ? 'text-[#A6D608]' : 'text-gray-400 group-hover:text-[#A6D608]'}`} />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase leading-none">
+                    {location.city ? "Deliver to" : "Set delivery"}
+                  </span>
+                  {location.city ? (
+                    <span className="text-[13px] font-black text-gray-900 truncate max-w-[160px]">
+                      {location.city}
+                      {location.pincode && (
+                        <span className="text-[11px] font-bold text-gray-400 ml-1">· {location.pincode}</span>
+                      )}
+                    </span>
+                  ) : (
+                    <span className="text-[13px] font-black text-[#A6D608]">Select Location</span>
+                  )}
                 </div>
               </button>
 
@@ -242,12 +244,18 @@ export function Navbar() {
           className="flex items-center justify-between w-full px-3 py-2 bg-gray-50/80 hover:bg-gray-100 rounded-xl border border-gray-100/80 transition-all text-left group active:scale-[0.99]"
         >
           <div className="flex items-center gap-2 min-w-0">
-            <MapPin size={15} className="text-[#A6D608] shrink-0" />
+            <MapPin size={15} className={`shrink-0 ${location.city ? 'text-[#A6D608]' : 'text-gray-400'}`} />
             <div className="flex items-center gap-1.5 truncate text-xs">
-              <span className="font-bold text-gray-400 uppercase text-[10px] tracking-tight shrink-0">Deliver to:</span>
-              <span className="font-black text-gray-800 truncate">{location.city}</span>
-              {location.pincode && location.pincode !== "560001" && (
-                <span className="font-bold text-gray-400 text-[10px]">({location.pincode})</span>
+              {location.city ? (
+                <>
+                  <span className="font-bold text-gray-400 uppercase text-[10px] tracking-tight shrink-0">Deliver to:</span>
+                  <span className="font-black text-gray-800 truncate">{location.city}</span>
+                  {location.pincode && (
+                    <span className="font-bold text-gray-400 text-[10px] shrink-0">· {location.pincode}</span>
+                  )}
+                </>
+              ) : (
+                <span className="font-black text-[#A6D608]">Select your delivery location</span>
               )}
             </div>
           </div>
@@ -399,7 +407,13 @@ export function Navbar() {
                   <MapPin size={20} className="text-[#A6D608]" />
                   <div className="flex-1 min-w-0">
                      <span className="text-[11px] text-gray-400 font-bold uppercase tracking-tight block">Deliver to</span>
-                     <span className="text-sm font-black text-gray-900 leading-none mt-1 truncate block">{location.city}, {location.pincode}</span>
+                     {location.city ? (
+                       <span className="text-sm font-black text-gray-900 leading-none mt-1 truncate block">
+                         {location.city}{location.pincode ? ` · ${location.pincode}` : ""}
+                       </span>
+                     ) : (
+                       <span className="text-sm font-black text-[#A6D608] leading-none mt-1 block">Select Location</span>
+                     )}
                   </div>
                   <Button 
                     variant="ghost" 

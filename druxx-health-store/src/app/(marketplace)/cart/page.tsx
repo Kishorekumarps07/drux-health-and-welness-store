@@ -95,7 +95,10 @@ export default function CartPage() {
                   onClick={() => setShowLocationModal(true)}
                   className="text-xs text-[#2874F0] font-bold cursor-pointer border border-gray-200 px-4 py-2 rounded-sm shadow-sm hover:bg-gray-50"
                 >
-                  Deliver to: <span className="text-gray-900">{location.city} - {location.pincode}</span>
+                  {location.city
+                    ? <>Deliver to: <span className="text-gray-900">{location.city}{location.pincode ? ` · ${location.pincode}` : ""}</span></>
+                    : <span className="text-[#A6D608]">Select Delivery Location</span>
+                  }
                 </button>
               </div>
 

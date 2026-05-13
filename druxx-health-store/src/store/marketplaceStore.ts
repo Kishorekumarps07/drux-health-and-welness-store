@@ -43,7 +43,7 @@ export const useMarketplaceStore = create<MarketplaceState>((set, get) => ({
   priceRange: [0, 5000],
   rating: null,
   sort: "featured",
-  location: { city: "Bengaluru", pincode: "560001" },
+  location: { city: "", pincode: "" },
   
   products: [],
   categories: [],
