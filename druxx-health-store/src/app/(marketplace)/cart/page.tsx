@@ -103,20 +103,20 @@ export default function CartPage() {
               <div className="divide-y divide-gray-100">
                 {items.map(({ product, quantity }) => (
                   <div key={product.id} className="p-6">
-                    <div className="flex flex-col sm:flex-row gap-6">
+                    <div className="flex gap-4 sm:gap-6">
                       {/* Image & Quantity */}
-                      <div className="flex flex-col items-center gap-4 flex-shrink-0">
-                        <div className="relative w-28 h-28 flex-shrink-0">
+                      <div className="flex flex-col items-center gap-3 flex-shrink-0">
+                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 bg-gray-50 rounded-sm overflow-hidden border border-gray-100">
                           <Image
                             src={product.images[0]}
                             alt={product.name}
                             fill
-                            className="object-contain"
-                            sizes="112px"
+                            className="object-contain p-2"
+                            sizes="(max-width: 640px) 96px, 128px"
                           />
                         </div>
                         {/* Qty controls - Flipkart Style */}
-                        <div className="flex items-center gap-0">
+                        <div className="flex items-center gap-0 mt-1">
                           <button
                             onClick={() => updateQuantity(product.id, Math.max(1, quantity - 1))}
                             className="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 active:scale-95"
@@ -137,35 +137,36 @@ export default function CartPage() {
                       </div>
 
                       {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <Link href={`/products/${product.slug}`}>
-                          <h3 className="text-base text-gray-900 hover:text-[#2874F0] transition-colors line-clamp-2 leading-tight">
-                            {product.name}
-                          </h3>
-                        </Link>
-                        <p className="text-xs text-gray-400 mt-1 font-medium italic">Seller: {product.vendor.name}</p>
-                        
-                        <div className="mt-3 flex items-center gap-2">
-                          <span className="text-lg font-bold text-gray-900">₹{(product.price * quantity).toLocaleString("en-IN")}</span>
-                          {product.originalPrice > product.price && (
-                            <>
-                              <span className="text-sm text-gray-400 line-through">₹{(product.originalPrice * quantity).toLocaleString("en-IN")}</span>
-                              <span className="text-sm font-bold text-[#388E3C]">{product.discount}% Off</span>
-                            </>
-                          )}
+                      <div className="flex-1 min-w-0 flex flex-col justify-between">
+                        <div>
+                          <Link href={`/products/${product.slug}`}>
+                            <h3 className="text-sm sm:text-base text-gray-900 hover:text-[#2874F0] transition-colors line-clamp-2 leading-tight font-medium">
+                              {product.name}
+                            </h3>
+                          </Link>
+                          <p className="text-[10px] sm:text-xs text-gray-400 mt-1 font-medium">Seller: {product.vendor.name}</p>
+                          
+                          <div className="mt-3 flex items-center gap-2 flex-wrap">
+                            <span className="text-base sm:text-lg font-bold text-gray-900">₹{(product.price * quantity).toLocaleString("en-IN")}</span>
+                            {product.originalPrice > product.price && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs sm:text-sm text-gray-400 line-through">₹{(product.originalPrice * quantity).toLocaleString("en-IN")}</span>
+                                <span className="text-xs sm:text-sm font-bold text-[#388E3C]">{product.discount}% Off</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="mt-2 text-[10px] sm:text-xs font-medium text-gray-800">
+                             Delivery by {new Date(Date.now() + 86400000 * 3).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} | <span className="text-[#388E3C]">Free</span>
+                          </div>
                         </div>
                         
-                        <div className="mt-3 flex items-center gap-4 text-xs font-bold text-gray-500 uppercase tracking-tighter">
+                        <div className="mt-3 flex items-center gap-4 text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
                           <div className="flex items-center gap-1">
                             <Truck size={14} className="text-[#388E3C]" />
                             <span>Free Delivery</span>
                           </div>
                         </div>
-                      </div>
-                      
-                      {/* Delivery Date */}
-                      <div className="text-xs font-medium text-gray-800 shrink-0">
-                        Delivery by {new Date(Date.now() + 86400000 * 3).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} | <span className="text-[#388E3C]">Free</span>
                       </div>
                     </div>
 
