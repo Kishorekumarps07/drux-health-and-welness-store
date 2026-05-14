@@ -41,19 +41,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const syncUser = async (sUser: User | null, session?: any) => {
       const accessToken = session?.access_token ?? null;
 
-      if (!sUser) {
+      if (!sUser || !session) {
         set({ isAuthenticated: false, user: null, supabaseUser: null, profile: null, accessToken: null });
         return;
       }
 
       // ── CRITICAL: Set accessToken FIRST so subsequent API calls have the header ──
-      set({ accessToken });
+      set({ accessToken: session.access_token });
+      localStorage.setItem("token", session.access_token);
+      api.defaults.headers.common["Authorization"] = `Bearer ${session.access_token}`;
 
       try {
         // Fetch profile from our Node.js Backend API instead of Supabase direct DB
-        const { default: api } = await import("@/lib/api");
-        const response = await api.get('/users/profile');
-        const profile = response.data.data.user;
+        const data = await userService.getProfile();
+        const profile = data.user;
 
         const role = profile.roles?.[profile.roles.length - 1] || "CUSTOMER";
         const vendorStatus = profile.vendor?.approvalStatus;
@@ -124,8 +125,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (error) throw error;
 
     // Sync user immediately before resolving to prevent race conditions in UI redirects
-    if ((get() as any)._syncUser) {
-      await (get() as any)._syncUser(data.user, data.session);
+    if (_syncUserRef) {
+      await _syncUserRef(data.user, data.session);
     }
 
     if (requiredRole && data.user) {
