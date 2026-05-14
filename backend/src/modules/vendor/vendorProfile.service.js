@@ -52,7 +52,37 @@ class VendorProfileService {
       take: 5
     });
 
+    // 3. Today's Revenue
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const todayStats = await prisma.orderItem.aggregate({
+      where: { vendorId, createdAt: { gte: startOfToday } },
+      _sum: { total: true }
+    });
+
+    // 4. Calculate Growth (Simplified: Today vs Yesterday)
+    const yesterday = new Date(startOfToday);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStats = await prisma.orderItem.aggregate({
+      where: { 
+        vendorId, 
+        createdAt: { gte: yesterday, lt: startOfToday } 
+      },
+      _sum: { total: true }
+    });
+
+    const todayRev = parseFloat(todayStats._sum.total || 0);
+    const yesterdayRev = parseFloat(yesterdayStats._sum.total || 0);
+    let growth = 0;
+    if (yesterdayRev > 0) {
+      growth = ((todayRev - yesterdayRev) / yesterdayRev) * 100;
+    } else if (todayRev > 0) {
+      growth = 100;
+    }
+
     return {
+      todayRevenue: todayRev,
+      revenueGrowth: `${growth >= 0 ? '+' : ''}${growth.toFixed(1)}%`,
       salesTrend: salesOverTime.map(s => ({
         date: s.date,
         revenue: parseFloat(s.revenue || 0),
@@ -74,31 +104,48 @@ class VendorProfileService {
     const vendor = await this.getVendor(userId);
     const vendorId = vendor.id;
 
+    // 1. Calculate Total Revenue from all fulfilling OrderItems
+    const revenueStats = await prisma.orderItem.aggregate({
+      where: { vendorId },
+      _sum: { total: true }
+    });
+
+    const totalRevenue = parseFloat(revenueStats._sum.total || 0);
+
+    // 2. Fetch recent payouts
     const payouts = await prisma.vendorPayout.findMany({
       where: { vendorId },
       orderBy: { createdAt: 'desc' },
       take: 20
     });
 
+    // 3. Calculate Total Withdrawn (Completed Payouts)
     const totalPayouts = await prisma.vendorPayout.aggregate({
-      where: { vendorId, status: 'COMPLETED' },
+      where: { vendorId, status: 'PROCESSED' },
       _sum: { amount: true }
     });
 
-    // Simple balance calculation: Total Sales (from Vendor record) - Total Payouts
     const totalWithdrawn = parseFloat(totalPayouts._sum.amount || 0);
-    const totalSales = parseFloat(vendor.totalSales || 0);
-    const balance = totalSales - totalWithdrawn;
+    
+    // 4. Calculate Current Balance
+    const balance = totalRevenue - totalWithdrawn;
 
     return {
       balance: balance.toFixed(2),
       totalWithdrawn: totalWithdrawn.toFixed(2),
+      bankInfo: {
+        accountNumber: vendor.bankAccountNumber ? `**** **** ${vendor.bankAccountNumber.slice(-4)}` : null,
+        bankName: "HDFC Bank Limited", // In a real app, this would be looked up by IFSC or stored
+        isVerified: !!vendor.bankAccountNumber
+      },
       payouts: payouts.map(p => ({
         id: p.id,
         amount: parseFloat(p.amount).toFixed(2),
         status: p.status,
         date: p.processedAt || p.createdAt,
-        period: `${p.periodStart.toLocaleDateString()} - ${p.periodEnd.toLocaleDateString()}`
+        period: (p.periodStart && p.periodEnd) 
+          ? `${p.periodStart.toLocaleDateString()} - ${p.periodEnd.toLocaleDateString()}`
+          : 'N/A'
       }))
     };
   }
@@ -115,7 +162,8 @@ class VendorProfileService {
     
     allowedFields.forEach(field => {
       if (data[field] !== undefined) {
-        updateData[field] = data[field];
+        // If empty string, set to null (deletion)
+        updateData[field] = data[field] === "" ? null : data[field];
       }
     });
 

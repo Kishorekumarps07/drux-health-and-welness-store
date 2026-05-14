@@ -30,6 +30,16 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
       const hasRole = user?.roles?.includes(requiredRole as any) || user?.isAdmin;
       if (!hasRole) {
         router.replace("/");
+        return;
+      }
+
+      // ── Strict Vendor Approval Check ──────────────────────────────────────
+      if (requiredRole === "VENDOR" && !user?.isAdmin) {
+        const isApproved = user?.vendorStatus === "ACTIVE" || user?.vendorStatus === "APPROVED";
+        if (!isApproved) {
+          router.replace("/vendor/status");
+          return;
+        }
       }
     }
   }, [initialized, loading, isAuthenticated, user, router, pathname, requiredRole]);

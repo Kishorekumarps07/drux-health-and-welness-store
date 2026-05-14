@@ -12,7 +12,7 @@ export function MinimalHeader({ type = 'VENDOR' }: MinimalHeaderProps) {
   return (
     <header className="w-full bg-white border-b border-gray-100 py-4 px-6 md:px-12 flex items-center justify-between sticky top-0 z-50">
       <Link href="/" className="flex items-center gap-2 group">
-        <div className="relative w-32 h-10">
+        <div className="relative w-48 h-12">
           <Image
             src="/logo.png"
             alt="Druxx Health"

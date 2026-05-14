@@ -35,6 +35,8 @@ export default function VendorSettingsPage() {
     storeBanner: "",
     gstNumber: ""
   });
+  const [files, setFiles] = useState<{ logo?: File; banner?: File }>({});
+  const [previews, setPreviews] = useState<{ logo?: string; banner?: string }>({});
 
   const fetchVendor = async () => {
     setLoading(true);
@@ -48,6 +50,10 @@ export default function VendorSettingsPage() {
         storeBanner: data.storeBanner || "",
         gstNumber: data.gstNumber || ""
       });
+      setPreviews({
+        logo: data.storeLogo || "",
+        banner: data.storeBanner || ""
+      });
     } catch (error) {
       toast.error("Failed to load store settings");
     } finally {
@@ -59,10 +65,39 @@ export default function VendorSettingsPage() {
     fetchVendor();
   }, []);
 
+  const handleFileChange = (type: 'logo' | 'banner', e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFiles(prev => ({ ...prev, [type]: file }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviews(prev => ({ ...prev, [type]: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = (type: 'logo' | 'banner') => {
+    setFiles(prev => ({ ...prev, [type]: undefined }));
+    setPreviews(prev => ({ ...prev, [type]: "" }));
+    setFormData(prev => ({ ...prev, [type === 'logo' ? 'storeLogo' : 'storeBanner']: "" }));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      await vendorService.updateProfile(formData);
+      const uploadData = new FormData();
+      uploadData.append('storeName', formData.storeName);
+      uploadData.append('storeDescription', formData.storeDescription);
+      uploadData.append('gstNumber', formData.gstNumber);
+      
+      if (files.logo) uploadData.append('logo', files.logo);
+      else if (previews.logo === "") uploadData.append('storeLogo', ""); // Signal deletion
+
+      if (files.banner) uploadData.append('banner', files.banner);
+      else if (previews.banner === "") uploadData.append('storeBanner', ""); // Signal deletion
+
+      await vendorService.updateProfile(uploadData);
       toast.success("Store configuration updated successfully");
       fetchVendor();
     } catch (error) {
@@ -157,28 +192,62 @@ export default function VendorSettingsPage() {
                        <div className="space-y-4">
                           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-2">Shop Logo</label>
                           <div className="w-32 h-32 rounded-3xl bg-gray-50 border-4 border-white shadow-lg overflow-hidden relative group">
-                             <img 
-                               src={formData.storeLogo || "https://api.dicebear.com/7.x/identicon/svg?seed=Store"} 
-                               alt="Store Logo"
-                               className="w-full h-full object-cover transition-transform group-hover:scale-110" 
-                             />
-                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                             {previews.logo ? (
+                                <img 
+                                  src={previews.logo} 
+                                  alt="Store Logo"
+                                  className="w-full h-full object-cover transition-transform group-hover:scale-110" 
+                                />
+                             ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                                   <ImageIcon size={32} />
+                                   <span className="text-[8px] font-black uppercase mt-2">No Logo</span>
+                                </div>
+                             )}
+                             <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
                                 <ImageIcon className="text-white w-6 h-6" />
-                             </div>
+                                <input 
+                                  type="file" 
+                                  accept="image/*" 
+                                  className="hidden" 
+                                  onChange={(e) => handleFileChange('logo', e)}
+                                />
+                             </label>
                           </div>
+                          {previews.logo && (
+                             <Button 
+                               variant="ghost" 
+                               size="sm" 
+                               onClick={() => removeImage('logo')}
+                               className="w-full h-8 rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50 font-black text-[10px] uppercase gap-1.5"
+                             >
+                                <Trash2 size={12} /> Remove
+                             </Button>
+                          )}
                        </div>
                        <div className="flex-1 space-y-4 pt-1">
-                          <p className="text-sm font-black text-gray-800">Logo Image URL</p>
-                          <Input 
-                            value={formData.storeLogo}
-                            onChange={(e) => setFormData({...formData, storeLogo: e.target.value})}
-                            className="h-12 rounded-xl border-gray-100 bg-gray-50/50 font-medium px-4"
-                            placeholder="https://example.com/logo.png"
-                          />
-                          <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-3">
-                             <Info size={16} className="text-amber-500 mt-0.5 shrink-0" />
-                             <p className="text-[10px] font-bold text-amber-700 uppercase tracking-tighter leading-tight">Recommended dimensions: 512x512. Standard PNG or SVG formats only.</p>
+                          <p className="text-sm font-black text-gray-800">Logo Branding</p>
+                          <div className="p-6 bg-gray-50 border border-gray-100 rounded-2xl space-y-3">
+                             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-relaxed">Recommended dimensions: 512x512.</p>
+                             <div className="flex flex-wrap gap-2">
+                                <Badge className="bg-[#A6D608]/10 text-[#A6D608] hover:bg-[#A6D608]/10 border-none font-black text-[8px]">CLOUDINARY STORAGE</Badge>
+                                <Badge className="bg-blue-50 text-blue-500 hover:bg-blue-50 border-none font-black text-[8px]">SVG/PNG SUPPORTED</Badge>
+                             </div>
                           </div>
+                          <Button 
+                            variant="outline" 
+                            className="w-full rounded-xl border-gray-200 font-black text-xs hover:bg-white"
+                            onClick={() => document.getElementById('logo-input')?.click()}
+                          >
+                             Choose New Logo
+                             <input 
+                               id="logo-input"
+                               type="file" 
+                               accept="image/*" 
+                               className="hidden" 
+                               onChange={(e) => handleFileChange('logo', e)}
+                             />
+                          </Button>
                        </div>
                     </div>
 
@@ -188,23 +257,43 @@ export default function VendorSettingsPage() {
                           <span className="text-[10px] font-black text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">1920x400 Recommended</span>
                        </div>
                        <div className="w-full h-48 rounded-[2rem] bg-gray-50 border-4 border-white shadow-lg overflow-hidden relative group">
-                          <img 
-                            src={formData.storeBanner || "https://images.unsplash.com/photo-1506784919140-50cf144ad310"} 
-                            alt="Store Banner"
-                            className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-700" 
-                          />
-                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center">
-                             <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white hover:text-black rounded-xl font-black text-xs uppercase tracking-widest backdrop-blur-md">
+                          {previews.banner ? (
+                             <img 
+                               src={previews.banner} 
+                               alt="Store Banner"
+                               className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-700" 
+                             />
+                          ) : (
+                             <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                                <ImageIcon size={48} />
+                                <span className="text-[10px] font-black uppercase mt-2 tracking-widest">No Banner Selected</span>
+                             </div>
+                          )}
+                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/60 transition-all opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-4">
+                             <Button 
+                               onClick={() => document.getElementById('banner-input')?.click()}
+                               variant="outline" 
+                               className="bg-white/10 border-white/20 text-white hover:bg-white hover:text-black rounded-xl font-black text-xs uppercase tracking-widest backdrop-blur-md"
+                             >
+                                <input 
+                                  id="banner-input"
+                                  type="file" 
+                                  accept="image/*" 
+                                  className="hidden" 
+                                  onChange={(e) => handleFileChange('banner', e)}
+                                />
                                 Change Banner
                              </Button>
+                             {previews.banner && (
+                                <Button 
+                                  onClick={() => removeImage('banner')}
+                                  className="bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white rounded-xl font-black text-xs uppercase tracking-widest backdrop-blur-md"
+                                >
+                                   Delete
+                                </Button>
+                             )}
                           </div>
                        </div>
-                       <Input 
-                         value={formData.storeBanner}
-                         onChange={(e) => setFormData({...formData, storeBanner: e.target.value})}
-                         className="h-12 rounded-xl border-gray-100 bg-gray-50/50 font-medium px-4 mt-4"
-                         placeholder=" Banner Image URL (Publicly accessible)"
-                       />
                     </div>
                  </div>
               </Card>

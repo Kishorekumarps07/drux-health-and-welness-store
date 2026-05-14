@@ -11,13 +11,22 @@ const {
   getPayments,
   updateProfile
 } = require('./vendorOrders.controller');
+const { onboardVendor } = require('./vendorOnboarding.controller');
 const { protect, restrictTo } = require('../../middleware/auth');
 
 const router = express.Router();
 
-// Require Authentication and Vendor Role for all routes
+// Require Authentication
 router.use(protect);
-router.use(restrictTo('VENDOR'));
+
+/**
+ * @route   POST /api/v1/vendor/onboard
+ * @desc    Initialize a vendor profile
+ */
+router.post('/onboard', onboardVendor);
+
+// Require Vendor Role for all subsequent routes
+router.use(restrictTo('VENDOR', 'ADMIN'));
 
 /**
  * @route   GET /api/v1/vendor/stats

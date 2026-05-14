@@ -87,7 +87,7 @@ export default function VendorOverviewPage() {
     },
     { 
       name: "Pending Orders", 
-      value: orders.length || '0', 
+      value: stats?.pendingOrderCount || '0', 
       change: 'Action Required', 
       trend: 'up' as const, 
       icon: Clock, 
@@ -103,7 +103,7 @@ export default function VendorOverviewPage() {
     },
     { 
       name: "Store Rating", 
-      value: (user as any)?.vendor?.rating || "4.8", 
+      value: (user as any)?.vendor?.rating ? parseFloat((user as any).vendor.rating).toFixed(1) : "4.8", 
       change: 'Customer Trust', 
       trend: 'up' as const, 
       icon: Star, 

@@ -8,6 +8,9 @@ class UsersService {
       select: {
         id: true, name: true, email: true, phone: true,
         roles: true, avatarUrl: true, isVerified: true, createdAt: true,
+        vendor: {
+          select: { approvalStatus: true }
+        }
       },
     });
     if (!user) throw new AppError('User not found.', 404);

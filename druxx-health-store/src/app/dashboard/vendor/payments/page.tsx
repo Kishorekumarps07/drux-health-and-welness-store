@@ -43,7 +43,7 @@ export default function VendorPaymentsPage() {
   }, []);
 
   const statusMap: Record<string, any> = {
-    COMPLETED: { color: "text-[#A6D608]", bg: "bg-[#A6D608]/10", icon: CheckCircle2 },
+    PROCESSED: { color: "text-[#A6D608]", bg: "bg-[#A6D608]/10", icon: CheckCircle2 },
     PENDING: { color: "text-amber-500", bg: "bg-amber-50", icon: Clock },
     FAILED: { color: "text-red-500", bg: "bg-red-50", icon: AlertCircle },
   };
@@ -103,36 +103,43 @@ export default function VendorPaymentsPage() {
               <div className="absolute -right-20 -top-20 w-80 h-80 bg-[#A6D608]/10 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity" />
            </Card>
 
-           {/* Bank Account Summary */}
-           <Card className="rounded-[2.5rem] bg-white p-10 border-gray-100 shadow-xl shadow-black/5 relative overflow-hidden border-2 border-dashed border-gray-100 italic">
-              <div className="flex items-start justify-between mb-8">
-                 <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center">
-                    <Banknote className="w-7 h-7 text-gray-300" />
-                 </div>
-                 <Button variant="ghost" className="rounded-xl font-black text-[#A6D608] hover:bg-[#A6D608]/5">
-                    Update Bank Account
-                 </Button>
-              </div>
-              <div>
-                 <h4 className="text-xl font-black text-gray-900 mb-1 tracking-tight">Settlement Account</h4>
-                 <p className="text-sm text-gray-400 font-medium">Funds will be deposited to your verified business account.</p>
-                 
-                 <div className="mt-8 space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-                       <span className="text-xs font-black uppercase tracking-widest text-gray-400">Bank Name</span>
-                       <span className="text-sm font-black text-gray-800 tracking-tight">HDFC Bank Limited</span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-                       <span className="text-xs font-black uppercase tracking-widest text-gray-400">Account Number</span>
-                       <span className="text-sm font-black text-gray-800 tracking-tight">**** **** 4209</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 mt-4 text-[10px] font-black text-[#A6D608] uppercase tracking-tighter">
-                       <ShieldCheck className="w-3.5 h-3.5" />
-                       Verified & Security Cleared
-                    </div>
-                 </div>
-              </div>
-           </Card>
+            {/* Bank Account Summary */}
+            <Card className="rounded-[2.5rem] bg-white p-10 border-gray-100 shadow-xl shadow-black/5 relative overflow-hidden border-2 border-dashed border-gray-100 italic">
+               <div className="flex items-start justify-between mb-8">
+                  <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center">
+                     <Banknote className="w-7 h-7 text-gray-300" />
+                  </div>
+                  <Button variant="ghost" className="rounded-xl font-black text-[#A6D608] hover:bg-[#A6D608]/5">
+                     Update Bank Account
+                  </Button>
+               </div>
+               <div>
+                  <h4 className="text-xl font-black text-gray-900 mb-1 tracking-tight">Settlement Account</h4>
+                  <p className="text-sm text-gray-400 font-medium">Funds will be deposited to your verified business account.</p>
+                  
+                  <div className="mt-8 space-y-4">
+                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+                        <span className="text-xs font-black uppercase tracking-widest text-gray-400">Bank Name</span>
+                        <span className="text-sm font-black text-gray-800 tracking-tight">{data?.bankInfo?.bankName || "Not Linked"}</span>
+                     </div>
+                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+                        <span className="text-xs font-black uppercase tracking-widest text-gray-400">Account Number</span>
+                        <span className="text-sm font-black text-gray-800 tracking-tight">{data?.bankInfo?.accountNumber || "---- ---- ----"}</span>
+                     </div>
+                     {data?.bankInfo?.isVerified ? (
+                        <div className="flex items-center justify-center gap-2 mt-4 text-[10px] font-black text-[#A6D608] uppercase tracking-tighter">
+                           <ShieldCheck className="w-3.5 h-3.5" />
+                           Verified & Security Cleared
+                        </div>
+                     ) : (
+                        <div className="flex items-center justify-center gap-2 mt-4 text-[10px] font-black text-amber-500 uppercase tracking-tighter">
+                           <AlertCircle className="w-3.5 h-3.5" />
+                           Action Required: Link Bank Account
+                        </div>
+                     )}
+                  </div>
+               </div>
+            </Card>
         </div>
 
         {/* Payout History */}

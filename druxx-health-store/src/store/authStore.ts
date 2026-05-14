@@ -17,12 +17,12 @@ interface AuthState {
   logout: () => Promise<void>;
   login: (email: string, password: string, requiredRole?: string) => Promise<boolean>;
   register: (name: string, email: string, password: string, forceRole?: string) => Promise<boolean>;
+  refreshProfile: () => Promise<void>;
 }
 
 // Guard so initialize() is truly idempotent across React StrictMode double-invocations
 let _initStarted = false;
-// Hold the unsubscribe callback to prevent listener leaks on re-init
-let _authListenerUnsub: (() => void) | null = null;
+let _syncUserRef: any = null;
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
@@ -35,84 +35,49 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   mismatchError: null,
 
   initialize: async () => {
-    // ── Idempotency guard ────────────────────────────────────────────────────
     if (_initStarted) return;
     _initStarted = true;
-
-    // ── Unsubscribe stale listener from previous hot-reload ─────────────────
-    if (_authListenerUnsub) {
-      _authListenerUnsub();
-      _authListenerUnsub = null;
-    }
 
     const syncUser = async (sUser: User | null, session?: any) => {
       const accessToken = session?.access_token ?? null;
 
       if (!sUser) {
-        set({
-          isAuthenticated: false,
-          user: null,
-          supabaseUser: null,
-          profile: null,
-          accessToken: null,
-        });
+        set({ isAuthenticated: false, user: null, supabaseUser: null, profile: null, accessToken: null });
         return;
       }
 
-      // ── Hardcoded admin bypass ─────────────────────────────────────────────
-      if (sUser.email === "infopromptix@gmail.com") {
-        set({
-          supabaseUser: sUser,
-          accessToken,
-          profile: { role: "ADMIN" },
-          isAuthenticated: true,
-          mismatchError: null,
-          user: {
-            id: sUser.id,
-            name: "Admin",
-            email: sUser.email,
-            avatar: "",
-            roles: ["CUSTOMER", "ADMIN"],
-            activeRole: "ADMIN",
-            isAdmin: true,
-            isVendor: false,
-            addresses: [],
-          },
-        });
-        return;
-      }
+      // ── CRITICAL: Set accessToken FIRST so subsequent API calls have the header ──
+      set({ accessToken });
 
       try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", sUser.id)
-          .maybeSingle();
+        // Fetch profile from our Node.js Backend API instead of Supabase direct DB
+        const { default: api } = await import("@/lib/api");
+        const response = await api.get('/users/profile');
+        const profile = response.data.data.user;
 
-        // Use profile from DB, or fall back to user_metadata (set during register)
-        const metaRole = sUser.user_metadata?.role ?? "CUSTOMER";
-        const role = profile?.role ?? metaRole;
+        const role = profile.roles?.[profile.roles.length - 1] || "CUSTOMER";
+        const vendorStatus = profile.vendor?.approvalStatus;
 
         set({
           supabaseUser: sUser,
-          accessToken,
-          profile: profile ?? null,
+          profile: profile,
           isAuthenticated: true,
           mismatchError: null,
           user: {
             id: sUser.id,
-            name: profile?.full_name ?? sUser.user_metadata?.full_name ?? sUser.email?.split("@")[0] ?? "User",
-            email: sUser.email ?? "",
-            avatar: profile?.avatar_url ?? "",
-            roles: ["CUSTOMER", role].filter((r, i, a) => a.indexOf(r) === i),
+            name: profile.name || sUser.user_metadata?.full_name || "User",
+            email: sUser.email || "",
+            avatar: profile.avatar || "",
+            roles: profile.roles || ["CUSTOMER"],
             activeRole: role,
-            isAdmin: role === "ADMIN",
-            isVendor: role === "VENDOR",
-            addresses: [],
+            isAdmin: profile.roles?.includes("ADMIN"),
+            isVendor: profile.roles?.includes("VENDOR"),
+            vendorStatus: vendorStatus,
+            addresses: profile.addresses || [],
           },
         });
       } catch (err) {
-        // Graceful fallback — never leave the user in a broken state
+        // Fallback if API fails (e.g. initial setup)
         const metaRole = sUser.user_metadata?.role ?? "CUSTOMER";
         set({
           supabaseUser: sUser,
@@ -133,35 +98,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     };
 
-    // Expose syncUser for use in login method to avoid race conditions
-    (get() as any)._syncUser = syncUser;
+    _syncUserRef = syncUser;
 
-    // ── Initial session check ────────────────────────────────────────────────
     try {
-      const { data: { session }, error } = await supabase.auth.getSession();
-
-      if (error) {
-        // Stale refresh token — sign out silently
-        if (error.message.includes("Refresh Token Not Found") || error.status === 400) {
-          await supabase.auth.signOut();
-          await syncUser(null);
-        }
-      } else {
-        await syncUser(session?.user ?? null, session);
-      }
-    } catch (err) {
-      console.error("Auth init error:", err);
+      const { data: { session } } = await supabase.auth.getSession();
+      await syncUser(session?.user ?? null, session);
     } finally {
       set({ loading: false, initialized: true });
     }
 
-    // ── Subscribe to future auth events (exactly once) ───────────────────────
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        await syncUser(session?.user ?? null, session);
-      }
-    );
-    _authListenerUnsub = () => subscription.unsubscribe();
+    supabase.auth.onAuthStateChange(async (_event, session) => {
+      await syncUser(session?.user ?? null, session);
+    });
+  },
+
+  refreshProfile: async () => {
+    const { supabaseUser, accessToken } = get();
+    if (supabaseUser && _syncUserRef) {
+      await _syncUserRef(supabaseUser, { access_token: accessToken });
+    }
   },
 
   login: async (email, password, requiredRole) => {

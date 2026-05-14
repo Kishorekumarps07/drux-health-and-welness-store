@@ -2,27 +2,36 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { 
   Store, 
   Mail, 
   Lock, 
   User, 
   ArrowRight, 
-  Loader2,
   CheckCircle2,
-  Zap
+  Zap,
+  Eye,
+  EyeOff,
+  ShieldCheck,
+  Truck,
+  LineChart
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import Link from "next/link";
-import Image from "next/image";
+
+const PERKS = [
+  { icon: Zap, label: "Instant store generation", desc: "Start listing in seconds." },
+  { icon: Truck, label: "Logistics Support", desc: "Nationwide shipping integration." },
+  { icon: LineChart, label: "Real-time Analytics", desc: "Track sales and user behavior." },
+  { icon: ShieldCheck, label: "Verified Status", desc: "Build trust with Druxx badges." },
+];
 
 export default function VendorRegisterPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   const [formData, setFormData] = useState({
     fullName: "",
@@ -36,10 +45,7 @@ export default function VendorRegisterPage() {
     setLoading(true);
 
     try {
-      // 0. Force clear any existing sticky sessions to prevent ID mismatch
-      await supabase.auth.signOut();
-
-      // 1. Create User Account natively as a VENDOR
+      // 1. Try to Sign Up via Supabase
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -51,201 +57,225 @@ export default function VendorRegisterPage() {
         }
       });
 
-      if (authError) throw authError;
-
-      // Ensure we have a user ID before proceeding
-      if (!authData.user?.id) {
-        throw new Error("Failed to generate user ID during registration.");
+      // Handle "Email already taken" (422)
+      if (authError) {
+        if (authError.status === 422) {
+          // If already exists, try to sign in with the provided password
+          const { error: loginError } = await supabase.auth.signInWithPassword({
+            email: formData.email,
+            password: formData.password
+          });
+          if (loginError) throw new Error("An account with this email already exists with a different password.");
+        } else {
+          throw authError;
+        }
       }
 
-      // Force update the profile role to VENDOR since some Supabase triggers default to CUSTOMER
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ role: 'VENDOR' })
-        .eq('id', authData.user.id);
-        
-      if (profileError) {
-        console.warn("Could not force-update profile role:", profileError);
-      }
+      // 2. Call our Node.js Backend to initialize the Vendor Profile
+      // We import api dynamically or use it from @/lib/api
+      const { default: api } = await import("@/lib/api");
+      await api.post('/vendor/onboard', {
+        storeName: formData.storeName
+      });
 
-      // Force a manual login if Supabase didn't automatically create a session
-      if (!authData.session) {
-        const { error: signInErr } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-        });
-        if (signInErr) throw new Error("Account created, but failed to log in automatically.");
-      }
-
-      // Ensure we have a user ID before proceeding
-      if (!authData.user?.id) {
-        throw new Error("Failed to generate user ID during registration.");
-      }
-
-      // 2. Immediately create the Vendor Store Profile
-      const uniqueSlug = formData.storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.floor(Math.random() * 10000);
-      
-      const { error: vendorError } = await supabase
-        .from('vendors')
-        .insert({
-          name: formData.storeName,
-          slug: uniqueSlug,
-          owner_id: authData.user.id,
-          is_verified: false
-        });
-
-      if (vendorError) throw vendorError;
-
-      toast.success("Merchant account created successfully!");
-      
-      // Redirect directly to the status/onboarding page
+      toast.success("Merchant application submitted!");
       router.push("/vendor/status");
     } catch (error: any) {
-      console.log("Registration validation error:", error.message);
-      toast.error(error.message || "Failed to create merchant account");
+      toast.error(error.message || "Failed to create account");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row min-h-screen">
-      {/* Left Column: Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-900 relative overflow-hidden p-20 flex-col justify-center border-r border-gray-800">
-        <div className="relative z-10 max-w-xl">
-           <div className="mb-8 inline-flex items-center gap-2 px-4 py-2 bg-[#A6D608]/10 rounded-full border border-[#A6D608]/20">
-              <Zap className="w-4 h-4 text-[#A6D608]" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#A6D608] italic">Express Onboarding</span>
-           </div>
-           
-           <h1 className="text-6xl font-black text-white leading-[1.1] tracking-tighter mb-8 italic">
-              Start Selling <br /> 
-              <span className="text-gray-500">in </span>
-              <span className="text-[#A6D608]">60 Seconds.</span>
-           </h1>
+    <div className="min-h-screen flex font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+      
+      {/* ── Left Panel: Dark Brand ───────────────────────────── */}
+      <div className="hidden lg:flex w-[52%] bg-[#0C0C0C] flex-col justify-between p-14 relative overflow-hidden border-r border-white/5">
+        
+        {/* Grid texture overlay */}
+        <div className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `linear-gradient(rgba(166,214,8,1) 1px, transparent 1px), linear-gradient(90deg, rgba(166,214,8,1) 1px, transparent 1px)`,
+            backgroundSize: "60px 60px"
+          }}
+        />
 
-           <div className="space-y-6 mb-16">
-              {[
-                "Instant store generation.",
-                "Zero platform fees for your first 30 days.",
-                "Direct access to our logistics network."
-              ].map((text, i) => (
-                <div key={i} className="flex items-center gap-4 group">
-                   <div className="w-6 h-6 rounded-full bg-gray-800 flex items-center justify-center text-[#A6D608] border border-gray-700">
-                      <CheckCircle2 size={14} />
-                   </div>
-                   <p className="text-sm font-bold text-gray-400 italic uppercase tracking-wider">{text}</p>
+        {/* Glow blobs */}
+        <div className="absolute top-[-100px] left-[-100px] w-[500px] h-[500px] rounded-full opacity-10"
+          style={{ background: "radial-gradient(circle, #A6D608 0%, transparent 70%)" }}
+        />
+        <div className="absolute bottom-[-150px] right-[-100px] w-[600px] h-[600px] rounded-full opacity-15"
+          style={{ background: "radial-gradient(circle, #A6D608 0%, transparent 70%)" }}
+        />
+
+        {/* Logo removed as requested for consistency */}
+        <div className="relative z-10" />
+
+        {/* Content */}
+        <div className="relative z-10 space-y-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#A6D608]/20 bg-[#A6D608]/5">
+            <Zap size={14} className="text-[#A6D608]" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#A6D608]">Vendor Enrollment</span>
+          </div>
+
+          <h1 className="text-6xl font-black text-white leading-[1] tracking-tight">
+            Launch your<br />
+            <span className="text-[#A6D608]">Wellness Brand.</span>
+          </h1>
+
+          <p className="text-gray-500 text-sm leading-relaxed max-w-sm">
+            Join the elite circle of health brands. Scale your reach with Druxx's premium distribution and tools.
+          </p>
+
+          {/* Perks list */}
+          <div className="grid grid-cols-2 gap-8 pt-4">
+            {PERKS.map((perk, i) => (
+              <div key={i} className="space-y-2 group">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-[#A6D608] group-hover:scale-110 transition-transform">
+                  <perk.icon size={20} />
                 </div>
-              ))}
-           </div>
+                <div>
+                  <h4 className="text-white text-[11px] font-black uppercase tracking-wider">{perk.label}</h4>
+                  <p className="text-gray-600 text-[10px] font-medium leading-tight">{perk.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Decorative elements */}
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-[#A6D608]/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl" />
+        {/* Bottom */}
+        <div className="relative z-10">
+          <p className="text-gray-700 text-[10px] font-bold uppercase tracking-widest">
+            Trusted by 500+ Indian Wellness Brands
+          </p>
+        </div>
       </div>
 
-      {/* Right Column: Registration Form */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8 bg-white">
-        <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-1000 delay-200">
-           
-           <div className="text-center mb-10">
-             <h2 className="text-3xl font-black text-gray-900 tracking-tight mb-3">
-               Merchant Application
-             </h2>
-             <p className="text-gray-400 font-medium italic text-sm">Create your personal account and brand identity.</p>
-           </div>
+      {/* ── Right Panel: Registration Form ───────────────────────────── */}
+      <div className="flex-1 flex flex-col items-center justify-center bg-[#F9F9F6] p-8 overflow-y-auto py-20">
 
-           <form onSubmit={handleSubmit} className="space-y-5">
-              
-              {/* Store Details Section */}
-              <div className="p-6 bg-[#A6D608]/5 rounded-[1.5rem] border border-[#A6D608]/10 mb-6">
-                 <div className="space-y-1">
-                   <Label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Store / Brand Name</Label>
-                   <div className="group relative">
-                     <Store size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#A6D608] transition-colors" />
-                     <Input 
-                       value={formData.storeName}
-                       onChange={(e) => setFormData({...formData, storeName: e.target.value})}
-                       className="pl-14 h-14 rounded-2xl border-white bg-white focus:ring-4 focus:ring-[#A6D608]/10 transition-all font-bold italic shadow-sm" 
-                       placeholder="Organic Wellness Co." 
-                       required 
-                     />
-                   </div>
-                 </div>
+        <div className="w-full max-w-md">
+
+          {/* Header */}
+          <div className="mb-10">
+            <h2 className="text-3xl font-black text-gray-900 tracking-tight mb-2">
+              Merchant Application
+            </h2>
+            <p className="text-gray-400 text-sm font-medium">
+              Start your journey with Druxx Health Store.
+            </p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            
+            {/* Store Name - Highlighted */}
+            <div className="p-6 bg-white rounded-3xl border-2 border-[#A6D608] shadow-xl shadow-[#A6D608]/5 mb-8 relative group overflow-hidden">
+              <div className="absolute top-0 right-0 p-3 opacity-10 group-focus-within:opacity-30 transition-opacity">
+                 <Store size={40} className="text-[#A6D608]" />
               </div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-[#A6D608] block mb-2">
+                Brand / Store Identity
+              </label>
+              <input
+                type="text"
+                value={formData.storeName}
+                onChange={e => setFormData({...formData, storeName: e.target.value})}
+                placeholder="e.g. Pure Life Supplements"
+                required
+                className="w-full bg-transparent text-lg font-black text-gray-900 placeholder:text-gray-200 focus:outline-none"
+              />
+            </div>
 
-              {/* Personal Details Section */}
-              <div className="space-y-1">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Your Full Name</Label>
-                <div className="group relative">
-                  <User size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-gray-900 transition-colors" />
-                  <Input 
+            <div className="grid grid-cols-1 gap-5">
+              {/* Full Name */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Full Name</label>
+                <div className="relative group">
+                  <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#A6D608] transition-colors" />
+                  <input
+                    type="text"
                     value={formData.fullName}
-                    onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                    className="pl-14 h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white" 
-                    placeholder="John Doe" 
-                    required 
+                    onChange={e => setFormData({...formData, fullName: e.target.value})}
+                    placeholder="John Doe"
+                    required
+                    className="w-full pl-11 pr-4 h-14 rounded-2xl bg-white border border-gray-200 text-sm font-medium focus:outline-none focus:border-[#A6D608] focus:ring-4 focus:ring-[#A6D608]/10 transition-all"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Email Address</Label>
-                <div className="group relative">
-                  <Mail size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-gray-900 transition-colors" />
-                  <Input 
+              {/* Email */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Business Email</label>
+                <div className="relative group">
+                  <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#A6D608] transition-colors" />
+                  <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="pl-14 h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white" 
-                    placeholder="merchant@druxx.com" 
-                    required 
+                    onChange={e => setFormData({...formData, email: e.target.value})}
+                    placeholder="you@brand.com"
+                    required
+                    className="w-full pl-11 pr-4 h-14 rounded-2xl bg-white border border-gray-200 text-sm font-medium focus:outline-none focus:border-[#A6D608] focus:ring-4 focus:ring-[#A6D608]/10 transition-all"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Secure Password</Label>
-                <div className="group relative">
-                  <Lock size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-gray-900 transition-colors" />
-                  <Input 
-                    type="password"
+              {/* Password */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Secure Password</label>
+                <div className="relative group">
+                  <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#A6D608] transition-colors" />
+                  <input
+                    type={showPassword ? "text" : "password"}
                     value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    className="pl-14 h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white" 
-                    placeholder="••••••••" 
-                    required 
+                    onChange={e => setFormData({...formData, password: e.target.value})}
+                    placeholder="••••••••••"
+                    required
+                    className="w-full pl-11 pr-12 h-14 rounded-2xl bg-white border border-gray-200 text-sm font-medium focus:outline-none focus:border-[#A6D608] focus:ring-4 focus:ring-[#A6D608]/10 transition-all"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-700 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
               </div>
+            </div>
 
-              <Button 
-                type="submit" 
-                disabled={loading} 
-                className="w-full h-16 rounded-[1.25rem] font-black text-sm transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-gray-900/10 mt-8" 
-                style={{ backgroundColor: '#1E1E1E', color: 'white' }}
-              >
-                {loading ? (
-                  <div className="flex items-center gap-2 text-[#A6D608]">
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Creating Profile...
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center gap-2">
-                    Submit Application
-                    <ArrowRight size={18} className="text-[#A6D608]" />
-                  </div>
-                )}
-              </Button>
-           </form>
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full h-16 rounded-2xl bg-[#0C0C0C] text-white font-black text-sm flex items-center justify-center gap-2 hover:bg-[#1a1a1a] active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-4 shadow-xl shadow-black/10"
+            >
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  Submit Application
+                  <ArrowRight size={18} className="text-[#A6D608]" />
+                </>
+              )}
+            </button>
+          </form>
 
-           <div className="mt-8 text-center">
-             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-               Already have a merchant account? <Link href="/vendor/login" className="text-[#A6D608] hover:underline ml-1">Sign In</Link>
-             </p>
-           </div>
-
+          {/* Footer links */}
+          <div className="mt-10 text-center space-y-4">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+              Already have an account? <Link href="/vendor/login" className="text-[#A6D608] hover:underline ml-1">Sign In</Link>
+            </p>
+            <div className="flex items-center justify-center gap-6">
+              <Link href="#" className="text-[9px] font-bold text-gray-300 uppercase hover:text-gray-500 transition-colors">Privacy Policy</Link>
+              <span className="w-1 h-1 rounded-full bg-gray-200" />
+              <Link href="#" className="text-[9px] font-bold text-gray-300 uppercase hover:text-gray-500 transition-colors">Terms of Service</Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

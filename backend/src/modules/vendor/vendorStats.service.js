@@ -36,6 +36,11 @@ class VendorStatsService {
       where: { vendorId },
     });
 
+    // Get pending orders count
+    const pendingOrderCount = await prisma.orderItem.count({
+      where: { vendorId, status: 'PENDING' }
+    });
+
     // Get product count
     const productCount = await prisma.product.count({
       where: { vendorId },
@@ -45,6 +50,7 @@ class VendorStatsService {
       totalSales: parseFloat(stats._sum.total || 0).toFixed(2),
       orderItemCount: stats._count.id || 0,
       orderCount: distinctOrders.length || 0,
+      pendingOrderCount,
       productCount,
     };
   }

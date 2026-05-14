@@ -62,7 +62,15 @@ const protect = asyncHandler(async (req, res, next) => {
         { email: email }
       ]
     },
-    select: { id: true, email: true, roles: true, isVerified: true },
+    select: { 
+      id: true, 
+      email: true, 
+      roles: true, 
+      isVerified: true,
+      vendor: {
+        select: { approvalStatus: true }
+      }
+    },
   });
 
   // ── 5. Auto-provisioning (Mission Critical) ──────────────────────────────────
@@ -96,14 +104,28 @@ const protect = asyncHandler(async (req, res, next) => {
     return next(new AppError('The user belonging to this token no longer exists.', 401));
   }
 
+  // Debug log for roles
+  logger.info(`Auth: User ${user.email} accessing ${req.originalUrl} with roles: ${JSON.stringify(user.roles)}`);
+
   req.user = user;
   next();
 });
 
 const restrictTo = (...roles) => (req, res, next) => {
+  // 1. Basic Role Check
   if (!roles.some(role => req.user.roles.includes(role))) {
     return next(new AppError('You do not have permission to perform this action.', 403));
   }
+
+  // 2. Strict Vendor Status Check
+  // If the user has a VENDOR role and isn't an ADMIN, they MUST be ACTIVE to proceed
+  if (req.user.roles.includes('VENDOR') && !req.user.roles.includes('ADMIN')) {
+    const status = req.user.vendor?.approvalStatus;
+    if (status !== 'ACTIVE' && status !== 'APPROVED') {
+      return next(new AppError('Access denied. Your vendor account is currently pending approval or suspended.', 403));
+    }
+  }
+
   next();
 };
 

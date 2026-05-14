@@ -5,6 +5,7 @@ export interface VendorStats {
   totalSales: string;
   orderItemCount: number;
   orderCount: number;
+  pendingOrderCount: number;
   productCount: number;
 }
 
@@ -196,18 +197,20 @@ export const vendorService = {
    * Update item status via Backend API
    */
   async updateItemStatus(id: string, status: string) {
-    const response = await api.put(`/orders/${id}/status`, { status });
-    return response.data.data.order;
+    const response = await api.patch(`/vendor/orders/${id}/status`, { status });
+    return response.data.data.orderItem;
   },
 
   /**
    * Submit a new vendor application
    */
   async applyVendor(data: { storeName: string; storeDescription: string; gstNumber?: string; category: string }) {
-    const response = await api.post('/vendors/apply', {
+    // We use our new onboard endpoint which handles both creation and promotion
+    const response = await api.post('/vendor/onboard', {
       storeName: data.storeName,
       storeDescription: data.storeDescription,
-      gstNumber: data.gstNumber
+      gstNumber: data.gstNumber,
+      category: data.category
     });
     return response.data;
   },
@@ -216,17 +219,15 @@ export const vendorService = {
    * Check current user's vendor application status
    */
   async getMyApplication() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) throw new Error("Unauthorized");
-
-    const { data, error } = await supabase
-      .from('vendors')
-      .select('*')
-      .eq('owner_id', session.user.id)
-      .maybeSingle();
-
-    if (error) throw error;
-    return data;
+    try {
+      const response = await api.get('/vendor/me');
+      return response.data.data.vendor;
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        return null; // No profile found, which is a valid state for new applicants
+      }
+      throw err;
+    }
   },
   
   /**
