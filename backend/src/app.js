@@ -74,6 +74,16 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.get('/api/v1/db-test', async (req, res) => {
+  try {
+    const prisma = require('./lib/prisma');
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'success', message: 'Database connected successfully!' });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message, stack: err.stack });
+  }
+});
+
 // ── API Routes ────────────────────────────────────────────────────────────────
 app.use('/api/v1', routes);
 
