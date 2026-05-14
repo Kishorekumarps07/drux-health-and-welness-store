@@ -48,6 +48,8 @@ api.interceptors.response.use(
       originalRequest._authRetried = true;
 
       // Sign out from Supabase and clear local state
+      // We use a dynamic import here to avoid circular dependency at the top level
+      const { useAuthStore } = await import("@/store/authStore");
       useAuthStore.getState().logout();
 
       // Only redirect if we're actually on a page that requires auth.
