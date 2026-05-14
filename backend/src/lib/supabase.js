@@ -7,11 +7,22 @@ if (!supabaseUrl || !supabaseServiceKey) {
   console.warn('⚠️ Supabase credentials missing in backend .env. Auth bridge might fail.');
 }
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-});
+let supabase = null;
+
+if (supabaseUrl && supabaseServiceKey) {
+  supabase = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+} else {
+  // Provide a mock object with auth.getUser to prevent crashes in middleware
+  supabase = {
+    auth: {
+      getUser: async () => ({ data: { user: null }, error: new Error('Supabase credentials missing') })
+    }
+  };
+}
 
 module.exports = supabase;
