@@ -75,10 +75,44 @@ export const orderService = {
   },
 
   async cancelOrder(id: string) {
-    const response = await api.patch(`/orders/${id}/cancel`);
+    const response = await api.put(`/orders/${id}/cancel`);
     if (response.data.status === "success") {
       return response.data.data;
     }
     throw new Error("Failed to cancel order");
+  },
+
+  async getVendorOrders(params = {}) {
+    const response = await api.get("/orders/vendor", { params });
+    if (response.data.status === "success") {
+      return {
+        status: "success",
+        orders: response.data.orders,
+        total: response.data.total,
+        pages: response.data.pages,
+      };
+    }
+    return { status: "error", orders: [], total: 0, pages: 1 };
+  },
+
+  async getAllOrders(params = {}) {
+    const response = await api.get("/orders/all", { params });
+    if (response.data.status === "success") {
+      return {
+        status: "success",
+        orders: response.data.orders,
+        total: response.data.total,
+        pages: response.data.pages,
+      };
+    }
+    return { status: "error", orders: [], total: 0, pages: 1 };
+  },
+
+  async updateOrderStatus(id: string, status: string) {
+    const response = await api.put(`/orders/${id}/status`, { status });
+    if (response.data.status === "success") {
+      return response.data.data.order;
+    }
+    throw new Error("Failed to update order status");
   },
 };

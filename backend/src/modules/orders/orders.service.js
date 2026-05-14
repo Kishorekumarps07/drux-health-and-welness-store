@@ -209,7 +209,72 @@ class OrdersService {
 
     return prisma.order.update({
       where: { id: orderId },
-      data: { status: 'CANCELLED' },
+      data: { status: "CANCELLED" },
+      include: ORDER_INCLUDE,
+    });
+  }
+
+  async getVendorOrders(vendorId, query) {
+    const { skip, take, page, limit } = getPagination(query);
+
+    // Fetch orders that contain at least one item from this vendor
+    const [orders, total] = await prisma.$transaction([
+      prisma.order.findMany({
+        where: {
+          items: {
+            some: { vendorId },
+          },
+        },
+        skip,
+        take,
+        include: {
+          ...ORDER_INCLUDE,
+          // Filter items to only show what belongs to this vendor
+          items: {
+            where: { vendorId },
+            include: {
+              product: {
+                include: {
+                  images: { where: { isPrimary: true }, take: 1 },
+                },
+              },
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.order.count({
+        where: {
+          items: {
+            some: { vendorId },
+          },
+        },
+      }),
+    ]);
+
+    return { orders, ...getPagingData(total, page, limit) };
+  }
+
+  async getAllOrders(query) {
+    const { skip, take, page, limit } = getPagination(query);
+
+    const [orders, total] = await prisma.$transaction([
+      prisma.order.findMany({
+        skip,
+        take,
+        include: ORDER_INCLUDE,
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.order.count(),
+    ]);
+
+    return { orders, ...getPagingData(total, page, limit) };
+  }
+
+  async updateStatus(orderId, { status }) {
+    return prisma.order.update({
+      where: { id: orderId },
+      data: { status },
       include: ORDER_INCLUDE,
     });
   }

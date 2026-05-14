@@ -129,71 +129,59 @@ export const vendorService = {
    * Fetch Paginated Order Items
    */
   async getMyOrders(params: { page?: number; limit?: number; status?: string } = {}) {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) throw new Error("Unauthorized");
+    try {
+      const response = await api.get('/orders/vendor', { params });
+      
+      const orders = response.data.orders || [];
+      const items: VendorOrderItem[] = [];
 
-    // 1. Get Vendor ID for this user
-    const { data: vendor, error: vErr } = await supabase
-      .from('vendors')
-      .select('id')
-      .eq('owner_id', session.user.id)
-      .maybeSingle();
+      orders.forEach((order: any) => {
+        order.items.forEach((item: any) => {
+          items.push({
+            id: item.id,
+            orderId: order.id,
+            productId: item.productId,
+            vendorId: item.vendorId,
+            title: item.title,
+            price: Number(item.price),
+            quantity: Number(item.quantity),
+            total: Number(item.total),
+            status: item.status || 'PENDING',
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+            order: {
+              id: order.id,
+              status: order.status,
+              paymentStatus: order.paymentStatus,
+              paymentMethod: order.paymentMethod,
+              createdAt: order.createdAt,
+              user: { 
+                name: order.address?.fullName || "Customer", 
+                email: order.user?.email || "", 
+                phone: order.address?.phone || "" 
+              },
+              address: order.address || {},
+            },
+            product: {
+              id: item.productId,
+              title: item.title,
+              images: item.product?.images?.map((img: any) => ({ url: img.url })) || []
+            }
+          });
+        });
+      });
 
-    if (vErr || !vendor) {
-      console.warn("User is not linked to a vendor account.");
+      return {
+        status: "success",
+        items,
+        total: response.data.total || items.length,
+        pages: response.data.pages || 1,
+        page: response.data.page || 1
+      };
+    } catch (err) {
+      console.error("Vendor orders fetch error:", err);
       return { status: "success", items: [], total: 0, pages: 1, page: 1 };
     }
-
-    // 2. Fetch order items for this vendor
-    let query = supabase
-      .from('order_items')
-      .select('*, order:orders(*)', { count: 'exact' })
-      .eq('vendor_id', vendor.id)
-      .order('created_at', { ascending: false });
-
-    if (params.status && params.status !== 'ALL') {
-      query = query.eq('status', params.status);
-    }
-
-    const { data, error, count } = await query;
-    if (error) throw error;
-
-    // 3. Format to VendorOrderItem interface
-    const items = (data || []).map((item: any) => ({
-      id: item.id,
-      orderId: item.order_id,
-      productId: item.product_id,
-      vendorId: item.vendor_id,
-      title: item.title,
-      price: Number(item.price),
-      quantity: Number(item.quantity),
-      total: Number(item.total),
-      status: item.status || 'PENDING',
-      createdAt: item.created_at,
-      updatedAt: item.created_at,
-      order: {
-        id: item.order?.id,
-        status: item.order?.status,
-        paymentStatus: item.order?.payment_status,
-        paymentMethod: item.order?.payment_method,
-        createdAt: item.order?.created_at,
-        user: { name: item.order?.address?.fullName || "Customer", email: "", phone: item.order?.address?.phone || "" },
-        address: item.order?.address || {},
-      },
-      product: {
-        id: item.product_id,
-        title: item.title,
-        images: []
-      }
-    }));
-
-    return {
-      status: "success",
-      items,
-      total: count || 0,
-      pages: 1,
-      page: 1
-    };
   },
 
   /**
@@ -205,21 +193,11 @@ export const vendorService = {
   },
 
   /**
-   * Update item status (Triggers parent order sync on backend)
+   * Update item status via Backend API
    */
   async updateItemStatus(id: string, status: string) {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) throw new Error("Unauthorized");
-
-    const { data, error } = await supabase
-      .from('order_items')
-      .update({ status })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const response = await api.put(`/orders/${id}/status`, { status });
+    return response.data.data.order;
   },
 
   /**

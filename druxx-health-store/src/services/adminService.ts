@@ -34,7 +34,7 @@ export const adminService = {
 
   async listAllOrders(params?: any) {
     try {
-      const response = await api.get('/admin/orders', { params });
+      const response = await api.get('/orders/all', { params });
       return {
         status: "success",
         orders: response.data.orders || [],

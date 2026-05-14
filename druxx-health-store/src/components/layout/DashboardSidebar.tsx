@@ -81,23 +81,16 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
         isAdmin ? "bg-[#0B0F14] border-[#1F2937]" : "bg-white border-gray-100",
         isOpen ? "translate-x-0" : "max-lg:-translate-x-full"
       )}>
-        {/* 1. Logo Section (Top) */}
-        <div className="p-6 md:p-8 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className={cn(
-              "w-10 h-10 rounded-xl flex items-center justify-center relative overflow-hidden shrink-0",
-              isAdmin ? "bg-[#10B981]/10 border border-[#10B981]/20" : "bg-[#A6D608]"
-            )}>
-              {!isAdmin && <div className="absolute inset-0 bg-white/20 animate-pulse" />}
-              <ShieldCheck className={cn("w-6 h-6 relative z-10", isAdmin ? "text-[#10B981]" : "text-white")} />
+        <div className="p-10 flex items-center justify-center border-b border-gray-50/50">
+          <Link href="/" className="flex flex-col items-center group w-full">
+            <div className="w-40 h-16 flex items-center justify-center relative overflow-hidden transition-transform duration-300 group-hover:scale-110">
+              <img 
+                src="/logo.png" 
+                alt="Drux Logo" 
+                className="w-full h-full object-contain"
+              />
             </div>
-            <span className={cn(
-              "text-2xl font-black tracking-tight",
-              isAdmin ? "text-white" : "text-gray-900"
-            )}>
-              Druxx<span className={isAdmin ? "text-[#10B981]" : "text-[#A6D608]"}>.hub</span>
-            </span>
-          </div>
+          </Link>
           
           {/* Close for mobile */}
           <Button 
