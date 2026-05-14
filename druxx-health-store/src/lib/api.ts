@@ -1,5 +1,4 @@
 import axios from "axios";
-import { useAuthStore } from "@/store/authStore";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1",
@@ -12,7 +11,8 @@ const api = axios.create({
 // The token is kept fresh automatically by onAuthStateChange in authStore.
 api.interceptors.request.use(
   (config) => {
-    const token = (useAuthStore.getState() as any).accessToken;
+    // Read from localStorage directly to avoid circular dependency with authStore
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

@@ -48,7 +48,11 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 
   if (!userPayload) {
-    return next(new AppError('Invalid or expired token. Please log in again.', 401));
+    let message = 'Invalid or expired token. Please log in again.';
+    if (!supabaseUrl || !supabaseServiceKey) {
+      message = 'Backend is not fully configured (Missing Supabase Keys). Please contact administrator.';
+    }
+    return next(new AppError(message, 401));
   }
 
   // ── 4. Resolve user from local database ──────────────────────────────────────
