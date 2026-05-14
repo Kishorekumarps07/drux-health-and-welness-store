@@ -9,7 +9,15 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 let supabase = null;
 
-if (supabaseUrl && supabaseServiceKey) {
+const isValidUrl = (url) => {
+  try {
+    return url && (url.startsWith('http://') || url.startsWith('https://'));
+  } catch (e) {
+    return false;
+  }
+};
+
+if (isValidUrl(supabaseUrl) && supabaseServiceKey) {
   supabase = createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
