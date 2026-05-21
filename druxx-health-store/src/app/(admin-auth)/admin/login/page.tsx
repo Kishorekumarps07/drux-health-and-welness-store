@@ -148,9 +148,12 @@ export default function AdminLoginPage() {
         
         {/* Connection Status Badge */}
         <div className="flex flex-col items-center gap-2 mb-6">
-          <div className="w-14 h-14 bg-zinc-950 rounded-2xl flex items-center justify-center border border-zinc-800 shadow-2xl relative overflow-hidden group">
-            <Terminal size={22} className="text-[#08D6A6] relative z-10" />
-            <div className="absolute inset-0 bg-[#08D6A6]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="h-24 mb-4 flex items-center justify-center relative overflow-hidden">
+            <img 
+              src="/druxlogo.png" 
+              alt="Drux Logo" 
+              className="h-full object-contain brightness-0 invert"
+            />
           </div>
           <div className="flex flex-col items-center gap-1 font-mono">
             <div className="flex items-center gap-1.5">
