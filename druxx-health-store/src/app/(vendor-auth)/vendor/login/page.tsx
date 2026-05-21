@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
@@ -34,7 +34,7 @@ export default function VendorLoginPage() {
   // Guard: if already logged in as a VENDOR, redirect to "/dashboard/vendor"
   useAuthRedirect("VENDOR");
 
-  const { login, sendOtp, verifyOtp, loginWithGoogle, mismatchError } = useAuthStore();
+  const { login, sendOtp, verifyOtp, loginWithGoogle, mismatchError, clearMismatchError } = useAuthStore();
 
   const [mode, setMode] = useState<"password" | "otp">("password");
   const [email, setEmail] = useState("");
@@ -44,6 +44,11 @@ export default function VendorLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    clearMismatchError();
+    setError("");
+  }, [clearMismatchError]);
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

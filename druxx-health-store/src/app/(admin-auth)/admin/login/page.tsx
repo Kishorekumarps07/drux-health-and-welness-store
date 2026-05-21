@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
   // Guard: if already logged in as ADMIN, redirect to "/dashboard/admin"
   useAuthRedirect("ADMIN");
 
-  const { login, sendOtp, verifyOtp, loginWithGoogle, mismatchError } = useAuthStore();
+  const { login, sendOtp, verifyOtp, loginWithGoogle, mismatchError, clearMismatchError } = useAuthStore();
 
   const [mode, setMode] = useState<"password" | "otp">("password");
   const [email, setEmail] = useState("");
@@ -37,6 +37,11 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    clearMismatchError();
+    setError("");
+  }, [clearMismatchError]);
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

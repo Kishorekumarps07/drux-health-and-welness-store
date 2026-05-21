@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
@@ -28,12 +28,13 @@ export default function CustomerLoginPage() {
   // Guard: if already logged in as a CUSTOMER, redirect to "/" (or redirect param)
   useAuthRedirect("CUSTOMER");
 
-  const { login, register, sendOtp, verifyOtp, loginWithGoogle, mismatchError } = useAuthStore();
+  const { login, register, sendOtp, verifyOtp, loginWithGoogle, mismatchError, clearMismatchError } = useAuthStore();
 
   const [mode, setMode] = useState<"login" | "signup" | "otp">("login");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+  const [error, setError] = useState("");
   
   const [formData, setFormData] = useState({
     email: "",
@@ -42,9 +43,15 @@ export default function CustomerLoginPage() {
     otpCode: "",
   });
 
+  useEffect(() => {
+    clearMismatchError();
+    setError("");
+  }, [clearMismatchError]);
+
   const handlePasswordAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
     try {
       if (mode === "signup") {
@@ -58,6 +65,7 @@ export default function CustomerLoginPage() {
       }
     } catch (error: any) {
       if (error.message !== "Role mismatch") {
+        setError(error.message || "Authentication failed");
         toast.error(error.message || "Authentication failed");
       }
     } finally {
@@ -90,12 +98,14 @@ export default function CustomerLoginPage() {
       return;
     }
     setLoading(true);
+    setError("");
     try {
       await verifyOtp(formData.email, formData.otpCode, "CUSTOMER");
       toast.success("Logged in successfully via OTP!");
       router.push("/");
     } catch (error: any) {
       if (error.message !== "Role mismatch") {
+        setError(error.message || "Invalid or expired OTP code.");
         toast.error(error.message || "Invalid or expired OTP code.");
       }
     } finally {
@@ -158,16 +168,20 @@ export default function CustomerLoginPage() {
             </p>
           </div>
 
-          {/* Role Mismatch Error Card */}
-          {mismatchError && (
-            <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-center">
-              <p className="text-xs font-bold text-rose-600 mb-3">{mismatchError.message}</p>
-              <Link 
-                href={mismatchError.link} 
-                className="inline-flex items-center justify-center px-4 py-2 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-rose-700 transition-colors"
-              >
-                {mismatchError.cta}
-              </Link>
+          {/* Role Mismatch or General Error Card */}
+          {(error || mismatchError) && (
+            <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-center animate-in fade-in duration-300">
+              <p className="text-xs font-bold text-rose-600 mb-3">
+                {mismatchError?.message || error}
+              </p>
+              {mismatchError && (
+                <Link 
+                  href={mismatchError.link} 
+                  className="inline-flex items-center justify-center px-4 py-2 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-rose-700 transition-colors"
+                >
+                  {mismatchError.cta}
+                </Link>
+              )}
             </div>
           )}
 

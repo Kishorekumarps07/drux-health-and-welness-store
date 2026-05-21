@@ -25,6 +25,7 @@ interface AuthState {
   sendOtp: (email: string, shouldCreateUser?: boolean) => Promise<boolean>;
   verifyOtp: (email: string, token: string, requiredRole?: string) => Promise<boolean>;
   loginWithGoogle: (requiredRole: string) => Promise<void>;
+  clearMismatchError: () => void;
 }
 
 // Guard so initialize() is truly idempotent across React StrictMode double-invocations
@@ -38,6 +39,44 @@ function _clearAuthStorage() {
     localStorage.removeItem("token");
   }
   delete api.defaults.headers.common["Authorization"];
+}
+
+/** Check if the active role matches the requirements of the current login page */
+function _checkRoleMismatch(pathname: string, role: string) {
+  if (pathname === "/login" && role !== "CUSTOMER") {
+    let message = "This account is registered as a Merchant/Vendor. Please use the Merchant Portal.";
+    let link = "/vendor/login";
+    let cta = "Go to Merchant Portal";
+    if (role === "ADMIN") {
+      message = "This account is registered as an Administrator. Please use the Admin Portal.";
+      link = "/admin/login";
+      cta = "Go to Admin Portal";
+    }
+    return { message, link, cta };
+  }
+  if (pathname === "/vendor/login" && role !== "VENDOR") {
+    let message = "This account is registered as a Customer. Please use the Customer Login.";
+    let link = "/login";
+    let cta = "Go to Customer Login";
+    if (role === "ADMIN") {
+      message = "This account is registered as an Administrator. Please use the Admin Portal.";
+      link = "/admin/login";
+      cta = "Go to Admin Portal";
+    }
+    return { message, link, cta };
+  }
+  if (pathname === "/admin/login" && role !== "ADMIN") {
+    let message = "Access Denied. Administrator privileges required.";
+    let link = "/login";
+    let cta = "Go to Customer Login";
+    if (role === "VENDOR") {
+      message = "Access Denied. Merchant privileges cannot access Admin Portal.";
+      link = "/vendor/login";
+      cta = "Go to Merchant Portal";
+    }
+    return { message, link, cta };
+  }
+  return null;
 }
 
 /** Apply a session token to storage and axios defaults. */
@@ -113,6 +152,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   mismatchError: null,
 
+  clearMismatchError: () => set({ mismatchError: null }),
+
   // ── initialize ─────────────────────────────────────────────────────────────
   // Called once from SessionManager on app mount.
   // Bug 3 fix: Register the onAuthStateChange listener FIRST before calling
@@ -142,7 +183,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
         const state = await _buildUserFromSession(session.user, session);
-        set(state);
+
+        // Pre-emptively check for role mismatch on login pages to prevent redirect races
+        if (typeof window !== "undefined") {
+          const pathname = window.location.pathname;
+          const userRole = state.user?.activeRole || "CUSTOMER";
+          const mismatch = _checkRoleMismatch(pathname, userRole);
+
+          if (mismatch) {
+            await supabase.auth.signOut();
+            _clearAuthStorage();
+            set({
+              isAuthenticated: false,
+              user: null,
+              supabaseUser: null,
+              profile: null,
+              accessToken: null,
+              mismatchError: mismatch,
+            });
+            return;
+          }
+        }
+
+        set({ ...state, mismatchError: null });
       }
     });
 
@@ -154,7 +217,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       if (session && session.user) {
         const state = await _buildUserFromSession(session.user, session);
-        set(state);
+
+        // Check for role mismatch on current page during initial session check
+        if (typeof window !== "undefined") {
+          const pathname = window.location.pathname;
+          const userRole = state.user?.activeRole || "CUSTOMER";
+          const mismatch = _checkRoleMismatch(pathname, userRole);
+
+          if (mismatch) {
+            await supabase.auth.signOut();
+            _clearAuthStorage();
+            set({
+              isAuthenticated: false,
+              user: null,
+              supabaseUser: null,
+              profile: null,
+              accessToken: null,
+              mismatchError: mismatch,
+            });
+            return;
+          }
+        }
+
+        set({ ...state, mismatchError: null });
       } else {
         _clearAuthStorage();
         set({ isAuthenticated: false, user: null });
