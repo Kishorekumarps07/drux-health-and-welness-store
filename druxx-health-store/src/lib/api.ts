@@ -30,10 +30,16 @@ function scheduleAuthRedirect() {
   if (_redirectTimeout) return; // already scheduled
   _redirectTimeout = setTimeout(() => {
     _redirectTimeout = null;
-    // Use replaceState so the browser back-button doesn't loop back to the
-    // broken page. The redirect param lets the login page redirect back after login.
     const current = window.location.pathname + window.location.search;
-    window.location.replace(`/login?expired=true&redirect=${encodeURIComponent(current)}`);
+    
+    let loginUrl = "/login";
+    if (window.location.pathname.startsWith("/dashboard/vendor") || window.location.pathname.startsWith("/vendor")) {
+      loginUrl = "/vendor/login";
+    } else if (window.location.pathname.startsWith("/dashboard/admin") || window.location.pathname.startsWith("/admin")) {
+      loginUrl = "/admin/login";
+    }
+
+    window.location.replace(`${loginUrl}?expired=true&redirect=${encodeURIComponent(current)}`);
   }, 100);
 }
 
