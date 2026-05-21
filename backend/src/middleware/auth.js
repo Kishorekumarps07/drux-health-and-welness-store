@@ -54,7 +54,8 @@ const protect = asyncHandler(async (req, res, next) => {
       }
     } catch (err) {
       if (err.message === 'AbortError') {
-        logger.warn('Supabase auth bridge timed out after 3s — treating token as invalid.');
+        logger.warn('Supabase auth bridge timed out after 10s — backend waking up.');
+        return next(new AppError('Authentication server is waking up. Please try again in a few seconds.', 504));
       } else {
         logger.error('Supabase auth bridge failed:', err);
       }
