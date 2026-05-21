@@ -22,7 +22,13 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
     if (!initialized || loading) return;
 
     if (!isAuthenticated) {
-      router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+      if (pathname.startsWith("/dashboard/vendor")) {
+        router.replace(`/vendor/login?redirect=${encodeURIComponent(pathname)}`);
+      } else if (pathname.startsWith("/dashboard/admin")) {
+        router.replace(`/admin/login?redirect=${encodeURIComponent(pathname)}`);
+      } else {
+        router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+      }
       return;
     }
 
