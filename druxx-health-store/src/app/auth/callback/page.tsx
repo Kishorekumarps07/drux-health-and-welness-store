@@ -6,6 +6,8 @@ import { useAuthStore } from "@/store/authStore";
 import { supabase } from "@/lib/supabase";
 import { Loader2, ShieldCheck, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import api from "@/lib/api";
+import { userService } from "@/services/userService";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -30,23 +32,41 @@ export default function AuthCallbackPage() {
         }
 
         const sUser = session.user;
-        const metaRole = sUser.user_metadata?.role ?? "CUSTOMER";
         const requiredRole = searchParams.get("role") || "CUSTOMER";
+        
+        let activeRole = sUser.user_metadata?.role ?? "CUSTOMER";
+        try {
+          if (session.access_token) {
+            api.defaults.headers.common["Authorization"] = `Bearer ${session.access_token}`;
+          }
+          const profileData = await userService.getProfile();
+          if (profileData && profileData.user) {
+            const profile = profileData.user;
+            activeRole = "CUSTOMER";
+            if (profile.roles?.includes("ADMIN")) {
+              activeRole = "ADMIN";
+            } else if (profile.roles?.includes("VENDOR")) {
+              activeRole = "VENDOR";
+            }
+          }
+        } catch (e) {
+          console.error("Failed to fetch backend profile in auth callback, falling back to metadata:", e);
+        }
 
         // Strict role locking
         if (requiredRole && requiredRole !== "ANY") {
-          const isAllowed = metaRole === requiredRole;
+          const isAllowed = activeRole === requiredRole;
 
           if (!isAllowed) {
             await logout();
             setStatus("error");
             
-            let customMessage = `Role mismatch: This account is registered as a ${metaRole}. Please use the correct login portal.`;
-            if (metaRole === "ADMIN") {
+            let customMessage = `Role mismatch: This account is registered as a ${activeRole}. Please use the correct login portal.`;
+            if (activeRole === "ADMIN") {
               customMessage = "This account is registered as an Administrator. Please use the Admin Portal.";
-            } else if (metaRole === "VENDOR") {
+            } else if (activeRole === "VENDOR") {
               customMessage = "This account is registered as a Merchant/Vendor. Please use the Merchant Portal.";
-            } else if (metaRole === "CUSTOMER") {
+            } else if (activeRole === "CUSTOMER") {
               customMessage = "This account is registered as a Customer. Please use the Customer Login.";
             }
             
@@ -58,9 +78,9 @@ export default function AuthCallbackPage() {
         setStatus("success");
         // Redirect to appropriate dashboard after a short delay
         const timer = setTimeout(() => {
-          if (metaRole === "ADMIN") {
+          if (activeRole === "ADMIN") {
             router.push("/dashboard/admin");
-          } else if (metaRole === "VENDOR") {
+          } else if (activeRole === "VENDOR") {
             router.push("/dashboard/vendor");
           } else {
             router.push("/");

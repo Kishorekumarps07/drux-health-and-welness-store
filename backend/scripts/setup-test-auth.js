@@ -17,6 +17,7 @@ const TEST_ACCOUNTS = [
   { email: 'test_vendor@druxx.com', password: 'password123', name: 'Test Vendor', role: 'VENDOR' },
   { email: 'test_vendor2@druxx.com', password: 'password123', name: 'Test Vendor 2', role: 'VENDOR' },
   { email: 'test_customer@druxx.com', password: 'password123', name: 'Test Customer', role: 'CUSTOMER' },
+  { email: 'mrcoachofficial@gmail.com', password: 'password123', name: 'jaffer', role: 'VENDOR' },
 ];
 
 async function main() {

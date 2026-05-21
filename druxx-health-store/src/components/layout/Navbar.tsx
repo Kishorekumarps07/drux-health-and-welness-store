@@ -119,16 +119,14 @@ export function Navbar() {
             {/* Center: Logo */}
             <div className="flex-1 flex justify-center px-2">
               <Link href="/" className="flex items-center group">
-                <div className="relative w-48 h-13">
-                  <Image
-                    src="/logo.png"
-                    alt="Drux Health Store"
-                    fill
-                    className="object-contain"
-                    sizes="176px"
-                    priority
-                  />
-                </div>
+                <Image
+                  src="/druxlogo.png"
+                  alt="Drux Health Store"
+                  width={90}
+                  height={60}
+                  className="h-[52px] w-auto object-contain"
+                  priority
+                />
               </Link>
             </div>
 
@@ -149,28 +147,28 @@ export function Navbar() {
           </div>
 
           {/* Desktop Layout - only for md and up */}
-          <div className="hidden md:flex items-center w-full gap-4 lg:gap-8">
-            {/* Logo */}
+          <div className="hidden md:flex items-center justify-between w-full gap-4 lg:gap-8">
+            {/* Logo (Left side) */}
             <Link href="/" className="flex-shrink-0 flex items-center gap-2 p-1 border border-transparent hover:border-black rounded transition-colors group">
-              <div className="relative w-64 h-16 lg:w-96 lg:h-24">
-                <Image
-                  src="/logo.png"
-                  alt="Drux Health Store"
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 1024px) 256px, 384px"
-                  priority
-                />
-              </div>
+              <Image
+                src="/druxlogo.png"
+                alt="Drux Health Store"
+                width={162}
+                height={108}
+                className="h-[92px] w-auto object-contain"
+                priority
+              />
             </Link>
 
-            {/* Desktop Actions Row */}
-            <div className="flex-1 flex items-center gap-2 lg:gap-4">
-              {/* Search Bar */}
-              <div className="flex-1 max-w-2xl">
+            {/* Search Bar (Centered) */}
+            <div className="flex-1 flex justify-center max-w-2xl mx-auto">
+              <div className="w-full">
                 <SearchBar />
               </div>
+            </div>
 
+            {/* Right Side Actions: Location, Account, Cart */}
+            <div className="flex items-center gap-2 lg:gap-4 shrink-0">
               {/* Location */}
               <button 
                 onClick={() => setShowLocationModal(true)}
@@ -199,7 +197,9 @@ export function Navbar() {
                 <button className="flex items-center gap-1.5 px-3 py-2 border border-transparent hover:border-black rounded transition-colors">
                   <User size={18} className="text-gray-500" />
                   <div className="flex flex-col text-left">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase leading-none">Hello, Sign In</span>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase leading-none">
+                      {mounted && isAuthenticated && user ? `Hello, ${user.name.split(" ")[0]}` : "Hello, Sign In"}
+                    </span>
                     <span className="text-[13px] font-black text-gray-900">Account & Lists</span>
                   </div>
                   <ChevronDown size={14} className="text-gray-400" />
@@ -208,8 +208,6 @@ export function Navbar() {
                   <NavAccountDropdown />
                 </div>
               </div>
-
-
 
               {/* Cart */}
               <Link

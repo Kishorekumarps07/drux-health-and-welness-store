@@ -54,6 +54,7 @@ export default function VendorLoginPage() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    clearMismatchError();
     try {
       await login(email, password, "VENDOR");
       toast.success("Merchant session authorized.");
@@ -74,6 +75,8 @@ export default function VendorLoginPage() {
       return;
     }
     setIsLoading(true);
+    setError("");
+    clearMismatchError();
     try {
       // Don't allow user creation (prevent fake/unregistered merchant accounts)
       await sendOtp(email, false);
@@ -93,12 +96,15 @@ export default function VendorLoginPage() {
       return;
     }
     setIsLoading(true);
+    setError("");
+    clearMismatchError();
     try {
       await verifyOtp(email, otpCode, "VENDOR");
       toast.success("Merchant session authorized via OTP.");
       router.push("/dashboard/vendor");
     } catch (err: any) {
       if (err?.message !== "Role mismatch") {
+        setError(err.message || "Invalid or expired OTP.");
         toast.error(err.message || "Invalid or expired OTP.");
       }
     } finally {
@@ -108,6 +114,8 @@ export default function VendorLoginPage() {
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
+    setError("");
+    clearMismatchError();
     try {
       await loginWithGoogle("VENDOR");
     } catch (err: any) {

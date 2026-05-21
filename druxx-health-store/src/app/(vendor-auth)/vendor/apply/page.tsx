@@ -104,7 +104,7 @@ export default function VendorApplyPage() {
         {/* ── Top Navigation ───────────────────────────── */}
         <header className="bg-white border-b border-gray-100 px-8 h-20 flex items-center justify-between sticky top-0 z-50">
           <Link href="/">
-            <Image src="/logo.png" alt="Drux" width={120} height={40} className="object-contain" />
+            <Image src="/druxlogo.png" alt="Drux" width={96} height={64} className="h-[46px] md:h-[56px] w-auto object-contain" />
           </Link>
           <div className="flex items-center gap-4">
             <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-gray-50 rounded-full border border-gray-100">

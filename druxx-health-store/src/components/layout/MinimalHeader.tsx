@@ -12,15 +12,14 @@ export function MinimalHeader({ type = 'VENDOR' }: MinimalHeaderProps) {
   return (
     <header className="w-full bg-white border-b border-gray-100 py-4 px-6 md:px-12 flex items-center justify-between sticky top-0 z-50">
       <Link href="/" className="flex items-center gap-2 group">
-        <div className="relative w-48 h-12">
-          <Image
-            src="/logo.png"
-            alt="Druxx Health"
-            fill
-            className="object-contain"
-            priority
-          />
-        </div>
+        <Image
+          src="/druxlogo.png"
+          alt="Drux Health Store"
+          width={96}
+          height={64}
+          className="h-[46px] md:h-[64px] w-auto object-contain"
+          priority
+        />
         <div className="h-6 w-px bg-gray-200 mx-2" />
         <span className="font-black text-sm tracking-tighter text-gray-900 group-hover:text-[#A6D608] transition-colors uppercase italic shadow-sm bg-white border border-gray-100 px-2 py-0.5 rounded-lg">
           {type === 'VENDOR' ? 'biz' : 'ops'}

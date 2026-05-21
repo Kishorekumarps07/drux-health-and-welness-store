@@ -93,14 +93,13 @@ export function Footer() {
           {/* Brand column */}
           <div className="lg:col-span-2">
             <Link href="/" className="inline-block mb-4">
-              <div className="relative w-48 h-14 lg:w-64 lg:h-20">
-                <Image
-                  src="/logo.png"
-                  alt="Drux Health Store"
-                  fill
-                  className="object-contain filter drop-shadow-[0_0_1px_rgba(255,255,255,0.6)]"
-                />
-              </div>
+              <Image
+                src="/druxlogo.png"
+                alt="Drux Health Store"
+                width={180}
+                height={120}
+                className="h-[100px] w-auto object-contain brightness-0 invert"
+              />
             </Link>
             <p className="text-sm text-gray-400 mb-5 leading-relaxed max-w-xs">
               Your trusted multi-vendor platform for premium health, wellness, and organic

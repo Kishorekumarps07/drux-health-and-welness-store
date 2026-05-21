@@ -126,11 +126,11 @@ export function BaseAuthForm({
         {logo ? (
           <div className="flex justify-center mb-6">
             <Image 
-              src="/logo.png"
+              src="/druxlogo.png"
               alt="Drux Logo"
-              width={300}
-              height={100}
-              className="h-20 w-auto"
+              width={162}
+              height={108}
+              className="h-24 w-auto object-contain"
             />
           </div>
         ) : (

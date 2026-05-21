@@ -47,6 +47,7 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    clearMismatchError();
     try {
       await login(email, password, "ADMIN");
       toast.success("Administrator session authorized.");
@@ -67,6 +68,8 @@ export default function AdminLoginPage() {
       return;
     }
     setIsLoading(true);
+    setError("");
+    clearMismatchError();
     try {
       // Don't allow user creation (prevent fake/unregistered admin accounts)
       await sendOtp(email, false);
@@ -86,12 +89,15 @@ export default function AdminLoginPage() {
       return;
     }
     setIsLoading(true);
+    setError("");
+    clearMismatchError();
     try {
       await verifyOtp(email, otpCode, "ADMIN");
       toast.success("Administrator session authorized via OTP.");
       router.push("/dashboard/admin");
     } catch (err: any) {
       if (err?.message !== "Role mismatch") {
+        setError(err.message || "Invalid or expired security token.");
         toast.error(err.message || "Invalid or expired security token.");
       }
     } finally {
@@ -101,6 +107,8 @@ export default function AdminLoginPage() {
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
+    setError("");
+    clearMismatchError();
     try {
       await loginWithGoogle("ADMIN");
     } catch (err: any) {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
@@ -15,7 +16,6 @@ import {
   Loader2, 
   ArrowRight, 
   ShieldCheck, 
-  Sparkles, 
   CheckCircle,
   KeyRound
 } from "lucide-react";
@@ -52,6 +52,7 @@ export default function CustomerLoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    clearMismatchError();
 
     try {
       if (mode === "signup") {
@@ -79,6 +80,8 @@ export default function CustomerLoginPage() {
       return;
     }
     setLoading(true);
+    setError("");
+    clearMismatchError();
     try {
       // For customers, allow account creation on OTP signup
       await sendOtp(formData.email, true);
@@ -99,6 +102,7 @@ export default function CustomerLoginPage() {
     }
     setLoading(true);
     setError("");
+    clearMismatchError();
     try {
       await verifyOtp(formData.email, formData.otpCode, "CUSTOMER");
       toast.success("Logged in successfully via OTP!");
@@ -115,6 +119,8 @@ export default function CustomerLoginPage() {
 
   const handleGoogleLogin = async () => {
     setLoading(true);
+    setError("");
+    clearMismatchError();
     try {
       await loginWithGoogle("CUSTOMER");
     } catch (error: any) {
@@ -143,20 +149,18 @@ export default function CustomerLoginPage() {
       </div>
 
       <div className="w-full max-w-md">
-        <div className="flex justify-center mb-6">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-              <span className="text-[#A6D608] font-black text-2xl">D</span>
-            </div>
-            <span className="text-2xl font-black text-gray-900 tracking-tighter uppercase">Druxx</span>
-          </Link>
-        </div>
-
         {/* Auth Card */}
         <div className="w-full bg-white border border-gray-100/80 rounded-[2.5rem] p-8 sm:p-10 shadow-2xl shadow-gray-200/40 animate-in fade-in zoom-in-95 duration-500">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#A6D608]/15 text-[#A6D608] mb-4">
-              <Sparkles size={24} />
+            <div className="flex justify-center mb-6">
+              <Image 
+                src="/druxlogo.png"
+                alt="Drux Logo"
+                width={162}
+                height={108}
+                className="h-24 w-auto object-contain"
+                priority
+              />
             </div>
             <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tighter">
               {mode === "login" ? "Welcome Back" : mode === "signup" ? "Create Account" : "Secure OTP Access"}

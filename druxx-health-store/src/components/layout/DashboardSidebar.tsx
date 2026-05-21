@@ -81,13 +81,14 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
         isAdmin ? "bg-[#0B0F14] border-[#1F2937]" : "bg-white border-gray-100",
         isOpen ? "translate-x-0" : "max-lg:-translate-x-full"
       )}>
-        <div className="p-10 flex items-center justify-center border-b border-gray-50/50">
+        <div className="py-6 px-10 flex items-center justify-center border-b border-[#1F2937]/10 dark:border-gray-50/5">
           <Link href="/" className="flex flex-col items-center group w-full">
-            <div className="w-40 h-16 flex items-center justify-center relative overflow-hidden transition-transform duration-300 group-hover:scale-110">
+            <div className="h-[48px] flex items-center justify-center relative overflow-hidden transition-transform duration-300 group-hover:scale-110">
               <img 
-                src="/logo.png" 
+                src="/druxlogo.png" 
                 alt="Drux Logo" 
-                className="w-full h-full object-contain"
+                className={cn("h-full object-contain", isAdmin && "brightness-0 invert")}
+                style={{ height: "48px" }}
               />
             </div>
           </Link>

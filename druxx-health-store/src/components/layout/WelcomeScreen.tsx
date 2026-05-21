@@ -71,15 +71,15 @@ export function WelcomeScreen() {
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.8 }}
-              className="relative w-48 h-24 mb-12"
+              className="relative w-48 h-32 mb-12"
             >
               <Image 
-                src="/logo.png" 
+                src="/druxlogo.png" 
                 alt="Drux" 
                 fill 
                 className="object-contain" 
                 priority
-                sizes="(max-width: 768px) 192px, 256px"
+                sizes="(max-width: 768px) 192px, 192px"
               />
             </motion.div>
 

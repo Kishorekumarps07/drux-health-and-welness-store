@@ -43,7 +43,8 @@ function _clearAuthStorage() {
 
 /** Check if the active role matches the requirements of the current login page */
 function _checkRoleMismatch(pathname: string, role: string) {
-  if (pathname === "/login" && role !== "CUSTOMER") {
+  const normPathname = pathname.replace(/\/$/, "");
+  if (normPathname === "/login" && role !== "CUSTOMER") {
     let message = "This account is registered as a Merchant/Vendor. Please use the Merchant Portal.";
     let link = "/vendor/login";
     let cta = "Go to Merchant Portal";
@@ -54,7 +55,7 @@ function _checkRoleMismatch(pathname: string, role: string) {
     }
     return { message, link, cta };
   }
-  if (pathname === "/vendor/login" && role !== "VENDOR") {
+  if (normPathname === "/vendor/login" && role !== "VENDOR") {
     let message = "This account is registered as a Customer. Please use the Customer Login.";
     let link = "/login";
     let cta = "Go to Customer Login";
@@ -65,7 +66,7 @@ function _checkRoleMismatch(pathname: string, role: string) {
     }
     return { message, link, cta };
   }
-  if (pathname === "/admin/login" && role !== "ADMIN") {
+  if (normPathname === "/admin/login" && role !== "ADMIN") {
     let message = "Access Denied. Administrator privileges required.";
     let link = "/login";
     let cta = "Go to Customer Login";
@@ -94,7 +95,13 @@ async function _buildUserFromSession(sUser: User, session: any) {
   try {
     const data = await userService.getProfile();
     const profile = data.user;
-    const role = profile.roles?.[profile.roles.length - 1] || "CUSTOMER";
+    let role = "CUSTOMER";
+    if (profile.roles?.includes("ADMIN")) {
+      role = "ADMIN";
+    } else if (profile.roles?.includes("VENDOR")) {
+      role = "VENDOR";
+    }
+
     const vendorStatus = profile.vendor?.approvalStatus;
 
     return {
@@ -273,22 +280,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (error) throw error;
     if (!data.user || !data.session) throw new Error("Login failed. No session returned.");
 
-    // Role check before we sync state
-    if (requiredRole && data.user) {
-      const metaRole = data.user.user_metadata?.role ?? "CUSTOMER";
-      if (metaRole !== requiredRole) {
+    const state = await _buildUserFromSession(data.user, data.session);
+
+    // Role check after building user from backend profile
+    if (requiredRole && state.user) {
+      // Strict role enforcement: determine the primary role (ADMIN > VENDOR > CUSTOMER)
+      let actualRole = "CUSTOMER";
+      if (state.user.roles.includes("ADMIN")) {
+        actualRole = "ADMIN";
+      } else if (state.user.roles.includes("VENDOR")) {
+        actualRole = "VENDOR";
+      }
+
+      if (requiredRole !== actualRole) {
         await supabase.auth.signOut();
         _clearAuthStorage();
 
-        let customMessage = `This account is a ${metaRole}. Please use the correct login portal.`;
+        let customMessage = `This account is a ${actualRole}. Please use the correct login portal.`;
         let customLink = "/login";
         let customCta = "Go to Customer Login";
 
-        if (metaRole === "ADMIN") {
+        if (actualRole === "ADMIN") {
           customMessage = "This account is registered as an Administrator. Please use the Admin Portal.";
           customLink = "/admin/login";
           customCta = "Go to Admin Portal";
-        } else if (metaRole === "VENDOR") {
+        } else if (actualRole === "VENDOR") {
           customMessage = "This account is registered as a Merchant/Vendor. Please use the Merchant Portal.";
           customLink = "/vendor/login";
           customCta = "Go to Merchant Portal";
@@ -310,11 +326,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           },
         });
         throw new Error("Role mismatch");
+      } else {
+        // Force the activeRole to be the required portal role
+        state.user.activeRole = requiredRole;
       }
     }
 
-    // Bug 4 fix: Directly build & set state — never depends on _syncUserRef closure
-    const state = await _buildUserFromSession(data.user, data.session);
     set({ ...state, mismatchError: null });
     return true;
   },
@@ -381,22 +398,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (error) throw error;
     if (!data.user || !data.session) throw new Error("OTP verification failed. No session.");
 
-    // Role check before we sync state
-    if (requiredRole && data.user) {
-      const metaRole = data.user.user_metadata?.role ?? "CUSTOMER";
-      if (metaRole !== requiredRole) {
+    const state = await _buildUserFromSession(data.user, data.session);
+
+    // Role check after building user from backend profile
+    if (requiredRole && state.user) {
+      // Strict role enforcement: determine the primary role (ADMIN > VENDOR > CUSTOMER)
+      let actualRole = "CUSTOMER";
+      if (state.user.roles.includes("ADMIN")) {
+        actualRole = "ADMIN";
+      } else if (state.user.roles.includes("VENDOR")) {
+        actualRole = "VENDOR";
+      }
+
+      if (requiredRole !== actualRole) {
         await supabase.auth.signOut();
         _clearAuthStorage();
 
-        let customMessage = `This account is a ${metaRole}. Please use the correct login portal.`;
+        let customMessage = `This account is a ${actualRole}. Please use the correct login portal.`;
         let customLink = "/login";
         let customCta = "Go to Customer Login";
 
-        if (metaRole === "ADMIN") {
+        if (actualRole === "ADMIN") {
           customMessage = "This account is registered as an Administrator. Please use the Admin Portal.";
           customLink = "/admin/login";
           customCta = "Go to Admin Portal";
-        } else if (metaRole === "VENDOR") {
+        } else if (actualRole === "VENDOR") {
           customMessage = "This account is registered as a Merchant/Vendor. Please use the Merchant Portal.";
           customLink = "/vendor/login";
           customCta = "Go to Merchant Portal";
@@ -418,10 +444,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           },
         });
         throw new Error("Role mismatch");
+      } else {
+        // Force the activeRole to be the required portal role
+        state.user.activeRole = requiredRole;
       }
     }
 
-    const state = await _buildUserFromSession(data.user, data.session);
     set({ ...state, mismatchError: null });
     return true;
   },

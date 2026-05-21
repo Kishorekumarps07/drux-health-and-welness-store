@@ -29,6 +29,12 @@ router.post('/onboard', onboardVendor);
 router.use(restrictTo('VENDOR', 'ADMIN'));
 
 /**
+ * @route   GET /api/v1/vendor/me
+ * @desc    Get current vendor's profile info
+ */
+router.get('/me', getMyVendorProfile);
+
+/**
  * @route   GET /api/v1/vendor/stats
  * @desc    Get stats for vendor dashboard
  */
@@ -58,11 +64,6 @@ router.patch('/orders/:id/status', updateOrderItemStatus);
  */
 router.get('/analytics', getAnalytics);
 
-/**
- * @route   GET /api/v1/vendor/me
- * @desc    Get current vendor's profile info
- */
-router.get('/me', getMyVendorProfile);
 
 /**
  * @route   GET /api/v1/vendor/payments
