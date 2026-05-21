@@ -186,7 +186,7 @@ class OrdersService {
   async getMyOrders(userId, query) {
     const { skip, take, page, limit } = getPagination(query);
 
-    const [orders, total] = await prisma.$transaction([
+    const [orders, total] = await Promise.all([
       prisma.order.findMany({ where: { userId }, skip, take, include: ORDER_INCLUDE, orderBy: { createdAt: 'desc' } }),
       prisma.order.count({ where: { userId } }),
     ]);
@@ -218,7 +218,7 @@ class OrdersService {
     const { skip, take, page, limit } = getPagination(query);
 
     // Fetch orders that contain at least one item from this vendor
-    const [orders, total] = await prisma.$transaction([
+    const [orders, total] = await Promise.all([
       prisma.order.findMany({
         where: {
           items: {
@@ -258,7 +258,7 @@ class OrdersService {
   async getAllOrders(query) {
     const { skip, take, page, limit } = getPagination(query);
 
-    const [orders, total] = await prisma.$transaction([
+    const [orders, total] = await Promise.all([
       prisma.order.findMany({
         skip,
         take,

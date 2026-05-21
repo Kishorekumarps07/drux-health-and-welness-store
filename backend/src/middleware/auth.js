@@ -34,22 +34,36 @@ const protect = asyncHandler(async (req, res, next) => {
     userPayload = null;
   }
 
-  // ── 3. Strategy B: Try Supabase API verification ────────────────────────────
+  // ── 3. Strategy B: Try Supabase API verification (with timeout) ─────────────
   if (!userPayload) {
     try {
-      const { data, error } = await supabase.auth.getUser(token);
+      // Wrap in a 3s timeout via Promise.race — Supabase API can be slow on cold start / high load.
+      // Without this, a single slow Supabase response consumes the client's 15s axios timeout.
+      let supabaseTimeout;
+      const timeoutPromise = new Promise((_, reject) => {
+        supabaseTimeout = setTimeout(() => reject(new Error('AbortError')), 3000);
+      });
+      const getUserPromise = supabase.auth.getUser(token);
+
+      const { data, error } = await Promise.race([getUserPromise, timeoutPromise]);
+      if (supabaseTimeout) clearTimeout(supabaseTimeout);
+
       if (!error && data.user) {
         userPayload = data.user;
         isSupabaseToken = true;
       }
     } catch (err) {
-      logger.error('Supabase auth bridge failed:', err);
+      if (err.message === 'AbortError') {
+        logger.warn('Supabase auth bridge timed out after 3s — treating token as invalid.');
+      } else {
+        logger.error('Supabase auth bridge failed:', err);
+      }
     }
   }
 
   if (!userPayload) {
     let message = 'Invalid or expired token. Please log in again.';
-    if (!supabaseUrl || !supabaseServiceKey) {
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       message = 'Backend is not fully configured (Missing Supabase Keys). Please contact administrator.';
     }
     return next(new AppError(message, 401));

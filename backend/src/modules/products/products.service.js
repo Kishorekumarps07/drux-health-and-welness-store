@@ -58,7 +58,7 @@ class ProductsService {
     else if (sort === 'best-seller') orderBy = { isBestSeller: 'desc' };
     else orderBy = { [sort]: order };
 
-    const [products, total] = await prisma.$transaction([
+    const [products, total] = await Promise.all([
       prisma.product.findMany({ where, skip, take, include: PRODUCT_INCLUDE, orderBy }),
       prisma.product.count({ where }),
     ]);
@@ -202,7 +202,7 @@ class ProductsService {
 
     const { skip, take, page, limit } = getPagination(query);
     
-    const [products, total] = await prisma.$transaction([
+    const [products, total] = await Promise.all([
       prisma.product.findMany({ where: { vendorId: vendor.id }, skip, take, include: PRODUCT_INCLUDE, orderBy: { createdAt: 'desc' } }),
       prisma.product.count({ where: { vendorId: vendor.id } }),
     ]);

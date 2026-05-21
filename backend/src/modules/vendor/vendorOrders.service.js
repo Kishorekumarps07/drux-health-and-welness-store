@@ -25,7 +25,7 @@ class VendorOrdersService {
     const where = { vendorId };
     if (status) where.status = status;
 
-    const [items, total] = await prisma.$transaction([
+    const [items, total] = await Promise.all([
       prisma.orderItem.findMany({
         where,
         skip,

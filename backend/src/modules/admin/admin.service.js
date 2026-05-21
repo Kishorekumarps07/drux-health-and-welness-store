@@ -66,7 +66,7 @@ class AdminService {
       pendingVendors, revenueData, 
       prevRevenueData, currentOrders, prevOrders,
       newUsers, prevUsers
-    ] = await prisma.$transaction([
+    ] = await Promise.all([
       prisma.user.count(),
       prisma.vendor.count(),
       prisma.product.count({ where: { status: 'ACTIVE' } }),
@@ -147,7 +147,7 @@ class AdminService {
   }
 
   async getTopPerformance() {
-    const [topVendors, topProducts] = await prisma.$transaction([
+    const [topVendors, topProducts] = await Promise.all([
       prisma.vendor.findMany({
         take: 5,
         orderBy: { totalSales: 'desc' },
@@ -164,7 +164,7 @@ class AdminService {
   }
 
   async getActivityFeed() {
-    const [recentOrders, newUsers, newVendors] = await prisma.$transaction([
+    const [recentOrders, newUsers, newVendors] = await Promise.all([
       prisma.order.findMany({
         take: 5,
         orderBy: { createdAt: 'desc' },
@@ -196,7 +196,7 @@ class AdminService {
   async listAllOrders({ page = 1, limit = 20, status }) {
     const skip = (page - 1) * limit;
     const where = status ? { status } : {};
-    const [orders, total] = await prisma.$transaction([
+    const [orders, total] = await Promise.all([
       prisma.order.findMany({
         where, skip, take: +limit,
         orderBy: { createdAt: 'desc' },
@@ -230,7 +230,7 @@ class AdminService {
       }),
     };
 
-    const [users, total] = await prisma.$transaction([
+    const [users, total] = await Promise.all([
       prisma.user.findMany({
         where, skip, take: +limit,
         orderBy: { createdAt: 'desc' },

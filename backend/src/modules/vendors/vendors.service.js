@@ -66,7 +66,7 @@ class VendorsService {
       throw new AppError('Your vendor profile is not approved or is suspended.', 403);
     }
 
-    const [totalProducts, totalOrders, revenueData] = await prisma.$transaction([
+    const [totalProducts, totalOrders, revenueData] = await Promise.all([
       prisma.product.count({ where: { vendorId: vendor.id } }),
       prisma.orderItem.count({ where: { vendorId: vendor.id } }),
       prisma.orderItem.aggregate({
@@ -114,7 +114,7 @@ class VendorsService {
 
     const orderBy = query.orderBy === 'latest' ? { createdAt: 'desc' } : { rating: 'desc' };
 
-    const [vendors, total] = await prisma.$transaction([
+    const [vendors, total] = await Promise.all([
       prisma.vendor.findMany({ where, skip, take, select: VENDOR_SELECT, orderBy }),
       prisma.vendor.count({ where }),
     ]);

@@ -44,6 +44,19 @@ export function BaseAuthForm({
 
   const { login, register, mismatchError } = useAuthStore();
 
+  /** Map Supabase/backend error messages to friendly strings. */
+  const getFriendlyError = (err: any): string => {
+    const msg: string = err?.message || err?.error_description || "";
+    if (msg.includes("Invalid login credentials")) return "Incorrect email or password. Please try again.";
+    if (msg.includes("Email not confirmed")) return "Please verify your email address before logging in. Check your inbox.";
+    if (msg.includes("Too many requests")) return "Too many attempts. Please wait a few minutes and try again.";
+    if (msg.includes("User not found")) return "No account found with this email address.";
+    if (msg.includes("Role mismatch")) return ""; // shown via mismatchError UI, not generic error
+    if (msg.includes("network") || msg.includes("fetch") || msg.includes("Network")) return "Connection error. Please check your internet and try again.";
+    if (msg) return msg; // Show the actual message if it's informative
+    return "Something went wrong. Please try again.";
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -53,8 +66,9 @@ export function BaseAuthForm({
       if (ok && onSuccess) {
         onSuccess(useAuthStore.getState().user);
       }
-    } catch (err) {
-      setError("Invalid credentials");
+    } catch (err: any) {
+      const friendly = getFriendlyError(err);
+      if (friendly) setError(friendly);
     } finally {
       setIsLoading(false);
     }
@@ -64,16 +78,35 @@ export function BaseAuthForm({
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      setIsLoading(false);
+      return;
+    }
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       setIsLoading(false);
       return;
     }
-    const ok = await register(name, email, password);
-    if (ok && onSuccess) {
-      onSuccess(useAuthStore.getState().user);
+    try {
+      const ok = await register(name, email, password);
+      if (ok && onSuccess) {
+        onSuccess(useAuthStore.getState().user);
+      }
+    } catch (err: any) {
+      const msg: string = err?.message || "";
+      if (msg.includes("User already registered") || msg.includes("already exists")) {
+        setError("An account with this email already exists. Please log in instead.");
+      } else if (msg.includes("Password should be") || msg.includes("weak")) {
+        setError("Password is too weak. Use at least 6 characters with a mix of letters and numbers.");
+      } else if (msg.includes("Invalid email")) {
+        setError("Please enter a valid email address.");
+      } else {
+        setError(msg || "Registration failed. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleGoogleSignIn = async () => {
@@ -159,10 +192,16 @@ export function BaseAuthForm({
                 </div>
               </div>
 
-              {mismatchError && (
+              {error && (
                 <div className="bg-red-50 border border-red-100 rounded-2xl p-4 text-center animate-in slide-in-from-top-2 duration-300">
-                  <p className="text-red-600 text-xs font-bold mb-3">{mismatchError.message}</p>
-                  <Button variant="outline" className="w-full rounded-xl h-10 border-red-200 text-red-600 hover:bg-red-50 font-black text-[10px] uppercase" onClick={() => (window.location.href = mismatchError.link)}>
+                  <p className="text-red-600 text-xs font-bold">{error}</p>
+                </div>
+              )}
+
+              {mismatchError && (
+                <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 text-center animate-in slide-in-from-top-2 duration-300">
+                  <p className="text-orange-700 text-xs font-bold mb-3">{mismatchError.message}</p>
+                  <Button variant="outline" className="w-full rounded-xl h-10 border-orange-200 text-orange-700 hover:bg-orange-50 font-black text-[10px] uppercase" onClick={() => (window.location.href = mismatchError.link)}>
                     {mismatchError.cta}
                   </Button>
                 </div>
@@ -202,7 +241,11 @@ export function BaseAuthForm({
                   <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="h-14 rounded-2xl border-gray-100 bg-gray-50/30" required />
                 </div>
               </div>
-              {error && <p className="text-red-500 text-[10px] font-black uppercase tracking-wider text-center">{error}</p>}
+              {error && (
+                <div className="bg-red-50 border border-red-100 rounded-2xl p-4 text-center animate-in slide-in-from-top-2 duration-300">
+                  <p className="text-red-600 text-xs font-bold">{error}</p>
+                </div>
+              )}
               <Button type="submit" disabled={isLoading} className="w-full h-16 rounded-[1.25rem] bg-[#1E1E1E] text-[#A6D608] hover:bg-black font-black text-sm transition-all mt-4">
                 {isLoading ? "Creating Account..." : "Complete Registration"}
               </Button>

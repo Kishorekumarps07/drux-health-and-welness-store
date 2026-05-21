@@ -39,7 +39,7 @@ export default function AdminDashboardLayout({
     <ProtectedRoute requiredRole="ADMIN">
       <div 
         className="h-screen overflow-hidden bg-[#0B0F14] text-[#E5E7EB] flex transform-gpu font-sans selection:bg-[#10B981]/30 selection:text-white"
-        style={{ fontFamily: 'var(--font-inter), sans-serif' }}
+        style={{ fontFamily: 'var(--font-lexend), sans-serif' }}
       >
         <DashboardSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         <AdminSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />

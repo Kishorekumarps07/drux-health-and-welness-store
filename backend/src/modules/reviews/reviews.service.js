@@ -34,7 +34,7 @@ class ReviewsService {
 
   async listForProduct(productId, { page = 1, limit = 10 }) {
     const skip = (page - 1) * limit;
-    const [reviews, total] = await prisma.$transaction([
+    const [reviews, total] = await Promise.all([
       prisma.review.findMany({
         where: { productId },
         skip, take: +limit,
