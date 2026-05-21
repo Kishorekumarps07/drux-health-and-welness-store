@@ -6,7 +6,7 @@ const { nodeEnv } = require('../config/env');
 // Standard global API rate limiter (used in app.js)
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
-  max: nodeEnv === 'production' ? 200 : 2000, // Increase to 2000 for development
+  max: nodeEnv === 'production' ? 1000 : 2000, // Increase to 1000 for prod (SPAs make many requests)
   standardHeaders: true,
   legacyHeaders: false,
   store: (nodeEnv === 'production' && process.env.REDIS_URL) ? new RedisStore({

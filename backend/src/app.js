@@ -18,6 +18,9 @@ const { redisClient } = require('./config/redis');
 
 const app = express();
 
+// Trust reverse proxy (Render/Heroku/Vercel) so rate limiters use the real client IP
+app.set('trust proxy', 1);
+
 // ── Performance ─────────────────────────────────────────────────────────────
 app.use(compression());
 
