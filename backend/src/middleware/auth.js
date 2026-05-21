@@ -37,11 +37,11 @@ const protect = asyncHandler(async (req, res, next) => {
   // ── 3. Strategy B: Try Supabase API verification (with timeout) ─────────────
   if (!userPayload) {
     try {
-      // Wrap in a 3s timeout via Promise.race — Supabase API can be slow on cold start / high load.
+      // Wrap in a 10s timeout via Promise.race — Supabase API can be slow on cold start / high load.
       // Without this, a single slow Supabase response consumes the client's 15s axios timeout.
       let supabaseTimeout;
       const timeoutPromise = new Promise((_, reject) => {
-        supabaseTimeout = setTimeout(() => reject(new Error('AbortError')), 3000);
+        supabaseTimeout = setTimeout(() => reject(new Error('AbortError')), 10000);
       });
       const getUserPromise = supabase.auth.getUser(token);
 
