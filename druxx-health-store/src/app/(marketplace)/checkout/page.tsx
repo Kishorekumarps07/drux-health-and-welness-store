@@ -26,6 +26,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useRazorpay } from "react-razorpay";
 
 const STEPS = [
@@ -180,19 +181,23 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-[#F3F4F6] pb-24 font-sans text-gray-900">
-      {/* Amazon-style Minimal Header */}
-      <header className="bg-[#131921] py-3 px-6 sticky top-0 z-50">
+      {/* Minimal Header */}
+      <header className="bg-white border-b border-gray-100 py-3 px-6 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="bg-[#A6D608] p-1.5 rounded-lg">
-              <span className="font-black text-black text-xl leading-none">D</span>
-            </div>
-            <span className="font-black text-white text-xl tracking-tighter uppercase">Druxx</span>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/druxlogo.png"
+              alt="Drux Health Store"
+              width={90}
+              height={60}
+              className="h-10 w-auto object-contain"
+              priority
+            />
           </Link>
-          <h1 className="text-white font-medium text-xl hidden md:block">Checkout</h1>
-          <div className="flex items-center gap-2 text-gray-400">
+          <h1 className="text-gray-900 font-bold text-xl hidden md:block">Checkout</h1>
+          <div className="flex items-center gap-2 text-gray-600">
             <Lock size={18} className="text-[#A6D608]" />
-            <span className="text-sm font-medium">Secure Checkout</span>
+            <span className="text-sm font-semibold">Secure Checkout</span>
           </div>
         </div>
       </header>
