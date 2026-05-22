@@ -205,9 +205,9 @@ export default function CheckoutPage() {
             </Link>
           </div>
           
-          <div className="flex items-center gap-2 text-gray-500 font-semibold text-sm">
-            <Lock size={16} className="text-[#2874F0]" />
-            <span>100% Safe & Secure Checkout</span>
+          <div className="flex items-center gap-1.5 text-gray-500 font-semibold text-[10px] sm:text-xs md:text-sm text-right justify-end shrink-0 max-w-[120px] sm:max-w-none">
+            <Lock className="text-[#2874F0] w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="leading-tight">100% Safe & Secure <span className="hidden sm:inline">Checkout</span></span>
           </div>
         </div>
       </header>
