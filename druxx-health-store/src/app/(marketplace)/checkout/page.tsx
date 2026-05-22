@@ -114,7 +114,7 @@ export default function CheckoutPage() {
         });
         toast.success("Order placed successfully!");
         clearCart();
-        router.push(`/dashboard/orders/${order.id}`);
+        router.push(`/dashboard/orders/${order.id}?success=true`);
       } else {
         const { razorpayOrder } = await orderService.createPaymentIntent();
 
@@ -135,7 +135,7 @@ export default function CheckoutPage() {
               });
               toast.success("Payment successful! Order confirmed.");
               clearCart();
-              router.push(`/dashboard/orders/${order.id}`);
+              router.push(`/dashboard/orders/${order.id}?success=true`);
             } catch (err) {
               toast.error("Payment verification failed. Please contact support.");
             }

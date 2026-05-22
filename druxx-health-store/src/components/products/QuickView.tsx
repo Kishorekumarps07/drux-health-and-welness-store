@@ -7,6 +7,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/store/cartStore";
+import { useWishlistStore } from "@/store/wishlistStore";
 import { Product } from "@/types";
 import { useState } from "react";
 
@@ -18,12 +19,24 @@ interface QuickViewProps {
 
 export function QuickView({ product, open, onOpenChange }: QuickViewProps) {
   const addItem = useCartStore((s) => s.addItem);
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
   const [addedToCart, setAddedToCart] = useState(false);
+  const isWishlisted = isInWishlist(product.id);
 
   const handleAddToCart = () => {
     addItem(product);
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
+  };
+
+  const toggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isWishlisted) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+    }
   };
 
   const deliveryDate = new Date();
@@ -174,8 +187,18 @@ export function QuickView({ product, open, onOpenChange }: QuickViewProps) {
                     </span>
                   )}
                 </Button>
-                <Button variant="outline" className="w-14 h-14 rounded-2xl border-gray-100 hover:border-red-500 hover:text-red-500 text-gray-400 group transition-all duration-300">
-                  <Heart size={20} strokeWidth={2.5} className="group-hover:fill-red-500 transition-all" />
+                <Button 
+                  onClick={toggleWishlist}
+                  variant="outline" 
+                  className={`w-14 h-14 rounded-2xl border-gray-100 transition-all duration-300 ${
+                    isWishlisted ? "text-red-500 border-red-500 bg-red-50" : "text-gray-400 hover:border-red-500 hover:text-red-500"
+                  }`}
+                >
+                  <Heart 
+                    size={20} 
+                    strokeWidth={2.5} 
+                    className={`transition-all ${isWishlisted ? "fill-red-500" : "group-hover:fill-red-500"}`} 
+                  />
                 </Button>
               </div>
               

@@ -41,13 +41,13 @@ export function NavAccountDropdown() {
         <div className="py-2">
           <p className="px-4 py-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">Your Account</p>
           <div className="space-y-0.5">
-            <Link href="/dashboard" className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-[#A6D608]/5 hover:text-[#A6D608] transition-all group">
+            <Link href="/dashboard/profile" className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-[#A6D608]/5 hover:text-[#A6D608] transition-all group">
                Profile <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all font-bold" />
             </Link>
             <Link href="/dashboard/orders" className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-[#A6D608]/5 hover:text-[#A6D608] transition-all group">
                Orders <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all font-bold" />
             </Link>
-            <Link href="/dashboard" className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-[#A6D608]/5 hover:text-[#A6D608] transition-all group">
+            <Link href="/dashboard/wishlist" className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-[#A6D608]/5 hover:text-[#A6D608] transition-all group">
                Wishlist <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all font-bold" />
             </Link>
           </div>
@@ -55,10 +55,10 @@ export function NavAccountDropdown() {
         <div className="py-2">
           <p className="px-4 py-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">Settings</p>
           <div className="space-y-0.5">
-            <Link href="/dashboard" className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-[#A6D608]/5 hover:text-[#A6D608] transition-all group">
+            <Link href="/dashboard/security" className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-[#A6D608]/5 hover:text-[#A6D608] transition-all group">
                Security <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all font-bold" />
             </Link>
-            <Link href="/dashboard" className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-[#A6D608]/5 hover:text-[#A6D608] transition-all group">
+            <Link href="/dashboard/addresses" className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-[#A6D608]/5 hover:text-[#A6D608] transition-all group">
                Addresses <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all font-bold" />
             </Link>
           </div>

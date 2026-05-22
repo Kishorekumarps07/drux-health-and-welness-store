@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
+import { useWishlistStore } from "@/store/wishlistStore";
 import { useRouter, usePathname } from "next/navigation";
 import { Product } from "@/types";
 import { QuickView } from "./QuickView";
@@ -42,9 +43,16 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const pathname = usePathname();
   const { addItem } = useCartStore();
   const { isAuthenticated } = useAuthStore();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
   
   const [isHovered, setIsHovered] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isWishlisted = mounted ? isInWishlist(product.id) : false;
   const [cartStatus, setCartStatus] = useState<"idle" | "loading" | "success">("idle");
   const [quickViewOpen, setQuickViewOpen] = useState(false);
 
@@ -72,7 +80,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
+    if (isWishlisted) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+    }
   };
 
   const openQuickView = (e: React.MouseEvent) => {
@@ -99,7 +111,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <Link href={`/products/${product.slug || product.id}`} className="absolute inset-0 z-0" />
 
         {/* Image Container */}
-        <div className="relative aspect-[4/5] rounded-xl sm:rounded-xl bg-gray-50 overflow-hidden mb-4 sm:mb-4 flex items-center justify-center">
+        <div className="relative z-1 pointer-events-none aspect-[4/5] rounded-xl sm:rounded-xl bg-gray-50 overflow-hidden mb-4 sm:mb-4 flex items-center justify-center">
           <motion.div 
             animate={{ scale: isHovered ? 1.05 : 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
@@ -149,7 +161,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <button
             onClick={toggleWishlist}
             className={cn(
-              "absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all duration-300",
+              "absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all duration-300 pointer-events-auto",
               isWishlisted ? "bg-red-50 text-red-500" : "bg-white/80 backdrop-blur-sm text-gray-400 hover:text-red-500"
             )}
           >
@@ -171,7 +183,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
                 <Button
                   onClick={openQuickView}
                   variant="secondary"
-                  className="bg-white/90 backdrop-blur-md text-[#1E1E1E] font-black text-[10px] uppercase tracking-widest rounded-full px-5 py-2 h-9 shadow-lg hover:bg-[#A6D608] hover:text-[#1E1E1E] border-none"
+                  className="bg-white/90 backdrop-blur-md text-[#1E1E1E] font-black text-[10px] uppercase tracking-widest rounded-full px-5 py-2 h-9 shadow-lg hover:bg-[#A6D608] hover:text-[#1E1E1E] border-none pointer-events-auto"
                 >
                   <Eye size={14} className="mr-2" /> Quick View
                 </Button>

@@ -7,7 +7,7 @@ export const userService = {
   },
 
   async updateProfile(data: any) {
-    const response = await api.patch("/users/profile", data);
+    const response = await api.put("/users/profile", data);
     return response.data.data;
   },
 
@@ -41,7 +41,7 @@ export const userService = {
   },
 
   async updateAddress(id: string, data: any) {
-    const response = await api.patch(`/users/addresses/${id}`, data);
+    const response = await api.put(`/users/addresses/${id}`, data);
     if (response.data.status === "success") {
        return response.data.data.address;
     }

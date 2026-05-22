@@ -59,7 +59,7 @@ export default function DashboardPage() {
       title: "Addresses",
       description: "Edit delivery addresses for orders",
       icon: <MapPin size={24} />,
-      link: "/dashboard", // Placeholder for now
+      link: "/dashboard/addresses",
       color: "text-green-500",
       bgColor: "bg-green-50"
     },
@@ -67,7 +67,7 @@ export default function DashboardPage() {
       title: "Login & Security",
       description: "Edit login, name, and mobile number",
       icon: <ShieldCheck size={24} />,
-      link: "/dashboard", // Placeholder
+      link: "/dashboard/security",
       color: "text-orange-500",
       bgColor: "bg-orange-50"
     },
@@ -75,7 +75,7 @@ export default function DashboardPage() {
       title: "Account Settings",
       description: "Manage your profile and notification preferences",
       icon: <Settings size={24} />,
-      link: "/dashboard", // Placeholder
+      link: "/dashboard/profile",
       color: "text-purple-500",
       bgColor: "bg-purple-50"
     },
@@ -83,7 +83,7 @@ export default function DashboardPage() {
       title: "Wishlist",
       description: "Items you've saved for later",
       icon: <Heart size={24} />,
-      link: "/dashboard", // Placeholder
+      link: "/dashboard/wishlist",
       color: "text-red-500",
       bgColor: "bg-red-50"
     },
@@ -194,7 +194,7 @@ export default function DashboardPage() {
               recentOrders.map((order) => (
                 <Link 
                   key={order.id} 
-                  href={`/dashboard/orders`} 
+                  href={`/dashboard/orders/${order.id}`} 
                   className="p-6 flex items-center justify-between hover:bg-gray-50/50 transition-colors group"
                 >
                   <div className="flex items-center gap-4">
