@@ -180,350 +180,459 @@ export default function CheckoutPage() {
   const selectedAddress = addresses.find(a => a.id === addressId);
 
   return (
-    <div className="min-h-screen bg-[#F3F4F6] pb-24 font-sans text-gray-900">
-      {/* Minimal Header */}
-      <header className="bg-white border-b border-gray-100 py-3 px-6 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center">
-            <Image
-              src="/druxlogo.png"
-              alt="Drux Health Store"
-              width={90}
-              height={60}
-              className="h-10 w-auto object-contain"
-              priority
-            />
-          </Link>
-          <h1 className="text-gray-900 font-bold text-xl hidden md:block">Checkout</h1>
-          <div className="flex items-center gap-2 text-gray-600">
-            <Lock size={18} className="text-[#A6D608]" />
-            <span className="text-sm font-semibold">Secure Checkout</span>
+    <div className="min-h-screen bg-[#F1F3F6] pb-24 font-sans text-gray-900">
+      {/* Minimal Flipkart/Amazon Style Header */}
+      <header className="bg-white border-b border-gray-200 py-3 px-6 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/druxlogo.png"
+                alt="Drux Health Store"
+                width={120}
+                height={40}
+                className="h-10 w-auto object-contain"
+                priority
+              />
+            </Link>
+          </div>
+          
+          <div className="flex items-center gap-2 text-gray-500 font-semibold text-sm">
+            <Lock size={16} className="text-[#2874F0]" />
+            <span>100% Safe & Secure Checkout</span>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 mt-8">
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
+      <main className="max-w-6xl mx-auto px-4 mt-6">
+        <div className="flex flex-col lg:flex-row gap-4 items-start">
           
-          {/* Main Checkout Sections (Left) */}
-          <div className="flex-1 w-full space-y-4">
+          {/* Left Column: Flipkart-Style Accordion (2/3 width) */}
+          <div className="flex-1 w-full space-y-3">
             
-            {/* 1. Delivery Address Section */}
-            <div className="bg-white rounded-md border border-gray-200 overflow-hidden shadow-sm">
-              <div className={cn(
-                "p-4 flex items-center justify-between border-b transition-colors",
-                currentStep === 1 ? "bg-gray-50" : "bg-white"
-              )}>
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-sm bg-black text-[#A6D608] text-sm font-black">1</span>
-                  <h3 className="font-bold text-lg uppercase tracking-tight">Delivery Address</h3>
+            {/* STEP 1: LOGIN DETAILS */}
+            <div className="bg-white rounded-sm border border-gray-200 shadow-sm">
+              {currentStep === 1 ? (
+                <div>
+                  <div className="bg-[#2874F0] text-white px-6 py-4 flex items-center gap-4">
+                    <span className="bg-white text-[#2874F0] font-bold w-5 h-5 flex items-center justify-center text-xs rounded-sm">1</span>
+                    <h3 className="font-bold uppercase text-sm tracking-wider">Login or Signup</h3>
+                  </div>
+                  <div className="p-6 bg-white">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800">Logged in as <span className="font-bold">{user?.name}</span></p>
+                        <p className="text-xs text-gray-500 mt-1">{user?.email}</p>
+                      </div>
+                      <Button
+                        onClick={() => setCurrentStep(2)}
+                        className="bg-[#FB641B] hover:bg-[#e05310] text-white font-bold px-8 h-11 rounded-sm text-xs uppercase tracking-wider"
+                      >
+                        Continue Checkout
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                {currentStep > 1 && (
-                  <button 
+              ) : (
+                <div className="px-6 py-4 flex items-center justify-between bg-white">
+                  <div className="flex items-center gap-4">
+                    <span className="bg-gray-100 text-gray-500 font-bold w-5 h-5 flex items-center justify-center text-xs rounded-sm">1</span>
+                    <div>
+                      <span className="font-bold uppercase text-[11px] text-gray-400 block tracking-wider">Login Details</span>
+                      <span className="text-sm font-semibold text-gray-800">{user?.name} <span className="text-gray-400 font-normal">| {user?.email}</span></span>
+                    </div>
+                  </div>
+                  <button
                     onClick={() => setCurrentStep(1)}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-bold uppercase tracking-wider"
+                    className="text-[#2874F0] font-bold text-xs uppercase border border-gray-200 px-4 py-2 rounded-sm hover:bg-gray-50 transition-colors"
                   >
                     Change
                   </button>
-                )}
-              </div>
-
-              <AnimatePresence mode="wait">
-                {currentStep === 1 ? (
-                  <motion.div 
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="p-6"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                      {addresses.map((addr) => (
-                        <div 
-                          key={addr.id}
-                          onClick={() => setAddressId(addr.id)}
-                          className={cn(
-                            "relative p-5 rounded-xl border-2 cursor-pointer transition-all group",
-                            addressId === addr.id 
-                              ? "border-[#A6D608] bg-[#A6D608]/5" 
-                              : "border-gray-100 hover:border-gray-200"
-                          )}
-                        >
-                          <div className="flex justify-between items-start mb-3">
-                            <Badge className={cn(
-                              "text-[9px] font-black uppercase px-2 py-0.5 rounded-full border-none",
-                              addressId === addr.id ? "bg-[#A6D608] text-black" : "bg-gray-100 text-gray-500"
-                            )}>
-                              {addr.label}
-                            </Badge>
-                            {addressId === addr.id && <CheckCircle2 size={18} className="text-[#A6D608]" />}
-                          </div>
-                          <p className="font-black text-gray-900 mb-1">{addr.fullName}</p>
-                          <p className="text-sm text-gray-500 font-medium leading-relaxed">
-                            {addr.street || addr.line1}, {addr.city}, {addr.state} - {addr.pincode}
-                          </p>
-                          <p className="text-sm text-gray-400 mt-2 font-bold italic">Phone: {addr.phone}</p>
-                          
-                          {addressId === addr.id && (
-                            <Button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setCurrentStep(2);
-                              }}
-                              className="w-full mt-4 bg-black text-[#A6D608] rounded-full font-black uppercase text-[10px] tracking-widest h-10 shadow-lg shadow-black/10"
-                            >
-                              Deliver to this address
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                      
-                      {/* Add New Address Card */}
-                      <button 
-                        onClick={() => setShowAddressForm(true)}
-                        className="p-5 rounded-xl border-2 border-dashed border-gray-200 hover:border-[#A6D608] hover:bg-[#A6D608]/5 transition-all flex flex-col items-center justify-center gap-3 text-gray-400 hover:text-[#A6D608] group"
-                      >
-                        <div className="w-10 h-10 rounded-full bg-gray-50 group-hover:bg-[#A6D608]/20 flex items-center justify-center">
-                          <Plus size={20} />
-                        </div>
-                        <span className="font-black uppercase text-[10px] tracking-widest">Add New Address</span>
-                      </button>
-                    </div>
-
-                    {showAddressForm && (
-                      <form onSubmit={handleAddAddress} className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 mt-4 space-y-4">
-                         <div className="grid grid-cols-2 gap-4">
-                            <Input placeholder="Full Name" value={newAddress.fullName} onChange={e => setNewAddress({...newAddress, fullName: e.target.value})} required className="h-12 rounded-xl" />
-                            <Input placeholder="Phone Number" value={newAddress.phone} onChange={e => setNewAddress({...newAddress, phone: e.target.value})} required className="h-12 rounded-xl" />
-                         </div>
-                         <Input placeholder="Street Address / Landmark" value={newAddress.line1} onChange={e => setNewAddress({...newAddress, line1: e.target.value})} required className="h-12 rounded-xl" />
-                         <div className="grid grid-cols-3 gap-4">
-                            <Input placeholder="City" value={newAddress.city} onChange={e => setNewAddress({...newAddress, city: e.target.value})} required className="h-12 rounded-xl" />
-                            <Input placeholder="State" value={newAddress.state} onChange={e => setNewAddress({...newAddress, state: e.target.value})} required className="h-12 rounded-xl" />
-                            <Input placeholder="Pincode" value={newAddress.pincode} onChange={e => setNewAddress({...newAddress, pincode: e.target.value})} required className="h-12 rounded-xl" />
-                         </div>
-                         <div className="flex gap-4">
-                            <Button type="submit" className="bg-[#A6D608] text-black hover:bg-[#95C207] font-black uppercase tracking-widest text-xs px-8 h-12 rounded-xl">Save Address</Button>
-                            <Button type="button" variant="ghost" onClick={() => setShowAddressForm(false)} className="font-black uppercase tracking-widest text-xs text-gray-400 h-12">Cancel</Button>
-                         </div>
-                      </form>
-                    )}
-                  </motion.div>
-                ) : (
-                  <div className="p-4 flex gap-4 text-sm text-gray-600 font-medium">
-                    <p className="font-bold text-black">{selectedAddress?.fullName},</p>
-                    <p className="truncate max-w-md">{selectedAddress?.street}, {selectedAddress?.city}, {selectedAddress?.pincode}</p>
-                  </div>
-                )}
-              </AnimatePresence>
+                </div>
+              )}
             </div>
 
-            {/* 2. Payment Method Section */}
-            <div className="bg-white rounded-md border border-gray-200 overflow-hidden shadow-sm">
-              <div className={cn(
-                "p-4 flex items-center justify-between border-b transition-colors",
-                currentStep === 2 ? "bg-gray-50" : "bg-white"
-              )}>
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-sm bg-black text-[#A6D608] text-sm font-black">2</span>
-                  <h3 className="font-bold text-lg uppercase tracking-tight">Payment Method</h3>
-                </div>
-                {currentStep > 2 && (
-                  <button 
-                    onClick={() => setCurrentStep(2)}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-bold uppercase tracking-wider"
-                  >
-                    Change
-                  </button>
-                )}
-              </div>
+            {/* STEP 2: DELIVERY ADDRESS */}
+            <div className="bg-white rounded-sm border border-gray-200 shadow-sm">
+              {currentStep === 2 ? (
+                <div>
+                  <div className="bg-[#2874F0] text-white px-6 py-4 flex items-center gap-4">
+                    <span className="bg-white text-[#2874F0] font-bold w-5 h-5 flex items-center justify-center text-xs rounded-sm">2</span>
+                    <h3 className="font-bold uppercase text-sm tracking-wider">Delivery Address</h3>
+                  </div>
+                  
+                  <div className="p-6 bg-white space-y-4">
+                    {isLoadingAddresses ? (
+                      <div className="text-center py-6 text-sm text-gray-500 font-medium">Loading your saved addresses...</div>
+                    ) : (
+                      <div className="space-y-4">
+                        {addresses.map((addr) => (
+                          <div 
+                            key={addr.id}
+                            onClick={() => setAddressId(addr.id)}
+                            className={cn(
+                              "relative p-4 rounded-sm border cursor-pointer transition-all flex items-start gap-4",
+                              addressId === addr.id 
+                                ? "border-gray-200 bg-gray-50/50" 
+                                : "border-gray-100 hover:border-gray-200"
+                            )}
+                          >
+                            <div className="mt-1">
+                              <div className={cn(
+                                "w-4 h-4 rounded-full border flex items-center justify-center",
+                                addressId === addr.id ? "border-[#2874F0]" : "border-gray-300"
+                              )}>
+                                {addressId === addr.id && <div className="w-2 h-2 rounded-full bg-[#2874F0]" />}
+                              </div>
+                            </div>
+                            
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 flex-wrap">
+                                <span className="font-bold text-sm text-gray-900">{addr.fullName}</span>
+                                <Badge className="bg-gray-100 text-gray-600 text-[10px] font-bold uppercase rounded-sm border-none px-2 py-0.5">
+                                  {addr.label}
+                                </Badge>
+                                <span className="font-bold text-sm text-gray-900">{addr.phone}</span>
+                              </div>
+                              
+                              <p className="text-xs text-gray-600 mt-2 leading-relaxed">
+                                {addr.street || addr.line1}, {addr.city}, {addr.state} - <span className="font-semibold">{addr.pincode}</span>
+                              </p>
 
-              <AnimatePresence>
-                {currentStep === 2 && (
-                  <motion.div 
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="p-6 space-y-4"
-                  >
+                              {addressId === addr.id && (
+                                <div className="mt-4">
+                                  <Button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setCurrentStep(3);
+                                    }}
+                                    className="bg-[#FB641B] hover:bg-[#e05310] text-white font-bold px-8 h-11 rounded-sm text-xs uppercase tracking-wider shadow-md"
+                                  >
+                                    Deliver Here
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+
+                        {/* Add New Address Accordion Tab */}
+                        {!showAddressForm ? (
+                          <button 
+                            onClick={() => setShowAddressForm(true)}
+                            className="w-full p-4 border border-dashed border-gray-300 hover:border-[#2874F0] hover:bg-blue-50/20 rounded-sm flex items-center justify-center gap-2 text-[#2874F0] font-bold text-xs uppercase transition-colors"
+                          >
+                            <Plus size={16} />
+                            <span>Add a New Address</span>
+                          </button>
+                        ) : (
+                          <form onSubmit={handleAddAddress} className="bg-gray-50/50 p-5 rounded-sm border border-gray-200 mt-4 space-y-4">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Add a New Address</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <Input 
+                                placeholder="Full Name" 
+                                value={newAddress.fullName} 
+                                onChange={e => setNewAddress({...newAddress, fullName: e.target.value})} 
+                                required 
+                                className="h-11 rounded-sm border-gray-300 focus:border-[#2874F0] text-sm" 
+                              />
+                              <Input 
+                                placeholder="10-digit Phone Number" 
+                                value={newAddress.phone} 
+                                onChange={e => setNewAddress({...newAddress, phone: e.target.value})} 
+                                required 
+                                className="h-11 rounded-sm border-gray-300 focus:border-[#2874F0] text-sm" 
+                              />
+                            </div>
+                            <Input 
+                              placeholder="Street Address / Area / Landmark" 
+                              value={newAddress.line1} 
+                              onChange={e => setNewAddress({...newAddress, line1: e.target.value})} 
+                              required 
+                              className="h-11 rounded-sm border-gray-300 focus:border-[#2874F0] text-sm" 
+                            />
+                            <div className="grid grid-cols-3 gap-4">
+                              <Input 
+                                placeholder="City" 
+                                value={newAddress.city} 
+                                onChange={e => setNewAddress({...newAddress, city: e.target.value})} 
+                                required 
+                                className="h-11 rounded-sm border-gray-300 focus:border-[#2874F0] text-sm" 
+                              />
+                              <Input 
+                                placeholder="State" 
+                                value={newAddress.state} 
+                                onChange={e => setNewAddress({...newAddress, state: e.target.value})} 
+                                required 
+                                className="h-11 rounded-sm border-gray-300 focus:border-[#2874F0] text-sm" 
+                              />
+                              <Input 
+                                placeholder="6-digit Pincode" 
+                                value={newAddress.pincode} 
+                                onChange={e => setNewAddress({...newAddress, pincode: e.target.value})} 
+                                required 
+                                className="h-11 rounded-sm border-gray-300 focus:border-[#2874F0] text-sm" 
+                              />
+                            </div>
+                            <div className="flex gap-4 pt-2">
+                              <Button 
+                                type="submit" 
+                                className="bg-[#2874F0] text-white hover:bg-[#1a64dc] font-bold uppercase tracking-wider text-xs px-6 h-11 rounded-sm"
+                              >
+                                Save & Deliver Here
+                              </Button>
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                onClick={() => setShowAddressForm(false)} 
+                                className="font-bold uppercase tracking-wider text-xs text-gray-500 h-11"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </form>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="px-6 py-4 flex items-center justify-between bg-white">
+                  <div className="flex items-center gap-4">
+                    <span className="bg-gray-100 text-gray-500 font-bold w-5 h-5 flex items-center justify-center text-xs rounded-sm">2</span>
+                    <div>
+                      <span className="font-bold uppercase text-[11px] text-gray-400 block tracking-wider">Delivery Address</span>
+                      {selectedAddress ? (
+                        <span className="text-sm font-semibold text-gray-800">
+                          {selectedAddress.fullName} - {selectedAddress.street || selectedAddress.line1}, {selectedAddress.city} - {selectedAddress.pincode}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">No delivery address selected</span>
+                      )}
+                    </div>
+                  </div>
+                  {currentStep > 2 && (
+                    <button
+                      onClick={() => setCurrentStep(2)}
+                      className="text-[#2874F0] font-bold text-xs uppercase border border-gray-200 px-4 py-2 rounded-sm hover:bg-gray-50 transition-colors"
+                    >
+                      Change
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* STEP 3: ORDER SUMMARY */}
+            <div className="bg-white rounded-sm border border-gray-200 shadow-sm">
+              {currentStep === 3 ? (
+                <div>
+                  <div className="bg-[#2874F0] text-white px-6 py-4 flex items-center gap-4">
+                    <span className="bg-white text-[#2874F0] font-bold w-5 h-5 flex items-center justify-center text-xs rounded-sm">3</span>
+                    <h3 className="font-bold uppercase text-sm tracking-wider">Order Summary</h3>
+                  </div>
+                  
+                  <div className="p-6 bg-white">
+                    <div className="space-y-4 mb-6">
+                      {items.map((item) => {
+                        const product = item.product;
+                        return (
+                          <div key={item.id} className="flex gap-4 py-4 border-b border-gray-100 last:border-b-0 group">
+                            <div className="w-16 h-16 bg-white border border-gray-200 p-1 overflow-hidden flex-shrink-0 flex items-center justify-center rounded-sm">
+                              <img 
+                                src={product?.images?.[0] || "/placeholder.png"} 
+                                alt={product?.name} 
+                                className="max-w-full max-h-full object-contain"
+                              />
+                            </div>
+                            
+                            <div className="flex-1 min-w-0 flex flex-col md:flex-row md:justify-between">
+                              <div className="space-y-1">
+                                <p className="text-sm font-bold text-gray-900 hover:text-[#2874F0] transition-colors truncate max-w-md">{product?.name}</p>
+                                <div className="flex items-center gap-3 text-xs text-gray-500">
+                                  <span>Quantity: <span className="font-bold text-gray-800">{item.quantity}</span></span>
+                                  <span>Price: <span className="font-bold text-gray-800">₹{Number(product?.price).toLocaleString()}</span></span>
+                                </div>
+                                <p className="text-[11px] text-green-600 font-bold">Delivery expected within 3-5 business days</p>
+                              </div>
+                              
+                              <div className="mt-2 md:mt-0 text-left md:text-right">
+                                <span className="text-sm font-bold text-gray-900">₹{Number((product?.price || 0) * item.quantity).toLocaleString()}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex justify-end pt-4 border-t border-gray-100">
+                      <Button 
+                        onClick={() => setCurrentStep(4)}
+                        className="bg-[#FB641B] hover:bg-[#e05310] text-white font-bold px-10 h-11 rounded-sm text-xs uppercase tracking-wider shadow-md"
+                      >
+                        Continue to Payment
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="px-6 py-4 flex items-center justify-between bg-white">
+                  <div className="flex items-center gap-4">
+                    <span className="bg-gray-100 text-gray-500 font-bold w-5 h-5 flex items-center justify-center text-xs rounded-sm">3</span>
+                    <div>
+                      <span className="font-bold uppercase text-[11px] text-gray-400 block tracking-wider">Order Summary</span>
+                      <span className="text-sm font-semibold text-gray-800">
+                        {items.length} {items.length === 1 ? "Item" : "Items"} in order
+                      </span>
+                    </div>
+                  </div>
+                  {currentStep > 3 && (
+                    <button
+                      onClick={() => setCurrentStep(3)}
+                      className="text-[#2874F0] font-bold text-xs uppercase border border-gray-200 px-4 py-2 rounded-sm hover:bg-gray-50 transition-colors"
+                    >
+                      Change
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* STEP 4: PAYMENT OPTIONS */}
+            <div className="bg-white rounded-sm border border-gray-200 shadow-sm">
+              {currentStep === 4 ? (
+                <div>
+                  <div className="bg-[#2874F0] text-white px-6 py-4 flex items-center gap-4">
+                    <span className="bg-white text-[#2874F0] font-bold w-5 h-5 flex items-center justify-center text-xs rounded-sm">4</span>
+                    <h3 className="font-bold uppercase text-sm tracking-wider">Payment Options</h3>
+                  </div>
+                  
+                  <div className="p-6 bg-white space-y-4">
                     {[
-                      { id: "RAZORPAY", name: "Online Payment (Card/UPI/NetBanking)", desc: "Fast & Secure payments via Razorpay", icon: CreditCard },
-                      { id: "COD", name: "Cash on Delivery", desc: "Pay when your products arrive", icon: Truck }
+                      { id: "RAZORPAY", name: "Online Payment (UPI, Cards, NetBanking)", desc: "Safe, fast, and secure checkout via Razorpay", icon: CreditCard },
+                      { id: "COD", name: "Cash on Delivery (COD)", desc: "Pay with cash when order is delivered", icon: Truck }
                     ].map((method) => (
                       <div 
                         key={method.id}
                         onClick={() => setPaymentMethod(method.id)}
                         className={cn(
-                          "p-4 rounded-xl border-2 cursor-pointer transition-all flex items-center gap-4",
+                          "p-4 rounded-sm border cursor-pointer transition-all flex items-start gap-4",
                           paymentMethod === method.id 
-                            ? "border-[#A6D608] bg-[#A6D608]/5" 
+                            ? "border-gray-200 bg-gray-50/50" 
                             : "border-gray-100 hover:border-gray-200"
                         )}
                       >
-                        <div className={cn(
-                          "w-5 h-5 rounded-full border-2 flex items-center justify-center",
-                          paymentMethod === method.id ? "border-[#A6D608]" : "border-gray-300"
-                        )}>
-                          {paymentMethod === method.id && <div className="w-2.5 h-2.5 rounded-full bg-[#A6D608]" />}
+                        <div className="mt-1">
+                          <div className={cn(
+                            "w-4 h-4 rounded-full border flex items-center justify-center",
+                            paymentMethod === method.id ? "border-[#2874F0]" : "border-gray-300"
+                          )}>
+                            {paymentMethod === method.id && <div className="w-2 h-2 rounded-full bg-[#2874F0]" />}
+                          </div>
                         </div>
-                        <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-500">
-                          <method.icon size={20} />
-                        </div>
-                        <div>
-                          <p className="font-bold text-gray-900">{method.name}</p>
-                          <p className="text-xs text-gray-500 font-medium">{method.desc}</p>
+                        
+                        <div className="flex-1">
+                          <p className="font-bold text-sm text-gray-900">{method.name}</p>
+                          <p className="text-xs text-gray-500 mt-1 leading-normal">{method.desc}</p>
+
+                          {paymentMethod === method.id && (
+                            <div className="mt-4">
+                              <Button 
+                                disabled={isPlacingOrder}
+                                onClick={handlePlaceOrder}
+                                className="bg-[#FB641B] hover:bg-[#e05310] text-white font-bold px-10 h-12 rounded-sm text-xs uppercase tracking-wider shadow-lg"
+                              >
+                                {isPlacingOrder ? "Placing Order..." : paymentMethod === "COD" ? "Confirm Order (COD)" : "Pay & Place Order"}
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
-                    
-                    <Button 
-                      onClick={() => setCurrentStep(3)}
-                      className="mt-6 bg-[#A6D608] text-black hover:bg-[#95C207] rounded-full px-12 h-12 font-black uppercase text-xs tracking-widest shadow-lg shadow-[#A6D608]/20"
-                    >
-                      Use this payment method
-                    </Button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* 3. Review Items Section */}
-            <div className="bg-white rounded-md border border-gray-200 overflow-hidden shadow-sm">
-              <div className={cn(
-                "p-4 flex items-center justify-between border-b transition-colors",
-                currentStep === 3 ? "bg-gray-50" : "bg-white"
-              )}>
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-sm bg-black text-[#A6D608] text-sm font-black">3</span>
-                  <h3 className="font-bold text-lg uppercase tracking-tight">Review Items & Delivery</h3>
+                  </div>
                 </div>
-              </div>
-
-              <AnimatePresence>
-                {currentStep === 3 && (
-                  <motion.div 
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="p-6"
-                  >
-                    <div className="space-y-4 mb-8">
-                       {items.map((item) => {
-                         const product = item.product;
-                         return (
-                           <div key={item.id} className="flex gap-4 p-4 rounded-2xl bg-gray-50/50 border border-gray-100 group transition-all">
-                               <div className="w-20 h-20 rounded-xl bg-white border border-gray-100 p-2 overflow-hidden flex-shrink-0">
-                                  <img 
-                                    src={product?.images?.[0] || "/placeholder.png"} 
-                                    alt={product?.name} 
-                                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
-                                  />
-                               </div>
-                               <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                  <p className="text-sm font-bold text-gray-900 uppercase tracking-tight truncate">{product?.name}</p>
-                                  <div className="flex items-center gap-4 mt-1">
-                                     <span className="text-xs font-black text-gray-400">Qty: {item.quantity}</span>
-                                     <span className="text-xs font-black text-black">₹{Number(product?.price).toLocaleString()}</span>
-                                  </div>
-                                  <p className="text-[10px] text-green-600 font-bold mt-1">Expected Delivery: 3-5 Business Days</p>
-                               </div>
-                               <p className="text-sm font-black text-gray-900 flex items-center">₹{Number((product?.price || 0) * item.quantity).toLocaleString()}</p>
-                           </div>
-                         );
-                       })}
+              ) : (
+                <div className="px-6 py-4 flex items-center justify-between bg-white opacity-60">
+                  <div className="flex items-center gap-4">
+                    <span className="bg-gray-100 text-gray-400 font-bold w-5 h-5 flex items-center justify-center text-xs rounded-sm">4</span>
+                    <div>
+                      <span className="font-bold uppercase text-[11px] text-gray-400 block tracking-wider">Payment Options</span>
+                      <span className="text-sm font-semibold text-gray-400">Select payment method at the final step</span>
                     </div>
-                    
-                    <div className="bg-[#A6D608]/5 p-6 rounded-2xl border border-[#A6D608]/20 flex flex-col md:flex-row items-center justify-between gap-6">
-                       <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#A6D608] shadow-sm">
-                             <ShieldCheck size={24} />
-                          </div>
-                          <div>
-                             <p className="font-black text-black uppercase text-xs tracking-widest">Premium Guarantee</p>
-                             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">Verified products & secure logistics only.</p>
-                          </div>
-                       </div>
-                       <Button 
-                         disabled={isPlacingOrder}
-                         onClick={handlePlaceOrder}
-                         className="w-full md:w-auto h-14 rounded-full bg-black text-[#A6D608] hover:bg-gray-900 font-black uppercase tracking-widest text-xs px-12 shadow-2xl shadow-black/20"
-                       >
-                         {isPlacingOrder ? "Placing Order..." : `Place Order • ₹${total().toLocaleString()}`}
-                       </Button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>
 
-          {/* Sticky Order Summary (Right) */}
-          <aside className="w-full lg:w-80 space-y-4 sticky top-24">
-            <div className="bg-white p-6 rounded-md border border-gray-200 shadow-sm">
-              <Button 
-                disabled={isPlacingOrder || !addressId}
-                onClick={handlePlaceOrder}
-                className="w-full h-12 rounded-md bg-[#FFD814] hover:bg-[#F7CA00] text-black font-medium text-sm shadow-sm mb-4"
-              >
-                Place your order
-              </Button>
-              <p className="text-[10px] text-gray-500 text-center mb-4 leading-normal">
-                By placing your order, you agree to Druxx's <span className="text-blue-600 hover:underline cursor-pointer">privacy notice</span> and <span className="text-blue-600 hover:underline cursor-pointer">conditions of use</span>.
-              </p>
+          {/* Right Column: Flipkart-Style Price Details (1/3 width) */}
+          <aside className="w-full lg:w-80 space-y-4 sticky top-20">
+            <div className="bg-white rounded-sm border border-gray-200 shadow-sm">
+              <h3 className="font-bold uppercase text-gray-500 text-[13px] tracking-wider px-6 py-4 border-b border-gray-100">
+                Price Details
+              </h3>
               
-              <div className="border-t border-gray-100 pt-4 space-y-3">
-                <h3 className="font-bold text-sm">Order Summary</h3>
-                <div className="space-y-2 text-sm">
-                   <div className="flex justify-between text-gray-600">
-                      <span>Items:</span>
-                      <span>₹{subtotal().toLocaleString()}</span>
-                   </div>
-                   <div className="flex justify-between text-gray-600">
-                      <span>Shipping:</span>
-                      <span className={shipping() === 0 ? "text-green-600 font-bold" : ""}>
-                        {shipping() === 0 ? "FREE" : `₹${shipping()}`}
-                      </span>
-                   </div>
-                   <div className="flex justify-between text-gray-600">
-                      <span>Tax (5%):</span>
-                      <span>₹{tax().toLocaleString()}</span>
-                   </div>
-                   {couponDiscount > 0 && (
-                     <div className="flex justify-between text-green-600 font-bold">
-                        <span>Discount:</span>
-                        <span>-₹{Math.round((subtotal() * couponDiscount) / 100).toLocaleString()}</span>
-                     </div>
-                   )}
+              <div className="p-6 space-y-4 text-sm font-medium">
+                <div className="flex justify-between text-gray-700">
+                  <span>Price ({items.length} {items.length === 1 ? "item" : "items"})</span>
+                  <span>₹{subtotal().toLocaleString()}</span>
                 </div>
-                <div className="border-t border-gray-100 pt-4 mt-4 flex justify-between items-center">
-                   <span className="text-lg font-bold text-[#B12704]">Order Total:</span>
-                   <span className="text-lg font-bold text-[#B12704]">₹{total().toLocaleString()}</span>
+                
+                <div className="flex justify-between text-gray-700">
+                  <span>Delivery Charges</span>
+                  <span className={shipping() === 0 ? "text-green-600 font-bold" : ""}>
+                    {shipping() === 0 ? "FREE" : `₹${shipping()}`}
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-gray-700">
+                  <span>Tax (5%)</span>
+                  <span>₹{tax().toLocaleString()}</span>
+                </div>
+
+                {couponDiscount > 0 && (
+                  <div className="flex justify-between text-green-600 font-bold">
+                    <span>Discount</span>
+                    <span>-₹{Math.round((subtotal() * couponDiscount) / 100).toLocaleString()}</span>
+                  </div>
+                )}
+                
+                <div className="border-t border-dashed border-gray-200 pt-4 mt-2 flex justify-between items-center text-gray-900">
+                  <span className="text-base font-bold">Amount Payable</span>
+                  <span className="text-base font-bold">₹{total().toLocaleString()}</span>
                 </div>
               </div>
+              
+              {couponDiscount > 0 && (
+                <div className="bg-green-50/50 border-t border-gray-100 px-6 py-3.5 text-xs font-bold text-green-600 flex items-center gap-1.5 rounded-b-sm">
+                  <span>★</span>
+                  <span>You will save ₹{Math.round((subtotal() * couponDiscount) / 100).toLocaleString()} on this order!</span>
+                </div>
+              )}
             </div>
 
-            <div className="bg-gray-100 p-4 rounded-md border border-gray-200">
-               <div className="flex items-center gap-2 mb-2">
-                  <ShieldCheck size={16} className="text-gray-500" />
-                  <span className="text-xs font-bold uppercase tracking-tight text-gray-700">Druxx Protection</span>
-               </div>
-               <p className="text-[10px] text-gray-500 leading-normal">
-                  All products are verified for quality and authenticity. Returns accepted within 7 days.
-               </p>
+            {/* Safe Shopping Guarantee Banner */}
+            <div className="flex items-start gap-3 p-4 bg-[#F9FAFB] border border-gray-200 rounded-sm">
+              <ShieldCheck size={28} className="text-gray-400 shrink-0" />
+              <div className="text-xs text-gray-500 font-medium leading-relaxed">
+                <p className="font-bold text-gray-600">Safe and Secure Payments</p>
+                <p className="mt-0.5">Your payment security is our top priority. We use secure servers and trusted APIs to handle your payment details.</p>
+              </div>
             </div>
           </aside>
 
         </div>
       </main>
 
-      {/* Minimal Footer */}
-      <footer className="max-w-7xl mx-auto px-4 mt-12 py-8 border-t border-gray-200 text-center">
-         <div className="flex flex-wrap justify-center gap-6 mb-4 text-[10px] font-bold text-blue-600 uppercase tracking-widest">
-            <span className="cursor-pointer hover:underline">Conditions of Use</span>
-            <span className="cursor-pointer hover:underline">Privacy Notice</span>
-            <span className="cursor-pointer hover:underline">Help</span>
-         </div>
-         <p className="text-[10px] text-gray-400 font-medium">© 2026 Druxx Health and Wellness. All rights reserved.</p>
+      {/* Footer */}
+      <footer className="max-w-6xl mx-auto px-4 mt-16 py-8 border-t border-gray-200 text-center text-xs text-gray-400 font-medium space-y-3">
+        <div className="flex flex-wrap justify-center gap-6 text-blue-600 font-bold uppercase tracking-wider">
+          <span className="cursor-pointer hover:underline">Conditions of Use</span>
+          <span className="cursor-pointer hover:underline">Privacy Policy</span>
+          <span className="cursor-pointer hover:underline">Help & FAQs</span>
+        </div>
+        <p>© 2026 Drux Health and Wellness Store. All rights reserved.</p>
       </footer>
     </div>
   );
