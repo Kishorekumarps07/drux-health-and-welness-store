@@ -29,13 +29,13 @@ const FOOTER_LINKS = {
   vendors: [
     { label: "Become a Vendor", href: "/vendor" },
     { label: "Vendor Login", href: "/vendor/login" },
-    { label: "Vendor Dashboard", href: "/vendor/dashboard" },
+    { label: "Vendor Dashboard", href: "/dashboard/vendor" },
     { label: "Seller Guidelines", href: "/vendor/guidelines" },
     { label: "Shipping Policy", href: "/vendor/shipping" },
   ],
   support: [
     { label: "Help Center", href: "/help" },
-    { label: "Track Order", href: "/orders" },
+    { label: "Track Order", href: "/dashboard/orders" },
     { label: "Returns & Refunds", href: "/returns" },
     { label: "Privacy Policy", href: "/privacy" },
     { label: "Terms of Service", href: "/terms" },
