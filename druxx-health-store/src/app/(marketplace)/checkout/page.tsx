@@ -20,7 +20,9 @@ import {
   Truck,
   ShieldCheck,
   Package,
-  ArrowLeft
+  ArrowLeft,
+  Minus,
+  Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -37,7 +39,7 @@ const STEPS = [
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, total, subtotal, shipping, tax, couponDiscount, clearCart, syncWithServer } = useCartStore();
+  const { items, total, subtotal, shipping, tax, couponDiscount, clearCart, syncWithServer, updateQuantity, removeItem } = useCartStore();
   const { user, isAuthenticated } = useAuthStore();
   const { Razorpay } = useRazorpay();
 
@@ -58,6 +60,13 @@ export default function CheckoutPage() {
     state: "",
     pincode: "",
   });
+
+  const getDeliveryDateString = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 3);
+    const options: Intl.DateTimeFormatOptions = { weekday: "short", month: "short", day: "numeric" };
+    return date.toLocaleDateString("en-US", options);
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -441,31 +450,84 @@ export default function CheckoutPage() {
                   </div>
                   
                   <div className="p-6 bg-white">
-                    <div className="space-y-4 mb-6">
+                    <div className="space-y-6 mb-6">
                       {items.map((item) => {
                         const product = item.product;
+                        if (!product) return null;
+                        const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+                        const originalPrice = hasDiscount ? product.originalPrice : Math.round(Number(product.price) * 1.25);
+                        const discountPercent = hasDiscount ? product.discount : 20;
+                        
                         return (
-                          <div key={item.id} className="flex gap-4 py-4 border-b border-gray-100 last:border-b-0 group">
-                            <div className="w-16 h-16 bg-white border border-gray-200 p-1 overflow-hidden flex-shrink-0 flex items-center justify-center rounded-sm">
-                              <img 
-                                src={product?.images?.[0] || "/placeholder.png"} 
-                                alt={product?.name} 
-                                className="max-w-full max-h-full object-contain"
-                              />
-                            </div>
-                            
-                            <div className="flex-1 min-w-0 flex flex-col md:flex-row md:justify-between">
-                              <div className="space-y-1">
-                                <p className="text-sm font-bold text-gray-900 hover:text-[#2874F0] transition-colors truncate max-w-md">{product?.name}</p>
-                                <div className="flex items-center gap-3 text-xs text-gray-500">
-                                  <span>Quantity: <span className="font-bold text-gray-800">{item.quantity}</span></span>
-                                  <span>Price: <span className="font-bold text-gray-800">₹{Number(product?.price).toLocaleString()}</span></span>
-                                </div>
-                                <p className="text-[11px] text-green-600 font-bold">Delivery expected within 3-5 business days</p>
+                          <div key={item.id} className="flex gap-4 sm:gap-6 py-5 border-b border-gray-100 last:border-b-0 group">
+                            {/* Left Side: Product Image & Quantity Controls */}
+                            <div className="flex flex-col items-center gap-3 flex-shrink-0">
+                              <div className="relative w-20 h-20 bg-white border border-gray-200 p-1 flex-shrink-0 flex items-center justify-center rounded-sm overflow-hidden">
+                                <Image 
+                                  src={product.images?.[0] || "/placeholder.png"} 
+                                  alt={product.name} 
+                                  fill
+                                  className="object-contain p-1"
+                                  sizes="80px"
+                                  priority
+                                />
                               </div>
                               
-                              <div className="mt-2 md:mt-0 text-left md:text-right">
-                                <span className="text-sm font-bold text-gray-900">₹{Number((product?.price || 0) * item.quantity).toLocaleString()}</span>
+                              {/* Qty Controls */}
+                              <div className="flex items-center">
+                                <button
+                                  type="button"
+                                  onClick={() => updateQuantity(product.id, Math.max(1, item.quantity - 1))}
+                                  className="w-6 h-6 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-gray-100 disabled:opacity-50 transition-colors active:scale-95 cursor-pointer"
+                                >
+                                  <Minus size={10} strokeWidth={3} />
+                                </button>
+                                <span className="w-8 text-center text-xs font-bold text-gray-900 select-none">
+                                  {item.quantity}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => updateQuantity(product.id, item.quantity + 1)}
+                                  disabled={item.quantity >= 10}
+                                  className="w-6 h-6 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-gray-100 disabled:opacity-30 transition-colors active:scale-95 cursor-pointer"
+                                >
+                                  <Plus size={10} strokeWidth={3} />
+                                </button>
+                              </div>
+                            </div>
+                            
+                            {/* Right Side: Product Details */}
+                            <div className="flex-1 min-w-0 flex flex-col justify-between pl-2">
+                              <div>
+                                <p className="text-sm sm:text-base font-medium text-gray-900 hover:text-[#2874F0] line-clamp-2 leading-tight transition-colors">
+                                  {product.name}
+                                </p>
+                                <p className="text-[10px] sm:text-xs text-gray-400 mt-1 font-medium">Seller: {product.vendor?.name || "Drux Official"}</p>
+                                
+                                <div className="mt-2.5 flex items-center gap-2 flex-wrap">
+                                  <span className="text-base sm:text-lg font-bold text-gray-900">₹{(Number(product.price) * item.quantity).toLocaleString("en-IN")}</span>
+                                  {originalPrice > product.price && (
+                                    <>
+                                      <span className="text-xs sm:text-sm text-gray-400 line-through">₹{(originalPrice * item.quantity).toLocaleString("en-IN")}</span>
+                                      <span className="text-xs sm:text-sm font-bold text-[#388E3C]">{discountPercent}% Off</span>
+                                    </>
+                                  )}
+                                </div>
+
+                                <div className="mt-3 text-[10px] sm:text-xs font-medium text-gray-800">
+                                  Delivery by {getDeliveryDateString()} | <span className="text-[#388E3C] font-semibold">Free Delivery</span>
+                                </div>
+                              </div>
+
+                              <div className="mt-4 flex items-center gap-6 border-t border-gray-50 pt-3">
+                                <button
+                                  type="button"
+                                  onClick={() => removeItem(product.id)}
+                                  className="text-xs font-bold text-gray-500 hover:text-red-600 uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
+                                >
+                                  <Trash2 size={12} className="text-gray-400" />
+                                  <span>Remove</span>
+                                </button>
                               </div>
                             </div>
                           </div>
