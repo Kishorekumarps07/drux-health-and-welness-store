@@ -184,14 +184,22 @@ export default function CheckoutPage() {
       {/* Minimal Flipkart/Amazon Style Header */}
       <header className="bg-white border-b border-gray-200 py-3 px-6 sticky top-0 z-50 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-1.5 text-gray-600 hover:text-[#2874F0] font-semibold text-sm transition-colors group"
+            >
+              <ArrowLeft size={18} className="transition-transform group-hover:-translate-x-1" />
+              <span>Back</span>
+            </button>
+            <div className="h-6 w-px bg-gray-200" />
             <Link href="/" className="flex items-center">
               <Image
                 src="/druxlogo.png"
                 alt="Drux Health Store"
-                width={120}
-                height={40}
-                className="h-10 w-auto object-contain"
+                width={150}
+                height={50}
+                className="h-[52px] md:h-[68px] w-auto object-contain"
                 priority
               />
             </Link>
