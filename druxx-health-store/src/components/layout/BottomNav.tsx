@@ -25,7 +25,7 @@ export function BottomNav() {
     { label: "Account", icon: User, href: isAuthenticated ? "/dashboard" : "/login" },
   ];
 
-  if (!mounted) return null;
+  if (!mounted || pathname === "/cart" || pathname === "/checkout") return null;
 
   return (
     <div className="lg:hidden fixed bottom-0 left-0 w-full z-50">
