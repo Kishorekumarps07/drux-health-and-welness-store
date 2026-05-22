@@ -6,7 +6,7 @@ export const useRazorpay = () => {
   const loadRazorpay = useCallback(() => {
     return new Promise((resolve) => {
       // If Razorpay is already loaded, resolve immediately
-      if ((window as any).Razorpay) {
+      if ((window as typeof window & { Razorpay?: unknown }).Razorpay) {
         resolve(true);
         return;
       }

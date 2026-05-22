@@ -88,7 +88,7 @@ export const useCMSStore = create<CMSState>((set, get) => ({
   },
 
   addHeroSlide: async (slide) => {
-    let payload = slide;
+    const payload = slide;
     const config = (payload instanceof FormData) 
       ? { headers: { 'Content-Type': 'multipart/form-data' } } 
       : {};
@@ -98,7 +98,7 @@ export const useCMSStore = create<CMSState>((set, get) => ({
   },
 
   updateHeroSlide: async (id, updatedSlide) => {
-    let payload = updatedSlide;
+    const payload = updatedSlide;
     const config = (payload instanceof FormData) 
       ? { headers: { 'Content-Type': 'multipart/form-data' } } 
       : {};

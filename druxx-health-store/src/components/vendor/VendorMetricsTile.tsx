@@ -8,7 +8,7 @@ interface VendorMetricsTileProps {
   value: string | number;
   change: string;
   trend: 'up' | 'down';
-  icon: any;
+  icon: LucideIcon;
   color: string;
   loading?: boolean;
 }
