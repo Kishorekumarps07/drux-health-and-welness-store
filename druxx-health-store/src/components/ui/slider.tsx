@@ -21,20 +21,32 @@ export function Slider({
   className,
 }: SliderProps) {
   const [minVal, maxVal] = value
+  const [lastActive, setLastActive] = React.useState<"min" | "max">("max")
 
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVal = Math.min(Number(e.target.value), maxVal - step)
     onValueChange([newVal, maxVal])
+    setLastActive("min")
   }
 
   const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVal = Math.max(Number(e.target.value), minVal + step)
     onValueChange([minVal, newVal])
+    setLastActive("max")
   }
 
   // Calculate percentage for gradient track
   const minPercent = ((minVal - min) / (max - min)) * 100
   const maxPercent = ((maxVal - min) / (max - min)) * 100
+
+  // Adjust z-index of input element dynamically when overlapping or close
+  React.useEffect(() => {
+    if (minVal > max - (max - min) * 0.1) {
+      setLastActive("min")
+    } else if (maxVal < min + (max - min) * 0.1) {
+      setLastActive("max")
+    }
+  }, [minVal, maxVal, max, min])
 
   return (
     <div className={cn("relative w-full h-6 flex items-center group", className)}>
@@ -57,7 +69,12 @@ export function Slider({
         step={step}
         value={minVal}
         onChange={handleMinChange}
-        className="absolute w-full pointer-events-none appearance-none bg-transparent z-20 h-2 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#A6D608] [&::-webkit-slider-thumb]:shadow-lg [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[#A6D608] [&::-moz-range-thumb]:shadow-lg"
+        onMouseDown={() => setLastActive("min")}
+        onTouchStart={() => setLastActive("min")}
+        className={cn(
+          "absolute w-full pointer-events-none appearance-none bg-transparent h-2 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#A6D608] [&::-webkit-slider-thumb]:shadow-lg [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[#A6D608] [&::-moz-range-thumb]:shadow-lg",
+          lastActive === "min" ? "z-30" : "z-20"
+        )}
       />
       <input
         type="range"
@@ -66,7 +83,12 @@ export function Slider({
         step={step}
         value={maxVal}
         onChange={handleMaxChange}
-        className="absolute w-full pointer-events-none appearance-none bg-transparent z-20 h-2 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#A6D608] [&::-webkit-slider-thumb]:shadow-lg [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[#A6D608] [&::-moz-range-thumb]:shadow-lg"
+        onMouseDown={() => setLastActive("max")}
+        onTouchStart={() => setLastActive("max")}
+        className={cn(
+          "absolute w-full pointer-events-none appearance-none bg-transparent h-2 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#A6D608] [&::-webkit-slider-thumb]:shadow-lg [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[#A6D608] [&::-moz-range-thumb]:shadow-lg",
+          lastActive === "max" ? "z-30" : "z-20"
+        )}
       />
     </div>
   )

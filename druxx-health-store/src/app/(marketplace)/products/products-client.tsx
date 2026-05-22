@@ -12,6 +12,7 @@ import {
   Star,
   AlertCircle,
   RefreshCw,
+  Check,
 } from "lucide-react";
 import { useMarketplaceStore } from "@/store/marketplaceStore";
 import { productService } from "@/services/productService";
@@ -56,6 +57,7 @@ function ProductsContent() {
     priceRange,
     rating,
     sort,
+    categories,
     setSearchQuery,
     setCategory,
     setPriceRange,
@@ -63,12 +65,14 @@ function ProductsContent() {
     setSort,
     setPage,
     fetchProducts,
+    fetchCategories,
     clearFilters
   } = useMarketplaceStore();
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    fetchCategories(); // Fetch categories on page mount
+  }, [fetchCategories]);
 
   // Sync URL params with store on mount/URL change
   useEffect(() => {
@@ -80,12 +84,38 @@ function ProductsContent() {
     setCategory(cat);
   }, [searchParams, mounted]);
 
-  // Fetch when filters change
+  // Price debouncing to prevent 429 Too Many Requests errors
+  const [debouncedPriceRange, setDebouncedPriceRange] = useState(priceRange);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedPriceRange(priceRange);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [priceRange]);
+
+  // Mobile Filter Drawer Draft States
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [draftCategory, setDraftCategory] = useState(category);
+  const [draftPriceRange, setDraftPriceRange] = useState(priceRange);
+  const [draftRating, setDraftRating] = useState<number | null>(rating);
+  const [activeMobileTab, setActiveMobileTab] = useState<"category" | "price" | "rating">("category");
+
+  // Synchronize draft states when mobile drawer opens
+  useEffect(() => {
+    if (isFilterDrawerOpen) {
+      setDraftCategory(category);
+      setDraftPriceRange(priceRange);
+      setDraftRating(rating);
+    }
+  }, [isFilterDrawerOpen, category, priceRange, rating]);
+
+  // Fetch when filters change (using debouncedPriceRange to throttle API calls)
   useEffect(() => {
     if (mounted) {
       fetchProducts();
     }
-  }, [mounted, searchQuery, category, priceRange, rating, sort, currentPage, fetchProducts]);
+  }, [mounted, searchQuery, category, debouncedPriceRange, rating, sort, currentPage, fetchProducts]);
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
@@ -202,41 +232,241 @@ function ProductsContent() {
                  </DrawerContent>
                </Drawer>
 
-               {/* Mobile Filter Trigger (Slide-up Drawer) */}
-               <Drawer>
-                <DrawerTrigger
-                  className="md:hidden flex-1 flex items-center justify-center gap-2 h-12 rounded-2xl bg-white border-2 border-gray-100 text-[#1E1E1E] font-black uppercase text-[10px] tracking-widest shadow-lg active:scale-95 transition-transform"
-                  id="mobile-filter-trigger"
-                >
-                  <Filter size={14} className="text-[#A6D608]" strokeWidth={3} />
-                  Filters
-                </DrawerTrigger>
-                <DrawerContent className="h-[85vh] rounded-t-[3rem] px-6 pb-12">
-                  <div className="mx-auto w-12 h-1.5 bg-gray-200 rounded-full my-4" />
-                  <div className="flex items-center justify-between mb-8">
-                    <DrawerTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A6D608]">Marketplace Filters</DrawerTitle>
-                    <button onClick={clearFilters} className="text-[10px] font-black uppercase text-red-500">Reset</button>
-                  </div>
-                  <div className="overflow-y-auto px-1 h-full pb-20">
-                    <FilterSidebar 
-                      priceRange={priceRange} 
-                      setPriceRange={setPriceRange}
-                      selectedRating={rating}
-                      setSelectedRating={setRating}
-                      selectedCategory={category}
-                      onClear={clearFilters}
-                    />
-                  </div>
-                  <DrawerFooter className="px-0 pt-4">
-                    <DrawerClose asChild>
-                      <Button className="w-full h-14 rounded-2xl bg-[#A6D608] text-[#1E1E1E] font-black uppercase tracking-widest text-xs shadow-xl shadow-[#A6D608]/20 active:scale-95 transition-transform">
-                        Show {totalProducts} Results
+                {/* Mobile Filter Trigger (Slide-up Drawer) */}
+                <Drawer open={isFilterDrawerOpen} onOpenChange={setIsFilterDrawerOpen}>
+                  <DrawerTrigger
+                    className="md:hidden flex-1 flex items-center justify-center gap-2 h-12 rounded-2xl bg-white border-2 border-gray-100 text-[#1E1E1E] font-black uppercase text-[10px] tracking-widest shadow-lg active:scale-95 transition-transform"
+                    id="mobile-filter-trigger"
+                    onClick={() => setIsFilterDrawerOpen(true)}
+                  >
+                    <Filter size={14} className="text-[#A6D608]" strokeWidth={3} />
+                    Filters
+                  </DrawerTrigger>
+                  <DrawerContent className="h-[75vh] rounded-t-[2.5rem] flex flex-col pb-0 px-0 bg-white">
+                    <div className="mx-auto w-12 h-1 bg-gray-200 rounded-full my-3 shrink-0" />
+                    
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-6 pb-4 border-b border-gray-100 shrink-0">
+                      <DrawerTitle className="text-xs font-black uppercase tracking-widest text-gray-900">
+                        Marketplace Filters
+                      </DrawerTitle>
+                      <button 
+                        onClick={() => {
+                          setDraftCategory("All");
+                          setDraftPriceRange([0, 5000]);
+                          setDraftRating(null);
+                        }} 
+                        className="text-xs font-bold uppercase text-red-500 hover:text-red-600 active:scale-95 transition-all"
+                      >
+                        Reset All
+                      </button>
+                    </div>
+
+                    {/* Dual-Pane Body */}
+                    <div className="flex flex-1 overflow-hidden min-h-0">
+                      {/* Left vertical sidebar (Tabs selector) */}
+                      <div className="w-[120px] bg-gray-50 flex flex-col border-r border-gray-100 shrink-0">
+                        <button
+                          onClick={() => setActiveMobileTab("category")}
+                          className={`py-4 px-4 text-left text-xs transition-all relative ${
+                            activeMobileTab === "category"
+                              ? "bg-white font-bold text-[#1E1E1E]"
+                              : "text-gray-500 hover:bg-gray-100"
+                          }`}
+                        >
+                          {activeMobileTab === "category" && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#A6D608]" />
+                          )}
+                          <span>Categories</span>
+                          {draftCategory !== "All" && (
+                            <span className="ml-1.5 w-2 h-2 bg-[#A6D608] rounded-full inline-block align-middle" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => setActiveMobileTab("price")}
+                          className={`py-4 px-4 text-left text-xs transition-all relative ${
+                            activeMobileTab === "price"
+                              ? "bg-white font-bold text-[#1E1E1E]"
+                              : "text-gray-500 hover:bg-gray-100"
+                          }`}
+                        >
+                          {activeMobileTab === "price" && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#A6D608]" />
+                          )}
+                          <span>Price Range</span>
+                          {(draftPriceRange[0] > 0 || draftPriceRange[1] < 5000) && (
+                            <span className="ml-1.5 w-2 h-2 bg-[#A6D608] rounded-full inline-block align-middle" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => setActiveMobileTab("rating")}
+                          className={`py-4 px-4 text-left text-xs transition-all relative ${
+                            activeMobileTab === "rating"
+                              ? "bg-white font-bold text-[#1E1E1E]"
+                              : "text-gray-500 hover:bg-gray-100"
+                          }`}
+                        >
+                          {activeMobileTab === "rating" && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#A6D608]" />
+                          )}
+                          <span>Rating</span>
+                          {draftRating !== null && (
+                            <span className="ml-1.5 w-2 h-2 bg-[#A6D608] rounded-full inline-block align-middle" />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Right Panel (Content area) */}
+                      <div className="flex-1 bg-white overflow-y-auto p-4">
+                        {activeMobileTab === "category" && (
+                          <div className="space-y-1.5">
+                            <button
+                              onClick={() => setDraftCategory("All")}
+                              className={`flex items-center justify-between w-full p-3 rounded-xl text-left text-xs transition-all ${
+                                draftCategory === "All"
+                                  ? "bg-[#A6D608]/10 text-[#A6D608] font-bold"
+                                  : "text-gray-700 hover:bg-gray-50"
+                              }`}
+                            >
+                              <span>All Categories</span>
+                              {draftCategory === "All" && <Check size={14} className="text-[#A6D608]" />}
+                            </button>
+                            {categories.map((cat: any) => (
+                              <button
+                                key={cat.id}
+                                onClick={() => setDraftCategory(cat.name)}
+                                className={`flex items-center justify-between w-full p-3 rounded-xl text-left text-xs transition-all ${
+                                  draftCategory === cat.name
+                                    ? "bg-[#A6D608]/10 text-[#A6D608] font-bold"
+                                    : "text-gray-700 hover:bg-gray-50"
+                                }`}
+                              >
+                                <span className="flex items-center gap-2">
+                                  <span>{cat.icon || "📦"}</span>
+                                  {cat.name}
+                                </span>
+                                <span className="flex items-center gap-1.5">
+                                  <span className="text-[10px] bg-gray-100 px-1.5 py-0.5 rounded font-bold text-gray-400">
+                                    {cat.productCount}
+                                  </span>
+                                  {draftCategory === cat.name && <Check size={14} className="text-[#A6D608]" />}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        {activeMobileTab === "price" && (
+                          <div className="space-y-6 pt-2">
+                            <Slider
+                              max={5000}
+                              step={100}
+                              value={draftPriceRange}
+                              onValueChange={setDraftPriceRange}
+                            />
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1">
+                                <label className="text-[9px] text-gray-400 font-bold uppercase tracking-wider block mb-1">Min Price</label>
+                                <div className="relative">
+                                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">₹</span>
+                                  <input
+                                    type="number"
+                                    value={draftPriceRange[0]}
+                                    onChange={(e) => {
+                                      const val = Math.min(Number(e.target.value), draftPriceRange[1] - 100);
+                                      setDraftPriceRange([val >= 0 ? val : 0, draftPriceRange[1]]);
+                                    }}
+                                    className="w-full pl-6 pr-2 py-2 border border-gray-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#A6D608]"
+                                  />
+                                </div>
+                              </div>
+                              <div className="text-gray-400 mt-4">-</div>
+                              <div className="flex-1">
+                                <label className="text-[9px] text-gray-400 font-bold uppercase tracking-wider block mb-1">Max Price</label>
+                                <div className="relative">
+                                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">₹</span>
+                                  <input
+                                    type="number"
+                                    value={draftPriceRange[1]}
+                                    onChange={(e) => {
+                                      const val = Math.max(Number(e.target.value), draftPriceRange[0] + 100);
+                                      setDraftPriceRange([draftPriceRange[0], val <= 5000 ? val : 5000]);
+                                    }}
+                                    className="w-full pl-6 pr-2 py-2 border border-gray-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#A6D608]"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {activeMobileTab === "rating" && (
+                          <div className="space-y-1.5">
+                            {[4, 3, 2, 1].map((ratingVal) => (
+                              <button
+                                key={ratingVal}
+                                onClick={() => setDraftRating(draftRating === ratingVal ? null : ratingVal)}
+                                className={`flex items-center justify-between w-full p-3 rounded-xl text-left text-xs transition-all ${
+                                  draftRating === ratingVal
+                                    ? "bg-[#A6D608]/10 text-[#1E1E1E] font-bold"
+                                    : "text-gray-700 hover:bg-gray-50"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-0.5 text-[#FF7A00]">
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        size={12}
+                                        className={i < ratingVal ? "fill-current" : "fill-gray-200 text-gray-200"}
+                                      />
+                                    ))}
+                                  </div>
+                                  <span>& Up</span>
+                                </div>
+                                {draftRating === ratingVal && <Check size={14} className="text-[#A6D608]" />}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <DrawerFooter className="px-6 py-4 border-t border-gray-100 flex-row gap-3 shrink-0 bg-white">
+                      <DrawerClose asChild>
+                        <Button 
+                          variant="outline"
+                          onClick={() => setIsFilterDrawerOpen(false)}
+                          className="flex-1 h-12 rounded-2xl border-2 border-gray-100 text-xs font-black uppercase tracking-widest text-gray-600 hover:bg-gray-50 active:scale-95 transition-all"
+                        >
+                          Cancel
+                        </Button>
+                      </DrawerClose>
+                      <Button
+                        onClick={() => {
+                          setCategory(draftCategory);
+                          setPriceRange(draftPriceRange);
+                          setRating(draftRating);
+                          
+                          const params = new URLSearchParams(searchParams?.toString() || "");
+                          if (draftCategory && draftCategory !== "All") {
+                            params.set("category", draftCategory);
+                          } else {
+                            params.delete("category");
+                          }
+                          params.delete("page");
+                          router.push(`/products?${params.toString()}`, { scroll: false });
+                          setIsFilterDrawerOpen(false);
+                        }}
+                        className="flex-1 h-12 rounded-2xl bg-[#A6D608] hover:bg-[#A6D608]/90 text-[#1E1E1E] text-xs font-black uppercase tracking-widest shadow-xl shadow-[#A6D608]/20 active:scale-95 transition-all"
+                      >
+                        Apply Filters
                       </Button>
-                    </DrawerClose>
-                  </DrawerFooter>
-                </DrawerContent>
-              </Drawer>
-            </div>
+                    </DrawerFooter>
+                  </DrawerContent>
+                </Drawer>
+              </div>
 
             {/* Desktop Sort Dropdown */}
             <div className="hidden md:block">
