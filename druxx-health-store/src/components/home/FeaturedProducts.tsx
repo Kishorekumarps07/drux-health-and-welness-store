@@ -6,16 +6,37 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Product } from "@/types";
 
+import { useState } from "react";
+
 interface ProductGridProps {
   products: Product[];
 }
 
 function ProductGrid({ products }: ProductGridProps) {
+  const [visibleCount, setVisibleCount] = useState(16);
+
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + 16);
+  };
+
+  const visibleProducts = products.slice(0, visibleCount);
+  const hasMore = visibleCount < products.length;
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product as any} />
-      ))}
+    <div className="flex flex-col items-center w-full">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6 w-full">
+        {visibleProducts.map((product) => (
+          <ProductCard key={product.id} product={product as any} />
+        ))}
+      </div>
+      {hasMore && (
+        <button 
+          onClick={handleLoadMore}
+          className="mt-8 px-8 py-3 bg-white border border-gray-200 hover:border-[#A6D608] hover:text-[#A6D608] rounded-full text-xs font-black uppercase tracking-widest text-[#1E1E1E] transition-all shadow-sm"
+        >
+          Load More
+        </button>
+      )}
     </div>
   );
 }

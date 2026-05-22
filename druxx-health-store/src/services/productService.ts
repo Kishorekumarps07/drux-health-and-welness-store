@@ -102,15 +102,15 @@ export const productService = {
   },
 
   async getFeatured() {
-    return this.getAllProducts({ sort: 'featured', limit: 10 });
+    return this.getAllProducts({ sort: 'featured', limit: 100 });
   },
 
   async getBestSellers() {
-    return this.getAllProducts({ sort: 'best-seller', limit: 10 });
+    return this.getAllProducts({ sort: 'best-seller', limit: 100 });
   },
 
   async getNewArrivals() {
-    return this.getAllProducts({ sort: 'newest', limit: 10 });
+    return this.getAllProducts({ sort: 'newest', limit: 100 });
   },
 
   async getReviews(productId: string) {
