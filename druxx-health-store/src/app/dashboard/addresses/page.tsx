@@ -173,7 +173,14 @@ export default function AddressesPage() {
     if (address.isDefault) return;
     try {
       await userService.updateAddress(address.id, {
-        ...address,
+        label: address.label,
+        fullName: address.fullName,
+        phone: address.phone,
+        street: address.street,
+        city: address.city,
+        state: address.state,
+        pincode: address.pincode,
+        country: address.country || "India",
         isDefault: true
       });
       toast.success("Default address updated!");

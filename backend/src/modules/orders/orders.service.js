@@ -1,6 +1,7 @@
 const prisma = require('../../lib/prisma');
 const AppError = require('../../lib/AppError');
 const { getPagination, getPagingData } = require('../../lib/pagination.util');
+const notificationsService = require('../users/notifications.service');
 
 const ORDER_INCLUDE = {
   items: { 
@@ -90,6 +91,18 @@ class OrdersService {
         await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
       }
 
+      try {
+        await notificationsService.createNotification(
+          userId,
+          isCod ? 'Order Confirmed' : 'Order Placed',
+          `Your order #${newOrder.id.slice(0, 8)} of ₹${newOrder.total} has been placed successfully.`,
+          `/dashboard/orders/${newOrder.id}`,
+          'order'
+        );
+      } catch (err) {
+        console.error('Failed to create notification for order placement:', err);
+      }
+
       return newOrder;
     });
 
@@ -106,8 +119,7 @@ class OrdersService {
     if (order.paymentStatus === 'ORDER_CREATED') return order; // Already processed
 
     return prisma.$transaction(async (tx) => {
-      // Update order status
-      const updatedOrder = await tx.order.update({
+      const result = await tx.order.update({
         where: { id: orderId },
         data: {
           status: 'CONFIRMED',
@@ -132,7 +144,19 @@ class OrdersService {
         where: { cart: { userId } },
       });
 
-      return updatedOrder;
+      try {
+        await notificationsService.createNotification(
+          userId,
+          'Order Confirmed',
+          `Your payment was verified. Order #${result.id.slice(0, 8)} is confirmed.`,
+          `/dashboard/orders/${result.id}`,
+          'order'
+        );
+      } catch (err) {
+        console.error('Failed to create notification for verified order:', err);
+      }
+
+      return result;
     });
   }
 
@@ -207,11 +231,25 @@ class OrdersService {
       throw new AppError('Order cannot be cancelled at this stage.', 400);
     }
 
-    return prisma.order.update({
+    const updated = await prisma.order.update({
       where: { id: orderId },
       data: { status: "CANCELLED" },
       include: ORDER_INCLUDE,
     });
+
+    try {
+      await notificationsService.createNotification(
+        userId,
+        'Order Cancelled',
+        `Your order #${updated.id.slice(0, 8)} has been cancelled successfully.`,
+        `/dashboard/orders/${updated.id}`,
+        'order'
+      );
+    } catch (err) {
+      console.error('Failed to create notification for cancelled order:', err);
+    }
+
+    return updated;
   }
 
   async getVendorOrders(vendorId, query) {
@@ -272,11 +310,25 @@ class OrdersService {
   }
 
   async updateStatus(orderId, { status }) {
-    return prisma.order.update({
+    const updated = await prisma.order.update({
       where: { id: orderId },
       data: { status },
       include: ORDER_INCLUDE,
     });
+
+    try {
+      await notificationsService.createNotification(
+        updated.userId,
+        'Order Status Update',
+        `Your order #${updated.id.slice(0, 8)} status is now ${status.toUpperCase()}.`,
+        `/dashboard/orders/${updated.id}`,
+        'order'
+      );
+    } catch (err) {
+      console.error('Failed to create notification for order status update:', err);
+    }
+
+    return updated;
   }
 }
 

@@ -22,7 +22,8 @@ export const useWishlistStore = create<WishlistState>()(
       items: [],
       wishlists: {},
       addToWishlist: (product) => {
-        const userId = useAuthStore.getState().user?.id || "guest";
+        const userId = useAuthStore.getState().user?.id;
+        if (!userId) return;
         const wishlists = get().wishlists || {};
         const userWishlist = wishlists[userId] || [];
         const exists = userWishlist.some((item) => item.id === product.id);
@@ -42,7 +43,8 @@ export const useWishlistStore = create<WishlistState>()(
         }
       },
       removeFromWishlist: (productId) => {
-        const userId = useAuthStore.getState().user?.id || "guest";
+        const userId = useAuthStore.getState().user?.id;
+        if (!userId) return;
         const wishlists = get().wishlists || {};
         const userWishlist = wishlists[userId] || [];
         const itemToRemove = userWishlist.find((item) => item.id === productId);
@@ -60,13 +62,15 @@ export const useWishlistStore = create<WishlistState>()(
         }
       },
       isInWishlist: (productId) => {
-        const userId = useAuthStore.getState().user?.id || "guest";
+        const userId = useAuthStore.getState().user?.id;
+        if (!userId) return false;
         const wishlists = get().wishlists || {};
         const userWishlist = wishlists[userId] || [];
         return userWishlist.some((item) => item.id === productId);
       },
       clearWishlist: () => {
-        const userId = useAuthStore.getState().user?.id || "guest";
+        const userId = useAuthStore.getState().user?.id;
+        if (!userId) return;
         const wishlists = get().wishlists || {};
         set({
           wishlists: {
@@ -77,9 +81,12 @@ export const useWishlistStore = create<WishlistState>()(
         });
       },
       syncUserWishlist: (userId) => {
-        const key = userId || "guest";
+        if (!userId) {
+          set({ items: [] });
+          return;
+        }
         const wishlists = get().wishlists || {};
-        const userWishlist = wishlists[key] || [];
+        const userWishlist = wishlists[userId] || [];
         set({ items: userWishlist });
       },
     }),

@@ -30,8 +30,7 @@ import { NavAccountDropdown } from "./navbar/NavAccountDropdown";
 import { NavCartPreview } from "./navbar/NavCartPreview";
 import api from "@/lib/api";
 import { LocationModal } from "./navbar/LocationModal";
-
-
+import { CustomerNotifications } from "@/components/layout/CustomerNotifications";
 
 export function Navbar() {
   const router = useRouter();
@@ -208,6 +207,9 @@ export function Navbar() {
                   <NavAccountDropdown />
                 </div>
               </div>
+
+              {/* Notifications */}
+              <CustomerNotifications />
 
               {/* Cart */}
               <Link

@@ -22,7 +22,8 @@ import {
   Package,
   ArrowLeft,
   Minus,
-  Trash2
+  Trash2,
+  Tag
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -39,8 +40,40 @@ const STEPS = [
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, total, subtotal, shipping, tax, couponDiscount, clearCart, syncWithServer, updateQuantity, removeItem } = useCartStore();
+  const { 
+    items, 
+    total, 
+    subtotal, 
+    shipping, 
+    tax, 
+    couponCode,
+    couponDiscount, 
+    applyCoupon,
+    removeCoupon,
+    clearCart, 
+    syncWithServer, 
+    updateQuantity, 
+    removeItem 
+  } = useCartStore();
   const { user, isAuthenticated } = useAuthStore();
+
+  const [couponInput, setCouponInput] = useState("");
+  const [couponError, setCouponError] = useState("");
+  const [couponSuccess, setCouponSuccess] = useState("");
+
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    const ok = await applyCoupon(couponInput.trim());
+    if (ok) {
+      const latestDiscount = useCartStore.getState().couponDiscount;
+      setCouponSuccess(`Coupon applied! ${latestDiscount}% off your order.`);
+      setCouponError("");
+      setCouponInput("");
+    } else {
+      setCouponError("Invalid or expired coupon code.");
+      setCouponSuccess("");
+    }
+  };
   const { Razorpay } = useRazorpay();
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -638,6 +671,64 @@ export default function CheckoutPage() {
 
           {/* Right Column: Flipkart-Style Price Details (1/3 width) */}
           <aside className="w-full lg:w-80 space-y-4 sticky top-20">
+            {/* Coupon Card */}
+            <div className="bg-white rounded-sm border border-gray-200 shadow-sm p-6 space-y-4">
+              {couponCode ? (
+                <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <Tag size={14} className="text-green-600" />
+                    <span className="text-sm font-bold text-green-700">
+                      {couponCode} — {couponDiscount}% OFF
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      removeCoupon();
+                      setCouponSuccess("");
+                    }}
+                    className="text-xs text-red-500 hover:text-red-700 font-bold transition-colors"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1.5">
+                    <Tag size={14} className="text-[#A6D608]" />
+                    Apply Coupon
+                  </h4>
+                  <div className="flex gap-2">
+                    <Input
+                      value={couponInput}
+                      onChange={(e) => {
+                        setCouponInput(e.target.value.toUpperCase());
+                        setCouponError("");
+                        setCouponSuccess("");
+                      }}
+                      placeholder="Enter coupon code"
+                      className="h-10 text-sm uppercase font-mono rounded-sm border-gray-300 focus:border-[#A6D608] focus:ring-[#A6D608]/15"
+                      onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
+                    />
+                    <Button
+                      onClick={handleApplyCoupon}
+                      className="h-10 px-6 bg-[#1E1E1E] hover:bg-black text-white text-xs font-bold rounded-sm uppercase tracking-wider transition-colors"
+                    >
+                      Apply
+                    </Button>
+                  </div>
+                  {couponError && (
+                    <p className="text-xs text-red-500 font-medium">{couponError}</p>
+                  )}
+                  {couponSuccess && (
+                    <p className="text-xs text-green-600 font-bold">{couponSuccess}</p>
+                  )}
+                  <p className="text-[10px] text-gray-400 font-medium">
+                    Try: DRUXX10, HEALTH20, FIRST15, ORGANIC25
+                  </p>
+                </div>
+              )}
+            </div>
+
             <div className="bg-white rounded-sm border border-gray-200 shadow-sm">
               <h3 className="font-bold uppercase text-gray-500 text-[13px] tracking-wider px-6 py-4 border-b border-gray-100">
                 Price Details

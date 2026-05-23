@@ -80,6 +80,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+      return;
+    }
+
     if (isWishlisted) {
       removeFromWishlist(product.id);
     } else {

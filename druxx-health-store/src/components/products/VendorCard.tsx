@@ -124,7 +124,7 @@ export function VendorCard({ vendor, className = "" }: VendorCardProps) {
           asChild
           className="w-full bg-[#1E1E1E] hover:bg-[#A6D608] hover:text-[#1E1E1E] text-white font-black text-sm h-12 rounded-2xl shadow-xl hover:shadow-[#A6D608]/20 transition-all duration-300 group/cta"
         >
-          <Link href={`/products?vendor=${vendor.slug}`}>
+          <Link href={`/vendors/${vendor.slug}`}>
             Visit Official Store 
             <ArrowRight size={18} className="ml-2 group-hover/cta:translate-x-1 transition-transform" />
           </Link>

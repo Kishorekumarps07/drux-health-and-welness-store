@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 import { Product } from "@/types";
 
-const mapBackendProduct = (p: any): Product => {
+export const mapBackendProduct = (p: any): Product => {
   if (!p) return {} as Product;
 
   const comparePrice = p.comparePrice ? Number(p.comparePrice) : Number(p.price);
@@ -128,5 +128,33 @@ export const productService = {
   async getCategories() {
     const response = await api.get('/categories');
     return response.data.data?.categories || [];
+  },
+
+  /**
+   * Submit a review for a product.
+   * Requires the user to be authenticated (JWT auto-attached by api interceptor).
+   * Backend enforces one review per user per product (409 on duplicate).
+   */
+  async submitReview(productId: string, data: {
+    rating: number;
+    title?: string;
+    comment?: string;
+  }) {
+    const response = await api.post(`/products/${productId}/reviews`, data);
+    return response.data.data.review;
+  },
+
+  /**
+   * Fetch fresh reviews for a product by productId (client-side refresh).
+   */
+  async getProductReviews(productId: string, page = 1, limit = 20) {
+    try {
+      const response = await api.get(`/products/${productId}/reviews`, {
+        params: { page, limit }
+      });
+      return response.data.reviews || [];
+    } catch {
+      return [];
+    }
   },
 };

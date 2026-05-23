@@ -13,6 +13,7 @@ const adminRoutes      = require('../modules/admin/admin.routes');
 const paymentsRoutes   = require('../modules/payments/payments.routes');
 const cmsRoutes        = require('../modules/cms/cms.routes');
 const uploadRoutes     = require('../modules/upload/upload.routes');
+const couponsRoutes    = require('../modules/coupons/coupons.routes');
 
 const router = Router();
 
@@ -26,6 +27,18 @@ router.get('/', (req, res) => {
     timestamp: new Date().toISOString(),
     version: '1.0.0'
   });
+});
+
+/**
+ * Public: Newsletter Subscription
+ */
+router.post('/newsletter/subscribe', (req, res) => {
+  const { email } = req.body;
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ status: 'error', message: 'Please provide a valid email address.' });
+  }
+  console.log(`[NEWSLETTER] New signup: ${email}`);
+  res.json({ status: 'success', message: 'Subscription successful!' });
 });
 
 router.use('/auth',        authRoutes);
@@ -44,5 +57,6 @@ router.use('/payments',    paymentsRoutes);
 router.use('/admin',       adminRoutes);
 router.use('/cms',         cmsRoutes);
 router.use('/upload',      uploadRoutes);
+router.use('/coupons',     couponsRoutes);
 
 module.exports = router;

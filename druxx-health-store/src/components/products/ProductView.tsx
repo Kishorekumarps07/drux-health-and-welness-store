@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ProductCard } from "@/components/products/ProductCard";
+import { ReviewForm } from "@/components/products/ReviewForm";
 import { useCartStore } from "@/store/cartStore";
 import { Product } from "@/types";
 import { toast } from "sonner";
@@ -84,6 +85,12 @@ export function ProductView({ product, related, reviews }: ProductViewProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  // Local copy of reviews so new submissions appear instantly without a full page reload
+  const [localReviews, setLocalReviews] = useState<any[]>(reviews);
+
+  const handleReviewSuccess = (newReview: any) => {
+    setLocalReviews((prev) => [newReview, ...prev]);
+  };
 
   const addItem = useCartStore((s) => s.addItem);
 
@@ -218,7 +225,7 @@ export function ProductView({ product, related, reviews }: ProductViewProps) {
             {/* Center Column */}
             <div className="lg:col-span-4 flex flex-col">
               <Link
-                href={`/products?vendor=${product.vendor.slug}`}
+                href={`/vendors/${product.vendor.slug}`}
                 className="text-xs sm:text-sm font-semibold text-[#007185] hover:text-[#C45500] hover:underline transition-all block mb-1"
               >
                 Visit the {product.vendor.name} Store
@@ -389,36 +396,96 @@ export function ProductView({ product, related, reviews }: ProductViewProps) {
           </div>
           <Separator />
           <div>
-            <h2 className="text-base font-bold text-[#C45500] mb-4 uppercase tracking-wider">Customer Reviews</h2>
-            <div className="space-y-4 max-w-3xl">
-              {reviews.length > 0 ? (
-                reviews.map((review) => (
-                  <div key={review.id} className="border-b border-gray-100 pb-4 last:border-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-xs font-bold text-[#A6D608] border border-[#A6D608]/20 shadow-sm">
-                        {review.userName[0].toUpperCase()}
+            <h2 className="text-base font-bold text-[#C45500] mb-6 uppercase tracking-wider">Customer Reviews</h2>
+            
+            {(() => {
+              const averageRating = localReviews.length > 0 
+                ? localReviews.reduce((sum, r) => sum + r.rating, 0) / localReviews.length 
+                : product.rating || 0;
+                
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                  {/* Rating Summary Widget */}
+                  <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 space-y-4">
+                    <div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-3xl font-black text-gray-900">{averageRating.toFixed(1)}</span>
+                        <span className="text-sm font-bold text-gray-400">out of 5</span>
                       </div>
-                      <div className="flex flex-col">
-                        <p className="font-bold text-[13px] text-gray-900 leading-none">{review.userName}</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star key={s} size={10} className={s <= review.rating ? "fill-[#FFA41C] text-[#FFA41C]" : "fill-gray-200 text-gray-200"} />
-                          ))}
-                          {review.verified && (
-                            <span className="text-[9px] font-bold text-[#C45500] ml-2 flex items-center gap-1">
-                              <ShieldCheck size={10} /> Verified Purchase
-                            </span>
-                          )}
-                        </div>
+                      <div className="flex items-center gap-1 mt-1">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star key={s} size={16} className={s <= Math.round(averageRating) ? "fill-[#FFA41C] text-[#FFA41C]" : "fill-gray-200 text-gray-200"} />
+                        ))}
                       </div>
+                      <p className="text-xs font-bold text-gray-500 mt-2">
+                        {localReviews.length} customer ratings
+                      </p>
                     </div>
-                    <p className="text-xs text-gray-700 leading-relaxed font-medium pl-10">{review.comment}</p>
+
+                    <div className="space-y-2 pt-2 border-t border-gray-100">
+                      {[5, 4, 3, 2, 1].map((stars) => {
+                        const totalReviews = localReviews.length;
+                        const starCount = localReviews.filter(r => Math.round(r.rating) === stars).length;
+                        const percent = totalReviews > 0 ? Math.round((starCount / totalReviews) * 100) : 0;
+                        
+                        return (
+                          <div key={stars} className="flex items-center gap-3 text-xs">
+                            <span className="w-10 font-bold text-gray-600 text-right">{stars} star</span>
+                            <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-[#FFA41C] rounded-full transition-all duration-500" 
+                                style={{ width: `${percent}%` }}
+                              />
+                            </div>
+                            <span className="w-8 text-gray-500 font-bold text-right">{percent}%</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                ))
-              ) : (
-                <div className="py-4 text-gray-500 text-xs italic">No reviews yet.</div>
-              )}
-            </div>
+
+                  {/* Reviews List & Form */}
+                  <div className="md:col-span-2 space-y-6">
+                    <div className="space-y-4 divide-y divide-gray-50">
+                      {localReviews.length > 0 ? (
+                        localReviews.map((review) => (
+                          <div key={review.id} className="pt-4 first:pt-0 pb-4 last:pb-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-xs font-bold text-[#A6D608] border border-[#A6D608]/20 shadow-sm">
+                                {review.userName[0].toUpperCase()}
+                              </div>
+                              <div className="flex flex-col">
+                                <p className="font-bold text-[13px] text-gray-900 leading-none">{review.userName}</p>
+                                <div className="flex items-center gap-1 mt-1">
+                                  {[1, 2, 3, 4, 5].map((s) => (
+                                    <Star key={s} size={10} className={s <= review.rating ? "fill-[#FFA41C] text-[#FFA41C]" : "fill-gray-200 text-gray-200"} />
+                                  ))}
+                                  {review.verified && (
+                                    <span className="text-[9px] font-bold text-[#C45500] ml-2 flex items-center gap-1">
+                                      <ShieldCheck size={10} /> Verified Purchase
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            {review.title && (
+                              <p className="text-xs font-bold text-gray-800 mb-1 pl-10">{review.title}</p>
+                            )}
+                            <p className="text-xs text-gray-700 leading-relaxed font-medium pl-10">{review.comment}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="py-4 text-gray-500 text-xs italic">No reviews yet. Be the first to review this product.</div>
+                      )}
+                    </div>
+
+                    <div className="border-t border-gray-100 pt-6">
+                      <ReviewForm productId={product.id} onSuccess={handleReviewSuccess} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
 

@@ -101,6 +101,7 @@ model User {
   cart          Cart?
   refreshTokens RefreshToken[]
   payments      Payment[]
+  notifications Notification[]
 
   @@map("users")
 }
@@ -463,4 +464,39 @@ model AdvantageItem {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("advantage_items")
+}
+
+// ─────────────────────────────────────────────
+// COUPON
+// ─────────────────────────────────────────────
+
+model Coupon {
+  id              String   @id @default(uuid())
+  code            String   @unique
+  discountPercent Int      @map("discount_percent")
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("coupons")
+}
+
+// ─────────────────────────────────────────────
+// NOTIFICATION
+// ─────────────────────────────────────────────
+
+model Notification {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  title       String
+  description String
+  type        String   @default("order")
+  read        Boolean  @default(false)
+  link        String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notifications")
 }

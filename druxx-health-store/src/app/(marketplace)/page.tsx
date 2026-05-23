@@ -6,6 +6,7 @@ import { OfferZone } from "@/components/home/OfferZone";
 import { productService } from "@/services/productService";
 import { HomeAnimations } from "@/components/home/HomeAnimations";
 import api from "@/lib/api";
+import { NewsletterSection } from "@/components/home/NewsletterSection";
 
 export default async function HomePage() {
   // Fetch all home data in parallel on the server
@@ -77,29 +78,7 @@ export default async function HomePage() {
       </HomeAnimations>
 
       {/* Newsletter section */}
-      <section className="py-12 px-4 bg-gradient-to-r from-[#A6D608]/10 to-[#2CA7A0]/10 border-t border-[#A6D608]/20">
-        <div className="max-w-xl mx-auto text-center">
-          <h2 className="font-heading font-bold text-2xl text-[#1E1E1E] mb-2">
-            Stay Healthy, Stay Updated
-          </h2>
-          <p className="text-sm text-gray-500 mb-6">
-            Get exclusive offers, health tips, and new arrivals straight to your inbox.
-          </p>
-          <div className="flex gap-2 max-w-sm mx-auto">
-            <input 
-              type="email" 
-              placeholder="Enter your email" 
-              className="flex-1 h-10 rounded-xl border border-gray-200 bg-white/50 backdrop-blur-sm px-4 text-sm outline-none focus:ring-2 focus:ring-[#A6D608]/20"
-            />
-            <button className="bg-[#1E1E1E] text-white hover:bg-black rounded-xl font-bold px-6 h-10 transition-colors">
-              Join
-            </button>
-          </div>
-          <p className="text-[10px] text-gray-400 mt-4 uppercase tracking-widest font-medium">
-            Join 50,000+ fitness enthusiasts
-          </p>
-        </div>
-      </section>
+      <NewsletterSection />
     </>
   );
 }

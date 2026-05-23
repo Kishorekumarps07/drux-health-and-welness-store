@@ -20,7 +20,8 @@ import {
   Activity,
   ChevronRight,
   Monitor,
-  LayoutGrid
+  LayoutGrid,
+  Tag
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ const ADMIN_NAV: NavItem[] = [
   { name: 'Global Orders', href: '/dashboard/admin/orders', icon: ShoppingBag },
   { name: 'Platform Users', href: '/dashboard/admin/users', icon: Users },
   { name: 'CMS Management', href: '/dashboard/admin/cms', icon: Monitor },
+  { name: 'Coupon Manager', href: '/dashboard/admin/coupons', icon: Tag },
   { name: 'Inventory Audit', href: '/dashboard/admin/inventory', icon: Package },
   { name: 'Audit Logs', href: '/dashboard/admin/audit-logs', icon: History },
 ];

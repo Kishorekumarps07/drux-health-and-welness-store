@@ -16,6 +16,13 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 import { orderService } from "@/services/orderService";
 import { OrderSkeleton } from "@/components/orders/OrderSkeleton";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -33,6 +40,8 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -53,6 +62,25 @@ export default function OrdersPage() {
     fetchOrders();
   }, [fetchOrders]);
 
+  const filteredOrders = orders.filter((order) => {
+    // 1. Filter by status
+    if (statusFilter !== "all" && order.status.toLowerCase() !== statusFilter.toLowerCase()) {
+      return false;
+    }
+    
+    // 2. Filter by search term (Order ID or Product Name)
+    if (searchTerm.trim() !== "") {
+      const term = searchTerm.toLowerCase().trim();
+      const matchesId = order.id.toLowerCase().includes(term);
+      const matchesProduct = order.items.some((item: any) =>
+        item.title.toLowerCase().includes(term)
+      );
+      return matchesId || matchesProduct;
+    }
+    
+    return true;
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -67,13 +95,25 @@ export default function OrdersPage() {
             <input 
               type="text" 
               placeholder="Search orders..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full h-10 pl-10 pr-4 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#A6D608] focus:border-transparent outline-none transition-all"
             />
           </div>
-          <Button variant="outline" className="h-10 rounded-xl gap-2 border-gray-200 font-bold text-xs uppercase tracking-widest">
-            <Filter size={14} />
-            Filter
-          </Button>
+          
+          <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val || "all")}>
+            <SelectTrigger className="h-10 w-[140px] rounded-xl border-gray-200 font-bold text-xs uppercase tracking-widest bg-white">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent className="bg-white border-gray-150 rounded-xl">
+              <SelectItem value="all" className="font-bold text-xs">All Statuses</SelectItem>
+              <SelectItem value="pending" className="font-bold text-xs">Pending</SelectItem>
+              <SelectItem value="confirmed" className="font-bold text-xs">Confirmed</SelectItem>
+              <SelectItem value="shipped" className="font-bold text-xs">Shipped</SelectItem>
+              <SelectItem value="delivered" className="font-bold text-xs">Delivered</SelectItem>
+              <SelectItem value="cancelled" className="font-bold text-xs">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -94,8 +134,9 @@ export default function OrdersPage() {
           }}
         />
       ) : orders.length > 0 ? (
-        <div className="space-y-4">
-          {orders.map((order) => {
+        filteredOrders.length > 0 ? (
+          <div className="space-y-4">
+            {filteredOrders.map((order) => {
             const statusKey = order.status.toLowerCase();
             const status = STATUS_CONFIG[statusKey] || STATUS_CONFIG.pending;
             return (
@@ -158,6 +199,20 @@ export default function OrdersPage() {
             );
           })}
         </div>
+        ) : (
+          <EmptyState
+            icon={Search}
+            title="No matches found"
+            description="We couldn't find any orders matching your criteria. Try adjusting your search or filters."
+            action={{
+              label: "Clear Filters",
+              onClick: () => {
+                setSearchTerm("");
+                setStatusFilter("all");
+              }
+            }}
+          />
+        )
       ) : (
         <EmptyState
           icon={Package}

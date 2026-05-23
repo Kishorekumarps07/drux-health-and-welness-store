@@ -41,11 +41,12 @@ export default function CartPage() {
   const totalAmt = total();
   const discountAmt = Math.round((subTotal * (couponDiscount ?? 0)) / 100);
 
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;
-    const ok = applyCoupon(couponInput.trim());
+    const ok = await applyCoupon(couponInput.trim());
     if (ok) {
-      setCouponSuccess(`Coupon applied! ${couponDiscount}% off your order.`);
+      const latestDiscount = useCartStore.getState().couponDiscount;
+      setCouponSuccess(`Coupon applied! ${latestDiscount}% off your order.`);
       setCouponError("");
       setCouponInput("");
     } else {
@@ -225,6 +226,64 @@ export default function CartPage() {
 
           {/* Right Column: Flipkart Style Price Details Sidebar */}
           <div className="lg:col-span-4 space-y-4 lg:sticky lg:top-24">
+            {/* Coupon Card */}
+            <div className="bg-white shadow-sm border border-gray-200 p-6 space-y-4 rounded-sm">
+              {couponCode ? (
+                <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <Tag size={14} className="text-green-600" />
+                    <span className="text-sm font-bold text-green-700">
+                      {couponCode} — {couponDiscount}% OFF
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      removeCoupon();
+                      setCouponSuccess("");
+                    }}
+                    className="text-xs text-red-500 hover:text-red-700 font-bold transition-colors"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1.5">
+                    <Tag size={14} className="text-[#A6D608]" />
+                    Apply Coupon
+                  </h4>
+                  <div className="flex gap-2">
+                    <Input
+                      value={couponInput}
+                      onChange={(e) => {
+                        setCouponInput(e.target.value.toUpperCase());
+                        setCouponError("");
+                        setCouponSuccess("");
+                      }}
+                      placeholder="Enter coupon code"
+                      className="h-10 text-sm uppercase font-mono rounded-sm border-gray-300 focus:border-[#A6D608] focus:ring-[#A6D608]/15"
+                      onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
+                    />
+                    <Button
+                      onClick={handleApplyCoupon}
+                      className="h-10 px-6 bg-[#1E1E1E] hover:bg-black text-white text-xs font-bold rounded-sm uppercase tracking-wider transition-colors"
+                    >
+                      Apply
+                    </Button>
+                  </div>
+                  {couponError && (
+                    <p className="text-xs text-red-500 font-medium">{couponError}</p>
+                  )}
+                  {couponSuccess && (
+                    <p className="text-xs text-green-600 font-bold">{couponSuccess}</p>
+                  )}
+                  <p className="text-[10px] text-gray-400 font-medium">
+                    Try: DRUXX10, HEALTH20, FIRST15, ORGANIC25
+                  </p>
+                </div>
+              )}
+            </div>
+
             <div className="bg-white shadow-sm border border-gray-200">
               <h3 className="px-6 py-4 text-sm font-bold text-gray-500 border-b border-gray-100 uppercase tracking-widest">Price Details</h3>
               <div className="p-6 space-y-4 text-sm">

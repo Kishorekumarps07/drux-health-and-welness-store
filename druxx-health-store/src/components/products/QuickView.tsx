@@ -3,10 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Star, ShoppingCart, Heart, Check, ArrowRight, ShieldCheck, Truck, X } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 import { Product } from "@/types";
 import { useState } from "react";
@@ -18,6 +20,9 @@ interface QuickViewProps {
 }
 
 export function QuickView({ product, open, onOpenChange }: QuickViewProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { isAuthenticated } = useAuthStore();
   const addItem = useCartStore((s) => s.addItem);
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
   const [addedToCart, setAddedToCart] = useState(false);
@@ -32,6 +37,13 @@ export function QuickView({ product, open, onOpenChange }: QuickViewProps) {
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!isAuthenticated) {
+      onOpenChange(false);
+      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+      return;
+    }
+
     if (isWishlisted) {
       removeFromWishlist(product.id);
     } else {

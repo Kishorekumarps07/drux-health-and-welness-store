@@ -11,4 +11,6 @@
 *None detected*
 
 ## Performance Observations
-*All endpoints performed within normal limits.*
+- Endpoint POST /products took 6908ms
+- Endpoint POST /cart/items took 3792ms
+- Endpoint POST /orders took 3033ms

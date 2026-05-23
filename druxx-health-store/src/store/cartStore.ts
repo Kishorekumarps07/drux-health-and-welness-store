@@ -20,7 +20,7 @@ interface CartState {
   openCart: () => void;
   closeCart: () => void;
   toggleCart: () => void;
-  applyCoupon: (code: string) => boolean;
+  applyCoupon: (code: string) => Promise<boolean>;
   removeCoupon: () => void;
   syncWithServer: () => Promise<void>;
   
@@ -138,15 +138,20 @@ export const useCartStore = create<CartState>()(
       closeCart: () => set({ isOpen: false }),
       toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
 
-      applyCoupon: (code) => {
-        const discount = VALID_COUPONS[code.toUpperCase()];
-        if (discount) {
-          set({ couponCode: code.toUpperCase(), couponDiscount: discount });
-          toast.success(`Coupon ${code.toUpperCase()} applied!`);
-          return true;
+      applyCoupon: async (code) => {
+        try {
+          const { couponService } = await import("@/services/couponService");
+          const coupon = await couponService.validateCoupon(code);
+          if (coupon) {
+            set({ couponCode: coupon.code.toUpperCase(), couponDiscount: coupon.discountPercent });
+            return true;
+          }
+          toast.error("Invalid coupon code");
+          return false;
+        } catch (error: any) {
+          toast.error(error.response?.data?.message || error.message || "Failed to apply coupon");
+          return false;
         }
-        toast.error("Invalid coupon code");
-        return false;
       },
 
       removeCoupon: () => set({ couponCode: "", couponDiscount: 0 }),

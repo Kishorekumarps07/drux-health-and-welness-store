@@ -34,11 +34,12 @@ export function CartDrawer() {
   const [couponError, setCouponError] = useState("");
   const [couponSuccess, setCouponSuccess] = useState("");
 
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;
-    const success = applyCoupon(couponInput.trim());
+    const success = await applyCoupon(couponInput.trim());
     if (success) {
-      setCouponSuccess(`${couponDiscount || "?"}% discount applied!`);
+      const latestDiscount = useCartStore.getState().couponDiscount;
+      setCouponSuccess(`${latestDiscount || "?"}% discount applied!`);
       setCouponError("");
       setCouponInput("");
     } else {

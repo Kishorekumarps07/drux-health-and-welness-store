@@ -37,6 +37,14 @@ let _initStarted = false;
 function _clearAuthStorage() {
   if (typeof window !== "undefined") {
     localStorage.removeItem("token");
+    // Also clear Supabase's own session storage keys (sb-<project>-auth-token).
+    // These contain the refresh token that triggers "Invalid Refresh Token" errors
+    // when the session has expired. Without clearing these, the error fires on
+    // every page load until the user explicitly logs in again.
+    const supabaseKeys = Object.keys(localStorage).filter((k) =>
+      k.startsWith("sb-")
+    );
+    supabaseKeys.forEach((k) => localStorage.removeItem(k));
   }
   delete api.defaults.headers.common["Authorization"];
 }
@@ -174,6 +182,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Skip INITIAL_SESSION — we handle that explicitly below with getSession()
       // to avoid double-processing on startup.
       if (event === "INITIAL_SESSION") return;
+
+      // Stale/invalid refresh token (e.g. from a previous logged-out session).
+      // Supabase fires this when the silent token refresh fails.
+      // We silently wipe local state — no redirect, no error, no console noise.
+      // Cast to string: older @supabase/supabase-js types omit TOKEN_REFRESH_FAILED
+      // from the AuthChangeEvent union, but it fires at runtime.
+      if ((event as string) === "TOKEN_REFRESH_FAILED") {
+        _clearAuthStorage();
+        set({
+          isAuthenticated: false,
+          user: null,
+          supabaseUser: null,
+          profile: null,
+          accessToken: null,
+        });
+        return;
+      }
 
       if (!session || !session.user) {
         // SIGNED_OUT event — clear everything

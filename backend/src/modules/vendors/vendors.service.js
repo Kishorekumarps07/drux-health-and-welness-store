@@ -92,7 +92,7 @@ class VendorsService {
         ...VENDOR_SELECT,
         products: {
           where: { status: 'ACTIVE' },
-          select: { id: true, title: true, slug: true, price: true, averageRating: true, images: { where: { isPrimary: true }, take: 1 } },
+          select: { id: true, title: true, slug: true, price: true, comparePrice: true, stockQty: true, averageRating: true, images: { where: { isPrimary: true }, take: 1 } },
           take: 20,
         },
       },

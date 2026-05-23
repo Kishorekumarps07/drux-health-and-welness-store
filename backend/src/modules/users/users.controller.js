@@ -1,4 +1,5 @@
 const usersService = require('./users.service');
+const notificationsService = require('./notifications.service');
 const asyncHandler = require('../../lib/asyncHandler');
 
 const getProfile    = asyncHandler(async (req, res) => {
@@ -31,4 +32,29 @@ const deleteAddress = asyncHandler(async (req, res) => {
   res.status(204).send();
 });
 
-module.exports = { getProfile, updateProfile, getAddresses, createAddress, updateAddress, deleteAddress };
+const getNotifications = asyncHandler(async (req, res) => {
+  const notifications = await notificationsService.list(req.user.id);
+  res.json({ status: 'success', results: notifications.length, data: { notifications } });
+});
+
+const markAllNotificationsRead = asyncHandler(async (req, res) => {
+  await notificationsService.markAllRead(req.user.id);
+  res.json({ status: 'success', message: 'All notifications marked as read' });
+});
+
+const markNotificationRead = asyncHandler(async (req, res) => {
+  const notification = await notificationsService.markRead(req.user.id, req.params.id);
+  res.json({ status: 'success', data: { notification } });
+});
+
+module.exports = { 
+  getProfile, 
+  updateProfile, 
+  getAddresses, 
+  createAddress, 
+  updateAddress, 
+  deleteAddress,
+  getNotifications,
+  markAllNotificationsRead,
+  markNotificationRead
+};
