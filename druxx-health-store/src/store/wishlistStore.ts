@@ -4,42 +4,83 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Product } from "@/types";
 import { toast } from "sonner";
+import { useAuthStore } from "./authStore";
 
 interface WishlistState {
   items: Product[];
+  wishlists: { [userId: string]: Product[] };
   addToWishlist: (product: Product) => void;
   removeFromWishlist: (productId: string) => void;
   isInWishlist: (productId: string) => boolean;
   clearWishlist: () => void;
+  syncUserWishlist: (userId: string | null) => void;
 }
 
 export const useWishlistStore = create<WishlistState>()(
   persist(
     (set, get) => ({
       items: [],
+      wishlists: {},
       addToWishlist: (product) => {
-        const items = get().items;
-        const exists = items.some((item) => item.id === product.id);
+        const userId = useAuthStore.getState().user?.id || "guest";
+        const wishlists = get().wishlists || {};
+        const userWishlist = wishlists[userId] || [];
+        const exists = userWishlist.some((item) => item.id === product.id);
+
         if (!exists) {
-          set({ items: [...items, product] });
+          const updatedList = [...userWishlist, product];
+          set({
+            wishlists: {
+              ...wishlists,
+              [userId]: updatedList,
+            },
+            items: updatedList,
+          });
           toast.success(`${product.name} added to wishlist`);
         } else {
           toast.info(`${product.name} is already in your wishlist`);
         }
       },
       removeFromWishlist: (productId) => {
-        const items = get().items;
-        const itemToRemove = items.find((item) => item.id === productId);
-        set({ items: items.filter((item) => item.id !== productId) });
+        const userId = useAuthStore.getState().user?.id || "guest";
+        const wishlists = get().wishlists || {};
+        const userWishlist = wishlists[userId] || [];
+        const itemToRemove = userWishlist.find((item) => item.id === productId);
+
         if (itemToRemove) {
+          const updatedList = userWishlist.filter((item) => item.id !== productId);
+          set({
+            wishlists: {
+              ...wishlists,
+              [userId]: updatedList,
+            },
+            items: updatedList,
+          });
           toast.success(`${itemToRemove.name} removed from wishlist`);
         }
       },
       isInWishlist: (productId) => {
-        return get().items.some((item) => item.id === productId);
+        const userId = useAuthStore.getState().user?.id || "guest";
+        const wishlists = get().wishlists || {};
+        const userWishlist = wishlists[userId] || [];
+        return userWishlist.some((item) => item.id === productId);
       },
       clearWishlist: () => {
-        set({ items: [] });
+        const userId = useAuthStore.getState().user?.id || "guest";
+        const wishlists = get().wishlists || {};
+        set({
+          wishlists: {
+            ...wishlists,
+            [userId]: [],
+          },
+          items: [],
+        });
+      },
+      syncUserWishlist: (userId) => {
+        const key = userId || "guest";
+        const wishlists = get().wishlists || {};
+        const userWishlist = wishlists[key] || [];
+        set({ items: userWishlist });
       },
     }),
     {
@@ -47,3 +88,15 @@ export const useWishlistStore = create<WishlistState>()(
     }
   )
 );
+
+// Subscribe to auth state changes to synchronize active items
+if (typeof window !== "undefined") {
+  // Sync on initial load
+  const initialUserId = useAuthStore.getState().user?.id || null;
+  useWishlistStore.getState().syncUserWishlist(initialUserId);
+
+  useAuthStore.subscribe((state) => {
+    const userId = state.user?.id || null;
+    useWishlistStore.getState().syncUserWishlist(userId);
+  });
+}
