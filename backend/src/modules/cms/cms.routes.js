@@ -13,27 +13,8 @@ router.get('/hero', asyncHandler(async (req, res) => {
     orderBy: { sortOrder: 'asc' }
   });
   
-  // If empty, return initial defaults (but don't save them to DB yet to avoid duplicates)
-  if (slides.length === 0) {
-    const defaults = [
-      {
-        id: "h1",
-        title: "Premium Health\nSupplements.",
-        subtitle: "Fuel your performance with the highest quality whey, creatine, and vitamins.",
-        image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2000",
-        bgColor: "from-[#1E1E1E] to-[#2CA7A0]"
-      },
-      {
-        id: "h2",
-        title: "100% Authentic\nBrands.",
-        subtitle: "We partner directly with manufacturers to guarantee genuine products.",
-        image: "https://images.unsplash.com/photo-1593079831268-3381b0db4a77?q=80&w=2000",
-        bgColor: "from-[#A6D608] to-[#2CA7A0]"
-      }
-    ];
-    return res.json({ status: 'success', data: defaults });
-  }
-
+  // Remove hardcoded defaults so the admin can intentionally delete all items.
+  // The database should be the single source of truth.
   res.json({ status: 'success', data: slides });
 }));
 
@@ -44,26 +25,8 @@ router.get('/advantages', asyncHandler(async (req, res) => {
     orderBy: { sortOrder: 'asc' }
   });
 
-  if (items.length === 0) {
-    const defaults = [
-      {
-        id: "a1",
-        title: "Certified Pure",
-        description: "Every product is lab-tested and certified for purity and safety.",
-        image: "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?q=80&w=800",
-        icon_type: "shield"
-      },
-      {
-        id: "a2",
-        title: "Fast Delivery",
-        description: "Experience lightning-fast shipping across India within 48 hours.",
-        image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=800",
-        icon_type: "zap"
-      }
-    ];
-    return res.json({ status: 'success', data: defaults });
-  }
-
+  // Remove hardcoded defaults so the admin can intentionally delete all items.
+  // The database should be the single source of truth.
   res.json({ status: 'success', data: items });
 }));
 

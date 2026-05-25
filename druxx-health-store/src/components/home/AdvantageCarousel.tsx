@@ -41,7 +41,11 @@ export function AdvantageCarousel({ advantages }: AdvantageCarouselProps) {
     return () => clearInterval(timer);
   }, [next, advantages, mounted]);
 
-  if (!mounted || !advantages || advantages.length === 0) {
+  if (!advantages || advantages.length === 0) {
+    return null; // Do not render if admin intentionally deleted all advantages
+  }
+
+  if (!mounted) {
     return <div className="w-full h-[500px] bg-[#1E1E1E] animate-pulse" />;
   }
 

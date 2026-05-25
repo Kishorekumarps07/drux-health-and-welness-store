@@ -37,7 +37,11 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
     return () => clearInterval(timer);
   }, [isPaused, next, heroSlides, mounted]);
 
-  if (!mounted || !heroSlides || heroSlides.length === 0) {
+  if (!heroSlides || heroSlides.length === 0) {
+    return null; // Don't show a blank box if admin deleted all slides
+  }
+
+  if (!mounted) {
     return <div className="w-full aspect-[4/3] md:aspect-[21/7] lg:aspect-[21/6] bg-[#1E1E1E] animate-pulse rounded-xl" />;
   }
 
