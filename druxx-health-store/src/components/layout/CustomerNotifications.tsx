@@ -34,7 +34,12 @@ export function CustomerNotifications() {
     try {
       const data = await notificationService.getNotifications();
       setNotifications(data);
-    } catch (err) {
+    } catch (err: any) {
+      // If it's a 401, the API interceptor automatically cleans up the session.
+      // We handle it silently to avoid logging expected token expirations as console errors.
+      if (err?.response?.status === 401) {
+        return;
+      }
       console.error("Failed to fetch customer notifications:", err);
     }
   }, [isAuthenticated]);
