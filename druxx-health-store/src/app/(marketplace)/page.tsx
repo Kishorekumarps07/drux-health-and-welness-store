@@ -8,6 +8,9 @@ import { HomeAnimations } from "@/components/home/HomeAnimations";
 import api from "@/lib/api";
 import { NewsletterSection } from "@/components/home/NewsletterSection";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function HomePage() {
   // Fetch all home data in parallel on the server
   // Fetch home data sequentially to avoid hitting rate limits (429)
