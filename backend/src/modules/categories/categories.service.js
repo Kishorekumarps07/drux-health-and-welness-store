@@ -35,8 +35,18 @@ class CategoriesService {
   }
 
   async create(data) {
+    if (data.name) data.name = data.name.trim();
     const slug = slugify(data.name, { lower: true, strict: true });
-    const exists = await prisma.category.findUnique({ where: { slug } });
+    
+    // Deduplicate case-insensitively per AGENTS.md conventions
+    const exists = await prisma.category.findFirst({
+      where: {
+        OR: [
+          { slug },
+          { name: { equals: data.name, mode: 'insensitive' } }
+        ]
+      }
+    });
     if (exists) throw new AppError(`Category "${data.name}" already exists.`, 409);
     return prisma.category.create({ data: { ...data, slug } });
   }
@@ -44,6 +54,23 @@ class CategoriesService {
   async update(id, data) {
     const cat = await prisma.category.findUnique({ where: { id } });
     if (!cat) throw new AppError('Category not found.', 404);
+    
+    if (data.name) {
+      data.name = data.name.trim();
+      const slug = slugify(data.name, { lower: true, strict: true });
+      const exists = await prisma.category.findFirst({
+        where: {
+          id: { not: id },
+          OR: [
+            { slug },
+            { name: { equals: data.name, mode: 'insensitive' } }
+          ]
+        }
+      });
+      if (exists) throw new AppError(`Category "${data.name}" already exists.`, 409);
+      data.slug = slug;
+    }
+    
     return prisma.category.update({ where: { id }, data });
   }
 
