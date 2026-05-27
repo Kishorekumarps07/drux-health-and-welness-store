@@ -1,10 +1,11 @@
 const { Router } = require('express');
-const { list, validateCoupon, create, update, remove } = require('./coupons.controller');
+const { list, getActiveCoupons, validateCoupon, create, update, remove } = require('./coupons.controller');
 const { protect, restrictTo } = require('../../middleware/auth');
 
 const router = Router();
 
-// Public / User route: validate coupon
+// Public routes
+router.get('/active', getActiveCoupons);
 router.get('/validate/:code', protect, validateCoupon);
 
 // Admin routes

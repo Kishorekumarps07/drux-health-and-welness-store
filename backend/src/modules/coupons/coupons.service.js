@@ -8,6 +8,13 @@ class CouponsService {
     });
   }
 
+  async getActiveCoupons() {
+    return prisma.coupon.findMany({
+      where: { isActive: true },
+      orderBy: { discountPercent: 'desc' },
+    });
+  }
+
   async validateCoupon(code) {
     if (!code) throw new AppError('Coupon code is required.', 400);
     const coupon = await prisma.coupon.findUnique({

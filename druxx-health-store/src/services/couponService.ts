@@ -19,6 +19,14 @@ export const couponService = {
   },
 
   /**
+   * Fetch active coupons (Public)
+   */
+  async getActiveCoupons(): Promise<Coupon[]> {
+    const response = await api.get('/coupons/active');
+    return response.data.data?.coupons || [];
+  },
+
+  /**
    * Create a coupon (Admin)
    */
   async createCoupon(data: { code: string; discountPercent: number; isActive?: boolean }) {

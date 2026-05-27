@@ -6,6 +6,11 @@ const list = asyncHandler(async (req, res) => {
   res.json({ status: 'success', results: coupons.length, data: { coupons } });
 });
 
+const getActiveCoupons = asyncHandler(async (req, res) => {
+  const coupons = await couponsService.getActiveCoupons();
+  res.json({ status: 'success', results: coupons.length, data: { coupons } });
+});
+
 const validateCoupon = asyncHandler(async (req, res) => {
   const coupon = await couponsService.validateCoupon(req.params.code);
   res.json({ status: 'success', data: { coupon } });
@@ -26,4 +31,4 @@ const remove = asyncHandler(async (req, res) => {
   res.status(204).send();
 });
 
-module.exports = { list, validateCoupon, create, update, remove };
+module.exports = { list, getActiveCoupons, validateCoupon, create, update, remove };

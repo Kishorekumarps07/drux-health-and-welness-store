@@ -31,6 +31,8 @@ import { NavCartPreview } from "./navbar/NavCartPreview";
 import api from "@/lib/api";
 import { LocationModal } from "./navbar/LocationModal";
 import { CustomerNotifications } from "@/components/layout/CustomerNotifications";
+import { toast } from "sonner";
+import { couponService, Coupon } from "@/services/couponService";
 
 export function Navbar() {
   const router = useRouter();
@@ -38,6 +40,19 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [activeCoupons, setActiveCoupons] = useState<Coupon[]>([]);
+
+  useEffect(() => {
+    const fetchActiveCoupons = async () => {
+      try {
+        const fetched = await couponService.getActiveCoupons();
+        setActiveCoupons(fetched || []);
+      } catch (err) {
+        console.error("Failed to load active coupons in navbar", err);
+      }
+    };
+    fetchActiveCoupons();
+  }, []);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const { location, setLocation, categories, fetchCategories } = useMarketplaceStore();
   
@@ -306,10 +321,38 @@ export function Navbar() {
             <Link href="/dashboard/orders" className="text-[10px] font-bold text-gray-500 hover:text-black transition-colors flex items-center gap-1">
                 <Package size={12} className="text-[#A6D608]" /> Track Order
             </Link>
-            <div className="h-3 w-px bg-gray-200" />
-            <p className="text-[9px] font-black text-[#FF7A00] animate-pulse uppercase tracking-widest">
-                DRUXX10 — Save Extra 10%
-            </p>
+            
+            {activeCoupons.length > 0 && (
+              <>
+                <div className="h-3 w-px bg-gray-200" />
+                <div className="relative group">
+                  <div className="bg-orange-50 border border-orange-100 hover:bg-orange-100/80 transition-all text-[#FF7A00] text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1.5 cursor-pointer shadow-sm shadow-orange-500/5 select-none">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF7A00] animate-ping" />
+                    <span>Use Code: <strong className="underline tracking-wider">{activeCoupons[0].code}</strong> (Save {activeCoupons[0].discountPercent}%)</span>
+                  </div>
+                  
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-gray-100 rounded-2xl shadow-xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-wider mb-2">Available Coupons</p>
+                    <div className="space-y-1.5">
+                      {activeCoupons.map((coupon) => (
+                        <div 
+                          key={coupon.id} 
+                          onClick={() => {
+                            navigator.clipboard.writeText(coupon.code);
+                            toast.success(`Coupon code ${coupon.code} copied!`);
+                          }}
+                          className="flex items-center justify-between p-2 rounded-xl bg-gray-50/50 hover:bg-[#A6D608]/5 border border-transparent hover:border-[#A6D608]/20 transition-all cursor-pointer group/item"
+                        >
+                          <span className="text-[10px] font-black text-gray-800 tracking-wider font-mono">{coupon.code}</span>
+                          <span className="text-[10px] font-black text-[#A6D608]">-{coupon.discountPercent}%</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[8px] text-gray-400 text-center mt-2.5">Click any code to copy</p>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
