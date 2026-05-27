@@ -61,7 +61,7 @@ export function QuickView({ product, open, onOpenChange }: QuickViewProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-4xl p-0 overflow-hidden border-none rounded-[2rem] md:rounded-[3rem] shadow-2xl bg-white">
+      <DialogContent showCloseButton={false} className="max-w-[95vw] md:max-w-4xl p-0 overflow-hidden border-none rounded-[2rem] md:rounded-[3rem] shadow-2xl bg-white">
         <div className="flex flex-col md:flex-row min-h-[500px]">
           {/* Left: Product Image */}
           <div className="w-full md:w-[45%] relative bg-[#F8F9FA] flex items-center justify-center p-6 md:p-12 overflow-hidden group">
