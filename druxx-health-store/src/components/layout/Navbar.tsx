@@ -392,6 +392,32 @@ export function Navbar() {
               )}
             </div>
 
+            {activeCoupons.length > 0 && (
+              <div className="bg-orange-50/50 border-b border-orange-100/50 p-5 shrink-0">
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">Active Promos</p>
+                <div className="flex gap-2.5 overflow-x-auto pb-1 px-1 no-scrollbar">
+                  {activeCoupons.map((coupon) => (
+                    <div 
+                      key={coupon.id} 
+                      onClick={() => {
+                        navigator.clipboard.writeText(coupon.code);
+                        toast.success(`Coupon code ${coupon.code} copied!`);
+                      }}
+                      className="flex-shrink-0 bg-white border border-orange-100 rounded-xl p-3 flex items-center justify-between gap-6 cursor-pointer hover:border-orange-200 transition-all shadow-sm active:scale-[0.98]"
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-xs font-black text-gray-900 font-mono tracking-wider">{coupon.code}</span>
+                        <span className="text-[9px] font-bold text-gray-400 mt-0.5">Click to copy</span>
+                      </div>
+                      <div className="bg-orange-50 text-[#FF7A00] font-black text-xs px-2.5 py-1 rounded-lg">
+                        -{coupon.discountPercent}%
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <nav className="flex-1 overflow-y-auto custom-scrollbar">
               <div className="p-6">
                 <h3 className="text-[12px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Shop By Category</h3>
