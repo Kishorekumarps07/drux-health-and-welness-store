@@ -4,12 +4,14 @@ import { CartItem, Product } from "@/types";
 import { toast } from "sonner";
 import { cartService } from "@/services/cartService";
 import { useAuthStore } from "@/store/authStore";
+import type { Coupon } from "@/services/couponService";
 
 interface CartState {
   items: CartItem[];
   isOpen: boolean;
   couponCode: string;
   couponDiscount: number;
+  couponDetails: Coupon | null;
   isSyncing: boolean;
 
   // Actions
@@ -29,15 +31,42 @@ interface CartState {
   subtotal: () => number;
   shipping: () => number;
   tax: () => number;
+  couponDiscountAmount: () => number;
   total: () => number;
   fetchCart: () => Promise<void>;
 }
 
-const VALID_COUPONS: Record<string, number> = {
-  DRUXX10: 10,
-  HEALTH20: 20,
-  FIRST15: 15,
-  ORGANIC25: 25,
+const isCouponApplicable = (coupon: Coupon | null, items: CartItem[]): boolean => {
+  if (!coupon) return true;
+  if (!coupon.productId && !coupon.vendorId) return true;
+  
+  if (coupon.productId) {
+    return items.some((item) => item.product.id === coupon.productId);
+  }
+  if (coupon.vendorId) {
+    return items.some((item) => item.product.vendor?.id === coupon.vendorId);
+  }
+  
+  return true;
+};
+
+const setItemsAndValidateCoupon = (
+  set: any,
+  get: any,
+  updatedItems: CartItem[]
+) => {
+  const coupon = get().couponDetails;
+  if (coupon && !isCouponApplicable(coupon, updatedItems)) {
+    set({
+      items: updatedItems,
+      couponCode: "",
+      couponDiscount: 0,
+      couponDetails: null,
+    });
+    toast.info("Coupon removed as target items are no longer in your cart.");
+  } else {
+    set({ items: updatedItems });
+  }
 };
 
 export const useCartStore = create<CartState>()(
@@ -47,6 +76,7 @@ export const useCartStore = create<CartState>()(
       isOpen: false,
       couponCode: "",
       couponDiscount: 0,
+      couponDetails: null,
       isSyncing: false,
 
       addItem: async (product, quantity = 1) => {
@@ -67,14 +97,14 @@ export const useCartStore = create<CartState>()(
           updatedItems.push({ product, quantity });
         }
         
-        set({ items: updatedItems });
+        setItemsAndValidateCoupon(set, get, updatedItems);
         toast.success(`${product.name} added to cart`);
 
         // Server Sync
         if (isAuthenticated) {
           try {
             const serverItems = await cartService.addItem(product.id, quantity);
-            set({ items: serverItems });
+            setItemsAndValidateCoupon(set, get, serverItems);
           } catch (error) {
             console.error("Cart sync failed:", error);
           }
@@ -85,15 +115,14 @@ export const useCartStore = create<CartState>()(
         const { isAuthenticated } = useAuthStore.getState();
         const itemToRemove = get().items.find(i => i.product.id === productId);
         
-        set((state) => ({
-          items: state.items.filter((i) => i.product.id !== productId),
-        }));
+        const updatedItems = get().items.filter((i) => i.product.id !== productId);
+        setItemsAndValidateCoupon(set, get, updatedItems);
         toast.error("Item removed from cart");
 
         if (isAuthenticated && itemToRemove?.id) {
           try {
             const serverItems = await cartService.removeItem(itemToRemove.id);
-            set({ items: serverItems });
+            setItemsAndValidateCoupon(set, get, serverItems);
           } catch (error) {
             console.error("Cart remove sync failed:", error);
           }
@@ -110,16 +139,15 @@ export const useCartStore = create<CartState>()(
 
         const itemToUpdate = get().items.find(i => i.product.id === productId);
 
-        set((state) => ({
-          items: state.items.map((i) =>
-            i.product.id === productId ? { ...i, quantity: Math.min(quantity, 10) } : i
-          ),
-        }));
+        const updatedItems = get().items.map((i) =>
+          i.product.id === productId ? { ...i, quantity: Math.min(quantity, 10) } : i
+        );
+        setItemsAndValidateCoupon(set, get, updatedItems);
 
         if (isAuthenticated && itemToUpdate?.id) {
           try {
             const serverItems = await cartService.updateItem(itemToUpdate.id, quantity);
-            set({ items: serverItems });
+            setItemsAndValidateCoupon(set, get, serverItems);
           } catch (error) {
             console.error("Cart update sync failed:", error);
           }
@@ -128,7 +156,7 @@ export const useCartStore = create<CartState>()(
 
       clearCart: () => {
         const { isAuthenticated } = useAuthStore.getState();
-        set({ items: [], couponCode: "", couponDiscount: 0 });
+        set({ items: [], couponCode: "", couponDiscount: 0, couponDetails: null });
         if (isAuthenticated) {
           cartService.clearCart();
         }
@@ -143,7 +171,23 @@ export const useCartStore = create<CartState>()(
           const { couponService } = await import("@/services/couponService");
           const coupon = await couponService.validateCoupon(code);
           if (coupon) {
-            set({ couponCode: coupon.code.toUpperCase(), couponDiscount: coupon.discountPercent });
+            const { items } = get();
+            if (!isCouponApplicable(coupon, items)) {
+              let targetName = "the required products";
+              if (coupon.product?.title) {
+                targetName = `"${coupon.product.title}"`;
+              } else if (coupon.vendor?.storeName) {
+                targetName = `products from "${coupon.vendor.storeName}"`;
+              }
+              toast.error(`This coupon is only applicable to ${targetName}.`);
+              return false;
+            }
+
+            set({ 
+              couponCode: coupon.code.toUpperCase(), 
+              couponDiscount: coupon.discountPercent,
+              couponDetails: coupon
+            });
             return true;
           }
           toast.error("Invalid coupon code");
@@ -154,7 +198,7 @@ export const useCartStore = create<CartState>()(
         }
       },
 
-      removeCoupon: () => set({ couponCode: "", couponDiscount: 0 }),
+      removeCoupon: () => set({ couponCode: "", couponDiscount: 0, couponDetails: null }),
 
       syncWithServer: async () => {
         const { isAuthenticated } = useAuthStore.getState();
@@ -167,7 +211,7 @@ export const useCartStore = create<CartState>()(
             quantity: i.quantity 
           }));
           const mergedItems = await cartService.syncCart(localItems);
-          set({ items: mergedItems });
+          setItemsAndValidateCoupon(set, get, mergedItems);
         } catch (error) {
           console.error("Cart final sync failed:", error);
         } finally {
@@ -187,9 +231,30 @@ export const useCartStore = create<CartState>()(
 
       tax: () => Math.round(get().subtotal() * 0.05),
 
+      couponDiscountAmount: () => {
+        const coupon = get().couponDetails;
+        if (!coupon) return 0;
+
+        const { items } = get();
+        let matchingItems = items;
+
+        if (coupon.productId) {
+          matchingItems = items.filter((item) => item.product.id === coupon.productId);
+        } else if (coupon.vendorId) {
+          matchingItems = items.filter((item) => item.product.vendor?.id === coupon.vendorId);
+        }
+
+        const applicableSubtotal = matchingItems.reduce(
+          (acc, item) => acc + item.product.price * item.quantity,
+          0
+        );
+
+        return Math.round((applicableSubtotal * coupon.discountPercent) / 100);
+      },
+
       total: () => {
         const sub = get().subtotal();
-        const discount = (sub * get().couponDiscount) / 100;
+        const discount = get().couponDiscountAmount();
         return Math.round(sub - discount + get().shipping() + get().tax());
       },
 
@@ -199,7 +264,7 @@ export const useCartStore = create<CartState>()(
         
         try {
           const serverItems = await cartService.getCart();
-          set({ items: serverItems });
+          setItemsAndValidateCoupon(set, get, serverItems);
         } catch (error) {
           console.error("Fetch cart failed:", error);
         }
@@ -211,6 +276,7 @@ export const useCartStore = create<CartState>()(
         items: state.items,
         couponCode: state.couponCode,
         couponDiscount: state.couponDiscount,
+        couponDetails: state.couponDetails,
       }),
     }
   )

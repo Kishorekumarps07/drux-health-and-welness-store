@@ -24,6 +24,7 @@ export default function CartPage() {
     total,
     couponCode,
     couponDiscount,
+    couponDiscountAmount,
     applyCoupon,
     removeCoupon,
     clearCart,
@@ -39,7 +40,7 @@ export default function CartPage() {
   const shipCost = shipping();
   const taxAmt = tax();
   const totalAmt = total();
-  const discountAmt = Math.round((subTotal * (couponDiscount ?? 0)) / 100);
+  const discountAmt = couponDiscountAmount();
 
   const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;

@@ -25,14 +25,14 @@ router.use(protect);
  */
 router.post('/onboard', onboardVendor);
 
-// Require Vendor Role for all subsequent routes
-router.use(restrictTo('VENDOR', 'ADMIN'));
-
 /**
  * @route   GET /api/v1/vendor/me
  * @desc    Get current vendor's profile info
  */
 router.get('/me', getMyVendorProfile);
+
+// Require Vendor Role for all subsequent routes
+router.use(restrictTo('VENDOR', 'ADMIN'));
 
 /**
  * @route   GET /api/v1/vendor/stats

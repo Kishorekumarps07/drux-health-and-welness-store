@@ -26,6 +26,7 @@ export function CartDrawer() {
     total,
     couponCode,
     couponDiscount,
+    couponDiscountAmount,
     applyCoupon,
     removeCoupon,
   } = useCartStore();
@@ -52,7 +53,7 @@ export function CartDrawer() {
   const shipCost = shipping();
   const taxAmt = tax();
   const totalAmt = total();
-  const discountAmt = Math.round((subTotal * (couponDiscount ?? 0)) / 100);
+  const discountAmt = couponDiscountAmount();
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && closeCart()}>

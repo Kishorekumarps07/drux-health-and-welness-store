@@ -265,27 +265,26 @@ class AdminService {
 
     const products = await prisma.product.findMany({
       where,
-      orderBy: { stock: 'asc' },
+      orderBy: { stockQty: 'asc' },
       include: {
         vendor: { select: { storeName: true, id: true } }
       }
     });
 
     const stats = await prisma.product.aggregate({
-      _sum: { stock: true },
+      _sum: { stockQty: true },
       _count: { id: true },
-      // total value = price * stock (prisma aggregate can't do this easily, we'll calc in service)
     });
 
     // Calculate total inventory value
-    const allProducts = await prisma.product.findMany({ select: { price: true, stock: true } });
-    const totalValue = allProducts.reduce((acc, curr) => acc + (Number(curr.price) * curr.stock), 0);
+    const allProducts = await prisma.product.findMany({ select: { price: true, stockQty: true } });
+    const totalValue = allProducts.reduce((acc, curr) => acc + (Number(curr.price) * curr.stockQty), 0);
 
     return { 
       products, 
       stats: {
         totalSkus: stats._count.id,
-        totalStock: stats._sum.stock || 0,
+        totalStock: stats._sum.stockQty || 0,
         totalValue,
         capacity: 72 // Placeholder or logic for storage
       }

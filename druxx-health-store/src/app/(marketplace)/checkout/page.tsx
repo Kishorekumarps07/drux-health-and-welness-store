@@ -48,6 +48,7 @@ export default function CheckoutPage() {
     tax, 
     couponCode,
     couponDiscount, 
+    couponDiscountAmount,
     applyCoupon,
     removeCoupon,
     clearCart, 
@@ -755,7 +756,7 @@ export default function CheckoutPage() {
                 {couponDiscount > 0 && (
                   <div className="flex justify-between text-green-600 font-bold">
                     <span>Discount</span>
-                    <span>-₹{Math.round((subtotal() * couponDiscount) / 100).toLocaleString()}</span>
+                    <span>-₹{couponDiscountAmount().toLocaleString()}</span>
                   </div>
                 )}
                 
@@ -768,7 +769,7 @@ export default function CheckoutPage() {
               {couponDiscount > 0 && (
                 <div className="bg-green-50/50 border-t border-gray-100 px-6 py-3.5 text-xs font-bold text-green-600 flex items-center gap-1.5 rounded-b-sm">
                   <span>★</span>
-                  <span>You will save ₹{Math.round((subtotal() * couponDiscount) / 100).toLocaleString()} on this order!</span>
+                  <span>You will save ₹{couponDiscountAmount().toLocaleString()} on this order!</span>
                 </div>
               )}
             </div>

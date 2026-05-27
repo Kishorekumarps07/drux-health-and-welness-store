@@ -23,10 +23,23 @@ export default function AdminCouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<{ code: string; discountPercent: number; isActive: boolean }>({ 
+  const [products, setProducts] = useState<{ id: string; name: string }[]>([]);
+  const [vendors, setVendors] = useState<{ id: string; name: string }[]>([]);
+
+  const [formData, setFormData] = useState<{ 
+    code: string; 
+    discountPercent: number; 
+    isActive: boolean;
+    applicabilityType: "ALL" | "PRODUCT" | "VENDOR";
+    productId: string | null;
+    vendorId: string | null;
+  }>({ 
     code: "", 
     discountPercent: 10, 
-    isActive: true 
+    isActive: true,
+    applicabilityType: "ALL",
+    productId: null,
+    vendorId: null
   });
   const [search, setSearch] = useState("");
   const [mounted, setMounted] = useState(false);
@@ -46,6 +59,22 @@ export default function AdminCouponsPage() {
   useEffect(() => {
     setMounted(true);
     fetchCoupons();
+
+    const loadTargets = async () => {
+      try {
+        const { productService } = await import("@/services/productService");
+        const { vendorService } = await import("@/services/vendorService");
+        
+        const productsRes = await productService.getAllProducts({ limit: 150 });
+        const vendorsRes = await vendorService.getAllVendors({ limit: 100 });
+        
+        setProducts(productsRes.products.map((p: any) => ({ id: p.id, name: p.name })));
+        setVendors(vendorsRes.vendors.map((v: any) => ({ id: v.id, name: v.name })));
+      } catch (error) {
+        console.error("Failed to load coupon targets:", error);
+      }
+    };
+    loadTargets();
   }, []);
 
   const handleSave = async () => {
@@ -60,20 +89,36 @@ export default function AdminCouponsPage() {
       return;
     }
 
+    const productId = formData.applicabilityType === "PRODUCT" ? formData.productId : null;
+    const vendorId = formData.applicabilityType === "VENDOR" ? formData.vendorId : null;
+
+    if (formData.applicabilityType === "PRODUCT" && !productId) {
+      toast.error("Please select a target product");
+      return;
+    }
+    if (formData.applicabilityType === "VENDOR" && !vendorId) {
+      toast.error("Please select a target vendor");
+      return;
+    }
+
     const loadingToast = toast.loading(editingId === "new" ? "Creating coupon..." : "Updating coupon...");
     try {
       if (editingId === "new") {
         await couponService.createCoupon({
           code: formData.code.toUpperCase().trim(),
           discountPercent: pct,
-          isActive: formData.isActive
+          isActive: formData.isActive,
+          productId,
+          vendorId
         });
         toast.success("Coupon created successfully", { id: loadingToast });
       } else {
         await couponService.updateCoupon(editingId!, {
           code: formData.code.toUpperCase().trim(),
           discountPercent: pct,
-          isActive: formData.isActive
+          isActive: formData.isActive,
+          productId,
+          vendorId
         });
         toast.success("Coupon updated successfully", { id: loadingToast });
       }
@@ -116,7 +161,14 @@ export default function AdminCouponsPage() {
         <Button 
           onClick={() => {
             setEditingId("new");
-            setFormData({ code: "", discountPercent: 10, isActive: true });
+            setFormData({ 
+              code: "", 
+              discountPercent: 10, 
+              isActive: true,
+              applicabilityType: "ALL",
+              productId: null,
+              vendorId: null
+            });
           }}
           className="bg-[#10B981] hover:bg-[#059669] rounded-xl h-12 gap-2 font-bold px-6 shadow-lg shadow-[#10B981]/20 active:scale-95 transition-all"
         >
@@ -171,12 +223,34 @@ export default function AdminCouponsPage() {
                       Added {new Date(c.createdAt).toLocaleDateString()}
                     </p>
                   </div>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 mt-2">
+                    {c.productId && c.product?.title ? (
+                      <span className="px-2.5 py-0.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[9px] font-bold uppercase tracking-wider">
+                        Target: {c.product.title}
+                      </span>
+                    ) : c.vendorId && c.vendor?.storeName ? (
+                      <span className="px-2.5 py-0.5 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[9px] font-bold uppercase tracking-wider">
+                        Vendor: {c.vendor.storeName}
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-0.5 rounded-lg bg-gray-500/10 text-gray-400 border border-gray-500/20 text-[9px] font-bold uppercase tracking-wider">
+                        Store-wide
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={() => {
                       setEditingId(c.id);
-                      setFormData({ code: c.code, discountPercent: c.discountPercent, isActive: c.isActive });
+                      setFormData({ 
+                        code: c.code, 
+                        discountPercent: c.discountPercent, 
+                        isActive: c.isActive,
+                        applicabilityType: c.productId ? "PRODUCT" : c.vendorId ? "VENDOR" : "ALL",
+                        productId: c.productId || null,
+                        vendorId: c.vendorId || null
+                      });
                     }}
                     className="p-3 rounded-xl bg-[#1F2937] text-[#9CA3AF] hover:text-[#10B981] hover:bg-[#10B981]/10 transition-all border border-transparent hover:border-[#10B981]/20"
                   >
@@ -250,6 +324,73 @@ export default function AdminCouponsPage() {
                           className="w-full bg-[#0B0F14] border border-[#1F2937] rounded-xl px-4 py-3.5 text-white text-sm focus:border-[#10B981] outline-none transition-all placeholder:text-[#374151]"
                         />
                      </div>
+
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest flex items-center gap-2 px-1">
+                          Applicability
+                        </label>
+                        <select
+                          value={formData.applicabilityType}
+                          onChange={(e) => {
+                            const val = e.target.value as "ALL" | "PRODUCT" | "VENDOR";
+                            setFormData({
+                              ...formData,
+                              applicabilityType: val,
+                              productId: val === "PRODUCT" ? (products[0]?.id || null) : null,
+                              vendorId: val === "VENDOR" ? (vendors[0]?.id || null) : null
+                            });
+                          }}
+                          className="w-full bg-[#0B0F14] border border-[#1F2937] rounded-xl px-4 py-3.5 text-white text-sm focus:border-[#10B981] outline-none transition-all cursor-pointer"
+                        >
+                          <option value="ALL">Store-wide (All Products)</option>
+                          <option value="PRODUCT">Specific Product</option>
+                          <option value="VENDOR">Specific Vendor</option>
+                        </select>
+                     </div>
+
+                     {formData.applicabilityType === "PRODUCT" && (
+                       <div className="space-y-2 animate-in fade-in duration-200">
+                          <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest flex items-center gap-2 px-1">
+                            Target Product
+                          </label>
+                          <select
+                            value={formData.productId || ""}
+                            onChange={(e) => setFormData({ ...formData, productId: e.target.value || null })}
+                            className="w-full bg-[#0B0F14] border border-[#1F2937] rounded-xl px-4 py-3.5 text-white text-sm focus:border-[#10B981] outline-none transition-all cursor-pointer"
+                          >
+                            <option value="" disabled>-- Select Product --</option>
+                            {products.length === 0 ? (
+                              <option disabled>Loading products...</option>
+                            ) : (
+                              products.map((p) => (
+                                <option key={p.id} value={p.id}>{p.name}</option>
+                              ))
+                            )}
+                          </select>
+                       </div>
+                     )}
+
+                     {formData.applicabilityType === "VENDOR" && (
+                       <div className="space-y-2 animate-in fade-in duration-200">
+                          <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest flex items-center gap-2 px-1">
+                            Target Vendor
+                          </label>
+                          <select
+                            value={formData.vendorId || ""}
+                            onChange={(e) => setFormData({ ...formData, vendorId: e.target.value || null })}
+                            className="w-full bg-[#0B0F14] border border-[#1F2937] rounded-xl px-4 py-3.5 text-white text-sm focus:border-[#10B981] outline-none transition-all cursor-pointer"
+                          >
+                            <option value="" disabled>-- Select Vendor --</option>
+                            {vendors.length === 0 ? (
+                              <option disabled>Loading vendors...</option>
+                            ) : (
+                              vendors.map((v) => (
+                                <option key={v.id} value={v.id}>{v.name}</option>
+                              ))
+                            )}
+                          </select>
+                       </div>
+                     )}
 
                      <div className="flex items-center gap-3 px-1 pt-2">
                         <input 

@@ -5,6 +5,10 @@ class CouponsService {
   async list() {
     return prisma.coupon.findMany({
       orderBy: { createdAt: 'desc' },
+      include: {
+        product: { select: { id: true, title: true } },
+        vendor: { select: { id: true, storeName: true } }
+      }
     });
   }
 
@@ -12,6 +16,10 @@ class CouponsService {
     return prisma.coupon.findMany({
       where: { isActive: true },
       orderBy: { discountPercent: 'desc' },
+      include: {
+        product: { select: { id: true, title: true } },
+        vendor: { select: { id: true, storeName: true } }
+      }
     });
   }
 
@@ -19,6 +27,10 @@ class CouponsService {
     if (!code) throw new AppError('Coupon code is required.', 400);
     const coupon = await prisma.coupon.findUnique({
       where: { code: code.toUpperCase() },
+      include: {
+        product: { select: { id: true, title: true } },
+        vendor: { select: { id: true, storeName: true } }
+      }
     });
     if (!coupon || !coupon.isActive) {
       throw new AppError('Invalid or expired coupon code.', 404);
@@ -42,6 +54,8 @@ class CouponsService {
         code,
         discountPercent,
         isActive: data.isActive !== undefined ? !!data.isActive : true,
+        productId: data.productId || null,
+        vendorId: data.vendorId || null,
       },
     });
   }
@@ -70,6 +84,13 @@ class CouponsService {
 
     if (data.isActive !== undefined) {
       updateData.isActive = !!data.isActive;
+    }
+
+    if (data.productId !== undefined) {
+      updateData.productId = data.productId || null;
+    }
+    if (data.vendorId !== undefined) {
+      updateData.vendorId = data.vendorId || null;
     }
 
     return prisma.coupon.update({

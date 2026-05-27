@@ -28,10 +28,31 @@ const onboardVendor = asyncHandler(async (req, res) => {
   // 2. Check if profile already exists
   const existingVendor = await prisma.vendor.findUnique({ where: { userId } });
   if (existingVendor) {
+    if (['APPROVED', 'ACTIVE'].includes(existingVendor.approvalStatus)) {
+      return res.status(200).json({
+        status: 'success',
+        message: 'Vendor profile already exists and is active/approved.',
+        data: { vendor: existingVendor }
+      });
+    }
+
+    // Update and resubmit the pending/rejected application
+    const slug = storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.floor(Math.random() * 10000);
+    const updatedVendor = await prisma.vendor.update({
+      where: { userId },
+      data: {
+        storeName,
+        storeSlug: slug,
+        storeDescription,
+        gstNumber,
+        approvalStatus: 'PENDING'
+      }
+    });
+
     return res.status(200).json({
       status: 'success',
-      message: 'Vendor profile already exists.',
-      data: { vendor: existingVendor }
+      message: 'Vendor application updated and resubmitted successfully.',
+      data: { vendor: updatedVendor }
     });
   }
 

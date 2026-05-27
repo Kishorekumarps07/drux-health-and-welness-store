@@ -5,6 +5,10 @@ export interface Coupon {
   code: string;
   discountPercent: number;
   isActive: boolean;
+  productId?: string | null;
+  vendorId?: string | null;
+  product?: { id: string; title: string } | null;
+  vendor?: { id: string; storeName: string } | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -29,7 +33,13 @@ export const couponService = {
   /**
    * Create a coupon (Admin)
    */
-  async createCoupon(data: { code: string; discountPercent: number; isActive?: boolean }) {
+  async createCoupon(data: { 
+    code: string; 
+    discountPercent: number; 
+    isActive?: boolean;
+    productId?: string | null;
+    vendorId?: string | null;
+  }) {
     const response = await api.post('/coupons', data);
     return response.data.data?.coupon;
   },
@@ -37,7 +47,16 @@ export const couponService = {
   /**
    * Update an existing coupon (Admin)
    */
-  async updateCoupon(id: string, updates: Partial<{ code: string; discountPercent: number; isActive: boolean }>) {
+  async updateCoupon(
+    id: string, 
+    updates: Partial<{ 
+      code: string; 
+      discountPercent: number; 
+      isActive: boolean;
+      productId: string | null;
+      vendorId: string | null;
+    }>
+  ) {
     const response = await api.put(`/coupons/${id}`, updates);
     return response.data.data?.coupon;
   },

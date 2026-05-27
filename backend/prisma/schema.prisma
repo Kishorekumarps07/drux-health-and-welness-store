@@ -146,10 +146,11 @@ model Vendor {
   updatedAt          DateTime     @updatedAt @map("updated_at")
 
   // Relations
-  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  products Product[]
-  payouts  VendorPayout[]
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products   Product[]
+  payouts    VendorPayout[]
   orderItems OrderItem[]
+  coupons    Coupon[]
 
   @@index([approvalStatus])
   @@index([rating])
@@ -215,6 +216,7 @@ model Product {
   reviews    Review[]
   orderItems OrderItem[]
   cartItems  CartItem[]
+  coupons    Coupon[]
 
   @@index([vendorId])
   @@index([categoryId])
@@ -475,8 +477,14 @@ model Coupon {
   code            String   @unique
   discountPercent Int      @map("discount_percent")
   isActive        Boolean  @default(true) @map("is_active")
+  productId       String?  @map("product_id")
+  vendorId        String?  @map("vendor_id")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  product         Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  vendor          Vendor?  @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 
   @@map("coupons")
 }
