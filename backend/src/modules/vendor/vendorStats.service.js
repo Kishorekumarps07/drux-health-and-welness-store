@@ -2,6 +2,21 @@
 
 const prisma = require('../../lib/prisma');
 const AppError = require('../../lib/AppError');
+const Cache = require('../../lib/cache');
+
+const CACHE_TTL = 30; // 30 seconds cache TTL
+
+const clearVendorStatsCache = async (userId) => {
+  try {
+    if (userId) {
+      await Cache.del(`vendor:stats:${userId}`);
+    } else {
+      await Cache.clearPattern('vendor:stats:*');
+    }
+  } catch (err) {
+    // Suppress potential invalidation errors
+  }
+};
 
 class VendorStatsService {
   /**
@@ -17,6 +32,11 @@ class VendorStatsService {
    * Aggregate statistics for the vendor dashboard
    */
   async getDashboardStats(userId) {
+    const cached = await Cache.get(`vendor:stats:${userId}`);
+    if (cached) {
+      return cached;
+    }
+
     const vendorId = await this.getVendorId(userId);
 
     // Aggregate statistics from OrderItems
@@ -46,13 +66,17 @@ class VendorStatsService {
       where: { vendorId },
     });
 
-    return {
+    const result = {
       totalSales: parseFloat(stats._sum.total || 0).toFixed(2),
       orderItemCount: stats._count.id || 0,
       orderCount: distinctOrders.length || 0,
       pendingOrderCount,
       productCount,
     };
+
+    await Cache.set(`vendor:stats:${userId}`, result, CACHE_TTL);
+
+    return result;
   }
 
   /**
@@ -78,4 +102,6 @@ class VendorStatsService {
   }
 }
 
-module.exports = new VendorStatsService();
+const serviceInstance = new VendorStatsService();
+serviceInstance.clearVendorStatsCache = clearVendorStatsCache;
+module.exports = serviceInstance;

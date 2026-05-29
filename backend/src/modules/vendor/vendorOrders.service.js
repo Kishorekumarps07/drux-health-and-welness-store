@@ -102,7 +102,7 @@ class VendorOrdersService {
     if (newStatus === 'DELIVERED' && !item.deliveredAt) auditUpdates.deliveredAt = new Date();
 
     // 4. ATOMIC TRANSACTION: Update Item & Sync Order
-    return prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
       // Update the line item
       const updatedItem = await tx.orderItem.update({
         where: { id: itemId, vendorId }, // Concurrency protection via where
@@ -117,6 +117,18 @@ class VendorOrdersService {
 
       return updatedItem;
     });
+
+    // 5. Invalidate vendor stats & profile caches
+    try {
+      const vendorStatsService = require('./vendorStats.service');
+      const vendorProfileService = require('./vendorProfile.service');
+      vendorStatsService.clearVendorStatsCache(userId);
+      vendorProfileService.clearVendorProfileCache(userId);
+    } catch (err) {
+      // Suppress invalidation errors
+    }
+
+    return result;
   }
 
   /**

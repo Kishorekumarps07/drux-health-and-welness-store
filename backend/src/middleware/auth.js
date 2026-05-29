@@ -5,6 +5,182 @@ const prisma = require('../lib/prisma');
 const supabase = require('../lib/supabase');
 const { jwt: jwtConfig } = require('../config/env');
 const logger = require('../config/logger');
+const Cache = require('../lib/cache');
+
+// Collapsed promise cache for Supabase token verification to prevent parallel rate limits and speed up performance
+const tokenVerificationCache = new Map(); // token -> { promise, expiresAt }
+const CACHE_DURATION = 30 * 1000; // Cache verification for 30 seconds
+
+const verifySupabaseTokenCached = async (token) => {
+  const now = Date.now();
+  const cached = tokenVerificationCache.get(token);
+  
+  if (cached && cached.expiresAt > now) {
+    return cached.promise;
+  }
+
+  // Create the verification promise
+  const verificationPromise = (async () => {
+    let supabaseTimeout;
+    const timeoutPromise = new Promise((_, reject) => {
+      supabaseTimeout = setTimeout(() => reject(new Error('AbortError')), 10000);
+    });
+    
+    try {
+      const getUserPromise = supabase.auth.getUser(token);
+      const { data, error } = await Promise.race([getUserPromise, timeoutPromise]);
+      
+      if (supabaseTimeout) clearTimeout(supabaseTimeout);
+      
+      if (error) {
+        logger.error('Supabase auth bridge returned error:', error);
+        throw error;
+      }
+      
+      if (!data.user) {
+        throw new Error('User not found in Supabase session');
+      }
+      
+      return data.user;
+    } catch (err) {
+      if (supabaseTimeout) clearTimeout(supabaseTimeout);
+      throw err;
+    }
+  })();
+
+  // Store the promise in cache
+  tokenVerificationCache.set(token, {
+    promise: verificationPromise,
+    expiresAt: now + CACHE_DURATION
+  });
+
+  // Catch errors in the cache so we don't store a permanently rejected promise
+  verificationPromise.catch(() => {
+    tokenVerificationCache.delete(token);
+  });
+
+  return verificationPromise;
+};
+
+// Collapsed promise cache for user database resolution to prevent database pooler saturation
+const userResolutionCache = new Map(); // token -> { promise, expiresAt }
+const USER_CACHE_DURATION = 15; // Cache user resolution for 15 seconds
+
+const clearAuthUserCache = async () => {
+  userResolutionCache.clear();
+  try {
+    await Cache.clearPattern('auth:user:*');
+  } catch (err) {
+    // Suppress potential invalidation errors
+  }
+};
+
+const resolveUserCached = async (token, userId, email, isSupabaseToken, userPayload) => {
+  const now = Date.now();
+  const cachedLocal = userResolutionCache.get(token);
+  
+  if (cachedLocal && cachedLocal.expiresAt > now) {
+    return cachedLocal.promise;
+  }
+
+  // Create user resolution promise
+  const resolutionPromise = (async () => {
+    // Check central cache (Redis or central memory) first
+    const cachedCentral = await Cache.get(`auth:user:${token}`);
+    if (cachedCentral) {
+      return cachedCentral;
+    }
+
+    // ── 1. Resolve user from local database using fast findUnique index queries ─────
+    let user;
+    if (userId) {
+      user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { 
+          id: true, 
+          email: true, 
+          roles: true, 
+          isVerified: true,
+          vendor: {
+            select: { approvalStatus: true }
+          }
+        },
+      });
+    }
+    
+    if (!user && email) {
+      user = await prisma.user.findUnique({
+        where: { email: email },
+        select: { 
+          id: true, 
+          email: true, 
+          roles: true, 
+          isVerified: true,
+          vendor: {
+            select: { approvalStatus: true }
+          }
+        },
+      });
+    }
+
+    // ── 2. Auto-provisioning (Mission Critical) ──────────────────────────────────
+    // If a Supabase user is valid but not in our local DB yet, create them.
+    if (!user && isSupabaseToken && email) {
+      const name = userPayload.user_metadata?.full_name 
+        || userPayload.user_metadata?.name 
+        || email.split('@')[0];
+      
+      const metaRole = userPayload.user_metadata?.role || 'CUSTOMER';
+
+      try {
+        user = await prisma.user.create({
+          data: {
+            id: userId, // Use same UUID for consistency
+            email,
+            name,
+            roles: [metaRole],
+            passwordHash: 'SUPABASE_AUTH', // Mark as managed by Supabase
+            isVerified: true
+          },
+          select: { 
+            id: true, 
+            email: true, 
+            roles: true, 
+            isVerified: true,
+            vendor: {
+              select: { approvalStatus: true }
+            }
+          },
+        });
+        logger.info(`Auto-provisioned user ${email} from Supabase token.`);
+      } catch (createErr) {
+        logger.error('Auto-provisioning failed:', createErr);
+      }
+    }
+
+    if (!user) {
+      throw new AppError('The user belonging to this token no longer exists.', 401);
+    }
+
+    // Save to central cache
+    await Cache.set(`auth:user:${token}`, user, USER_CACHE_DURATION);
+
+    return user;
+  })();
+
+  // Store resolved user promise in local collapsed cache
+  userResolutionCache.set(token, {
+    promise: resolutionPromise,
+    expiresAt: now + (USER_CACHE_DURATION * 1000)
+  });
+
+  // Catch errors so we don't store permanently rejected promises
+  resolutionPromise.catch(() => {
+    userResolutionCache.delete(token);
+  });
+
+  return resolutionPromise;
+};
 
 /**
  * Verifies the JWT in the Authorization header.
@@ -37,21 +213,8 @@ const protect = asyncHandler(async (req, res, next) => {
   // ── 3. Strategy B: Try Supabase API verification (with timeout) ─────────────
   if (!userPayload) {
     try {
-      // Wrap in a 10s timeout via Promise.race — Supabase API can be slow on cold start / high load.
-      // Without this, a single slow Supabase response consumes the client's 15s axios timeout.
-      let supabaseTimeout;
-      const timeoutPromise = new Promise((_, reject) => {
-        supabaseTimeout = setTimeout(() => reject(new Error('AbortError')), 10000);
-      });
-      const getUserPromise = supabase.auth.getUser(token);
-
-      const { data, error } = await Promise.race([getUserPromise, timeoutPromise]);
-      if (supabaseTimeout) clearTimeout(supabaseTimeout);
-
-      if (!error && data.user) {
-        userPayload = data.user;
-        isSupabaseToken = true;
-      }
+      userPayload = await verifySupabaseTokenCached(token);
+      isSupabaseToken = true;
     } catch (err) {
       if (err.message === 'AbortError') {
         logger.warn('Supabase auth bridge timed out after 10s — backend waking up.');
@@ -74,54 +237,8 @@ const protect = asyncHandler(async (req, res, next) => {
   const userId = isSupabaseToken ? userPayload.id : (userPayload.id || userPayload.sub);
   const email = isSupabaseToken ? userPayload.email : userPayload.email;
 
-  let user = await prisma.user.findFirst({
-    where: { 
-      OR: [
-        { id: userId },
-        { email: email }
-      ]
-    },
-    select: { 
-      id: true, 
-      email: true, 
-      roles: true, 
-      isVerified: true,
-      vendor: {
-        select: { approvalStatus: true }
-      }
-    },
-  });
-
-  // ── 5. Auto-provisioning (Mission Critical) ──────────────────────────────────
-  // If a Supabase user is valid but not in our local DB yet, create them.
-  if (!user && isSupabaseToken && email) {
-    const name = userPayload.user_metadata?.full_name 
-      || userPayload.user_metadata?.name 
-      || email.split('@')[0];
-    
-    const metaRole = userPayload.user_metadata?.role || 'CUSTOMER';
-
-    try {
-      user = await prisma.user.create({
-        data: {
-          id: userId, // Use same UUID for consistency
-          email,
-          name,
-          roles: [metaRole],
-          passwordHash: 'SUPABASE_AUTH', // Mark as managed by Supabase
-          isVerified: true
-        },
-        select: { id: true, email: true, roles: true, isVerified: true },
-      });
-      logger.info(`Auto-provisioned user ${email} from Supabase token.`);
-    } catch (createErr) {
-      logger.error('Auto-provisioning failed:', createErr);
-    }
-  }
-
-  if (!user) {
-    return next(new AppError('The user belonging to this token no longer exists.', 401));
-  }
+  // Resolve user via the optimized caching resolution helper
+  const user = await resolveUserCached(token, userId, email, isSupabaseToken, userPayload);
 
   // Debug log for roles
   logger.info(`Auth: User ${user.email} accessing ${req.originalUrl} with roles: ${JSON.stringify(user.roles)}`);
@@ -148,4 +265,4 @@ const restrictTo = (...roles) => (req, res, next) => {
   next();
 };
 
-module.exports = { protect, restrictTo };
+module.exports = { protect, restrictTo, clearAuthUserCache };

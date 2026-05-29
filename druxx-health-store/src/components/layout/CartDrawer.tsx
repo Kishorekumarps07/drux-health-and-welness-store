@@ -217,7 +217,7 @@ export function CartDrawer() {
                       <p className="text-xs text-green-600 mt-1">{couponSuccess}</p>
                     )}
                     <p className="text-[10px] text-gray-400 mt-1">
-                      Try: DRUXX10, HEALTH20, FIRST15
+                      Check your email for exclusive discount codes
                     </p>
                   </div>
                 )}

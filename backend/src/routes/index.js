@@ -29,16 +29,32 @@ router.get('/', (req, res) => {
   });
 });
 
+const prisma = require('../lib/prisma');
+
 /**
  * Public: Newsletter Subscription
  */
-router.post('/newsletter/subscribe', (req, res) => {
+router.post('/newsletter/subscribe', async (req, res, next) => {
   const { email } = req.body;
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ status: 'error', message: 'Please provide a valid email address.' });
   }
-  console.log(`[NEWSLETTER] New signup: ${email}`);
-  res.json({ status: 'success', message: 'Subscription successful!' });
+  try {
+    const trimmedEmail = email.toLowerCase().trim();
+    const existing = await prisma.newsletterSubscription.findUnique({
+      where: { email: trimmedEmail }
+    });
+    if (existing) {
+      return res.status(200).json({ status: 'success', message: 'You are already subscribed!' });
+    }
+    await prisma.newsletterSubscription.create({
+      data: { email: trimmedEmail }
+    });
+    console.log(`[NEWSLETTER] New signup: ${trimmedEmail}`);
+    res.json({ status: 'success', message: 'Subscription successful!' });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.use('/auth',        authRoutes);

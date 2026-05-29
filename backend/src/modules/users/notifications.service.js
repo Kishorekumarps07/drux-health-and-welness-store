@@ -21,12 +21,13 @@ class NotificationsService {
   }
 
   /**
-   * Fetch notifications for a user (most recent first)
+   * Fetch notifications for a user (most recent 50, newest first)
    */
   async list(userId) {
     return prisma.notification.findMany({
       where: { userId },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: 50, // Cap at 50 — prevents unbounded reads on the 30s polling interval
     });
   }
 

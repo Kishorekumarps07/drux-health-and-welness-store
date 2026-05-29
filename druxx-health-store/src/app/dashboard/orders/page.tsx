@@ -12,7 +12,8 @@ import {
   Truck,
   Search,
   Filter,
-  AlertCircle
+  AlertCircle,
+  History
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,9 +32,12 @@ import { toast } from "sonner";
 const STATUS_CONFIG: Record<string, { color: string; icon: any; label: string }> = {
   pending: { color: "bg-yellow-50 text-yellow-700 border-yellow-100", icon: <Clock size={14} />, label: "Pending" },
   confirmed: { color: "bg-blue-50 text-blue-700 border-blue-100", icon: <CheckCircle2 size={14} />, label: "Confirmed" },
+  processing: { color: "bg-orange-50 text-orange-700 border-orange-100", icon: <Package size={14} />, label: "Processing" },
+  partial: { color: "bg-orange-50 text-orange-700 border-orange-100", icon: <Package size={14} />, label: "Partial" },
   shipped: { color: "bg-purple-50 text-purple-700 border-purple-100", icon: <Truck size={14} />, label: "Shipped" },
   delivered: { color: "bg-green-50 text-green-700 border-green-100", icon: <CheckCircle2 size={14} />, label: "Delivered" },
   cancelled: { color: "bg-red-50 text-red-700 border-red-100", icon: <XCircle size={14} />, label: "Cancelled" },
+  refunded: { color: "bg-rose-50 text-rose-700 border-rose-100", icon: <History size={14} />, label: "Refunded" },
 };
 
 export default function OrdersPage() {
@@ -109,9 +113,11 @@ export default function OrdersPage() {
               <SelectItem value="all" className="font-bold text-xs">All Statuses</SelectItem>
               <SelectItem value="pending" className="font-bold text-xs">Pending</SelectItem>
               <SelectItem value="confirmed" className="font-bold text-xs">Confirmed</SelectItem>
+              <SelectItem value="partial" className="font-bold text-xs">Partial</SelectItem>
               <SelectItem value="shipped" className="font-bold text-xs">Shipped</SelectItem>
               <SelectItem value="delivered" className="font-bold text-xs">Delivered</SelectItem>
               <SelectItem value="cancelled" className="font-bold text-xs">Cancelled</SelectItem>
+              <SelectItem value="refunded" className="font-bold text-xs">Refunded</SelectItem>
             </SelectContent>
           </Select>
         </div>

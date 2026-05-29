@@ -1,9 +1,7 @@
 const slugify = require('slugify');
 const prisma = require('../../lib/prisma');
 const AppError = require('../../lib/AppError');
-const logger = require('../../config/logger');
 const { deleteImageByUrl } = require('../../utils/cloudinary');
-const { addRandomReviews } = require('../../utils/reviewHelper');
 
 const PRODUCT_INCLUDE = {
   images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] },
@@ -46,8 +44,6 @@ class ProductsService {
       ...(tags && tags.length > 0 && { tags: { hasSome: tags } }),
     };
 
-    logger.info('--- PRODUCT LIST WHERE ---');
-    logger.info(JSON.stringify(where, null, 2));
 
     let orderBy = { createdAt: 'desc' }; // Default
     if (sort === 'featured') orderBy = { isFeatured: 'desc' };
@@ -105,7 +101,11 @@ class ProductsService {
     let slug = baseSlug;
     let attempt = 0;
     while (await prisma.product.findUnique({ where: { slug } })) {
-      slug = `${baseSlug}-${++attempt}`;
+      attempt++;
+      if (attempt > 50) {
+        throw new AppError('Could not generate a unique slug for this product after 50 attempts.', 500);
+      }
+      slug = `${baseSlug}-${attempt}`;
     }
 
     const { images, ...productData } = data;
@@ -129,11 +129,6 @@ class ProductsService {
       });
     }
 
-    // Automatically add random reviews for new products (Tamil Style)
-    await addRandomReviews(product.id).catch(err => {
-      console.error('Failed to add automatic reviews:', err);
-    });
-
     return prisma.product.findUnique({
       where: { id: product.id },
       include: PRODUCT_INCLUDE
@@ -152,9 +147,6 @@ class ProductsService {
     // If new images are provided, we'll replace existing ones
     if (images && images.length > 0) {
       const existingImages = await prisma.productImage.findMany({ where: { productId } });
-      for (const img of existingImages) {
-        await deleteImageByUrl(img.url);
-      }
       await prisma.productImage.deleteMany({ where: { productId } });
       
       await prisma.productImage.createMany({
@@ -164,6 +156,11 @@ class ProductsService {
           sortOrder: img.sortOrder || 0,
           productId
         }))
+      });
+
+      // Delete old images from Cloudinary in parallel after DB updates succeed
+      Promise.all(existingImages.map(img => deleteImageByUrl(img.url).catch(() => {}))).catch(err => {
+        console.error('Failed to delete some old images from Cloudinary:', err);
       });
     }
 
@@ -182,9 +179,6 @@ class ProductsService {
     if (!product) throw new AppError('Product not found or you do not own it.', 404);
 
     const productImages = await prisma.productImage.findMany({ where: { productId } });
-    for (const img of productImages) {
-      await deleteImageByUrl(img.url).catch(() => {});
-    }
 
     // Safely delete all associated records in a transaction to ensure data integrity
     await prisma.$transaction([
@@ -194,6 +188,11 @@ class ProductsService {
       prisma.cartItem.deleteMany({ where: { productId } }),
       prisma.product.delete({ where: { id: productId } })
     ]);
+
+    // Delete images from Cloudinary in parallel after the DB transaction succeeds
+    Promise.all(productImages.map(img => deleteImageByUrl(img.url).catch(() => {}))).catch(err => {
+      console.error('Failed to delete product images from Cloudinary:', err);
+    });
   }
 
   async getVendorProducts(userId, query) {

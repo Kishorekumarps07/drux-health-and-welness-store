@@ -77,12 +77,15 @@ export default function VendorOrdersPage() {
   const getStatusColor = (status: string) => {
     const s = status.toLowerCase()
     switch (s) {
-      case 'delivered': return "bg-[#A6D608]/10 text-[#A6D608] border-[#A6D608]/20"
-      case 'processing': return "bg-blue-50 text-blue-500 border-blue-100"
-      case 'shipped': return "bg-purple-50 text-purple-500 border-purple-100"
-      case 'pending': return "bg-orange-50 text-orange-500 border-orange-100"
-      case 'cancelled': return "bg-red-50 text-red-500 border-red-100"
-      default: return "bg-gray-50 text-gray-400"
+      case 'delivered':  return "bg-[#A6D608]/10 text-[#A6D608] border-[#A6D608]/20"
+      case 'confirmed':  return "bg-blue-50 text-blue-600 border-blue-100"
+      case 'processing': return "bg-indigo-50 text-indigo-500 border-indigo-100"
+      case 'shipped':    return "bg-purple-50 text-purple-500 border-purple-100"
+      case 'pending':    return "bg-orange-50 text-orange-500 border-orange-100"
+      case 'partial':    return "bg-amber-50 text-amber-600 border-amber-100"
+      case 'cancelled':  return "bg-red-50 text-red-500 border-red-100"
+      case 'refunded':   return "bg-rose-50 text-rose-500 border-rose-100"
+      default:           return "bg-gray-50 text-gray-400 border-gray-100"
     }
   }
 
@@ -107,7 +110,7 @@ export default function VendorOrdersPage() {
 
         {/* Orders Filter Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-           {['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => (
+           {['all', 'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => (
              <Button
                key={status}
                variant="ghost"

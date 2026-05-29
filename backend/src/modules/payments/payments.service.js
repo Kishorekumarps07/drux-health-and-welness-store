@@ -13,12 +13,35 @@ class PaymentsService {
   /**
    * 1. Create a Razorpay Order (Intent) based on server-calculated cart totals.
    */
-  async createPaymentIntent(userId) {
+  async createPaymentIntent(userId, { couponCode } = {}) {
     const totals = await cartService.calculateTotals(userId);
     if (totals.total <= 0) throw new AppError('Cannot create payment for an empty cart.', 400);
 
+    let discount = 0;
+    if (couponCode) {
+      try {
+        const couponsService = require('../coupons/coupons.service');
+        const coupon = await couponsService.validateCoupon(couponCode);
+        let applicableSubtotal = totals.subtotal;
+        if (coupon.productId) {
+          applicableSubtotal = totals.items
+            .filter(i => i.productId === coupon.productId)
+            .reduce((acc, i) => acc + parseFloat(i.price) * i.quantity, 0);
+        } else if (coupon.vendorId) {
+          applicableSubtotal = totals.items
+            .filter(i => i.vendorId === coupon.vendorId)
+            .reduce((acc, i) => acc + parseFloat(i.price) * i.quantity, 0);
+        }
+        discount = Math.round((applicableSubtotal * coupon.discountPercent) / 100);
+      } catch (err) {
+        throw new AppError('Invalid or expired coupon code.', 400);
+      }
+    }
+
+    const finalTotal = Math.max(0, totals.subtotal - discount + totals.shippingCharge);
+
     const options = {
-      amount: Math.round(totals.total * 100), // paise
+      amount: Math.round(finalTotal * 100), // paise
       currency: 'INR',
       receipt: `receipt_user_${userId.substring(0, 8)}_${Date.now()}`,
     };
@@ -31,7 +54,7 @@ class PaymentsService {
         data: {
           userId,
           razorpayOrderId: razorpayOrder.id,
-          amount: totals.total,
+          amount: finalTotal,
           status: 'CREATED',
         },
       });
@@ -47,7 +70,7 @@ class PaymentsService {
   /**
    * 2. Verify signature and perform atomic Order Creation.
    */
-  async verifyAndFinalizeOrder(userId, { razorpayOrderId, razorpayPaymentId, razorpaySignature, addressId, notes }) {
+  async verifyAndFinalizeOrder(userId, { razorpayOrderId, razorpayPaymentId, razorpaySignature, addressId, notes, couponCode }) {
     // 1. Signature Check
     const body = razorpayOrderId + '|' + razorpayPaymentId;
     const expectedSignature = crypto
@@ -86,16 +109,47 @@ class PaymentsService {
         const totals = await cartService.calculateTotals(userId);
         if (totals.items.length === 0) throw new AppError('Cart is empty during finalization.', 400);
 
+        let discount = 0;
+        let coupon = null;
+        if (couponCode) {
+          try {
+            const couponsService = require('../coupons/coupons.service');
+            coupon = await couponsService.validateCoupon(couponCode);
+            let applicableSubtotal = totals.subtotal;
+            if (coupon.productId) {
+              applicableSubtotal = totals.items
+                .filter(i => i.productId === coupon.productId)
+                .reduce((acc, i) => acc + parseFloat(i.price) * i.quantity, 0);
+            } else if (coupon.vendorId) {
+              applicableSubtotal = totals.items
+                .filter(i => i.vendorId === coupon.vendorId)
+                .reduce((acc, i) => acc + parseFloat(i.price) * i.quantity, 0);
+            }
+            discount = Math.round((applicableSubtotal * coupon.discountPercent) / 100);
+          } catch (err) {
+            throw new AppError('Invalid or expired coupon code.', 400);
+          }
+        }
+
+        const finalTotal = Math.max(0, totals.subtotal - discount + totals.shippingCharge);
+
         // Reconciliation: Amount must match what was intended
         const paymentRecord = await tx.payment.findUnique({ where: { razorpayOrderId } });
-        if (Math.abs(parseFloat(paymentRecord.amount) - totals.total) > 0.01) {
+        if (Math.abs(parseFloat(paymentRecord.amount) - finalTotal) > 0.01) {
           throw new AppError('Transaction amount mismatch. Please contact support.', 400);
         }
+
+        // Add discount details into totals passed to createOrderFromVerifiedCart
+        const orderTotals = {
+          ...totals,
+          discount,
+          total: finalTotal
+        };
 
         // Create the platform order
         const order = await ordersService.createOrderFromVerifiedCart(userId, tx, {
           addressId,
-          totals,
+          totals: orderTotals,
           notes
         });
 
@@ -107,6 +161,14 @@ class PaymentsService {
             status: 'ORDER_CREATED' 
           }
         });
+
+        // Increment coupon usage count if one was applied
+        if (coupon) {
+          await tx.coupon.update({
+            where: { id: coupon.id },
+            data: { usageCount: { increment: 1 } }
+          });
+        }
 
         // Clear cart
         await tx.cartItem.deleteMany({ where: { cartId: totals.id } });

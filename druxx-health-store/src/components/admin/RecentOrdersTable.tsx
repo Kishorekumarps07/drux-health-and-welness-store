@@ -10,7 +10,8 @@ import {
   CheckCircle2,
   Truck,
   XCircle,
-  Package
+  Package,
+  History
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -24,9 +25,11 @@ const statusMap: Record<string, any> = {
   PENDING: { color: "text-amber-400", bg: "bg-amber-500/10", icon: Clock },
   CONFIRMED: { color: "text-blue-400", bg: "bg-blue-500/10", icon: Package },
   PROCESSING: { color: "text-indigo-400", bg: "bg-indigo-500/10", icon: Package },
+  PARTIAL: { color: "text-orange-400", bg: "bg-orange-500/10", icon: Package },
   SHIPPED: { color: "text-purple-400", bg: "bg-purple-500/10", icon: Truck },
   DELIVERED: { color: "text-[#10B981]", bg: "bg-[#10B981]/10", icon: CheckCircle2 },
   CANCELLED: { color: "text-red-400", bg: "bg-red-500/10", icon: XCircle },
+  REFUNDED: { color: "text-rose-400", bg: "bg-rose-500/10", icon: History },
 };
 
 export function RecentOrdersTable({ orders, loading = false }: RecentOrdersTableProps) {

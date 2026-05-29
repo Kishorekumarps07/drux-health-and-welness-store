@@ -14,7 +14,8 @@ import {
   Clock, 
   Truck, 
   Loader2, 
-  AlertTriangle 
+  AlertTriangle,
+  History
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,9 +26,11 @@ const STATUS_CONFIG: Record<string, { color: string; icon: any; label: string }>
   pending: { color: "bg-yellow-50 text-yellow-700 border-yellow-100", icon: <Clock size={14} />, label: "Pending" },
   confirmed: { color: "bg-blue-50 text-blue-700 border-blue-100", icon: <CheckCircle2 size={14} />, label: "Confirmed" },
   processing: { color: "bg-orange-50 text-orange-700 border-orange-100", icon: <Loader2 size={14} className="animate-spin" />, label: "Processing" },
+  partial: { color: "bg-orange-50 text-orange-700 border-orange-100", icon: <Package size={14} />, label: "Partial" },
   shipped: { color: "bg-purple-50 text-purple-700 border-purple-100", icon: <Truck size={14} />, label: "Shipped" },
   delivered: { color: "bg-green-50 text-green-700 border-green-100", icon: <CheckCircle2 size={14} />, label: "Delivered" },
   cancelled: { color: "bg-red-50 text-red-700 border-red-100", icon: <XCircle size={14} />, label: "Cancelled" },
+  refunded: { color: "bg-rose-50 text-rose-700 border-rose-100", icon: <History size={14} />, label: "Refunded" },
 };
 
 export default function OrderDetailsPage() {
@@ -297,7 +300,7 @@ export default function OrderDetailsPage() {
           <div className="space-y-2 pt-4">
             <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Order Notes</h3>
             <div className="bg-gray-50/50 p-5 rounded-2xl border border-gray-100 text-sm text-gray-600 italic">
-              "{order.notes}"
+              &ldquo;{order.notes}&rdquo;
             </div>
           </div>
         )}

@@ -7,13 +7,14 @@ import { Zap, ArrowRight, Percent } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Product } from "@/types";
 
 interface OfferZoneProps {
-  products?: any[];
+  products?: Product[];
 }
 
 export function OfferZone({ products: initialProducts = [] }: OfferZoneProps) {
-  const [products, setProducts] = useState<any[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>(initialProducts);
   const [loading, setLoading] = useState(initialProducts.length === 0);
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export function OfferZone({ products: initialProducts = [] }: OfferZoneProps) {
     const fetchOffers = async () => {
       try {
         const result = await productService.getAllProducts({ limit: 12 });
-        const offerProducts = result.products.filter((p: any) => p.originalPrice && p.originalPrice > p.price);
+        const offerProducts = result.products.filter((p: Product) => p.originalPrice && p.originalPrice > p.price);
         setProducts(offerProducts);
       } catch (error) {
         console.error("Failed to fetch offers:", error);

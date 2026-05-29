@@ -77,22 +77,38 @@ export interface Cart {
 export interface OrderItem {
   id: string;
   productId: string;
-  productName: string;
+  /** Backend returns `title` (not productName) */
+  title: string;
   vendorId: string;
-  price: number;
+  /** Vendor store name — available from ORDER_INCLUDE join */
+  vendor?: { id: string; storeName: string };
+  price: number | string; // Prisma Decimal serialises as string
   quantity: number;
-  image: string;
+  total: number | string;
+  product?: {
+    images: Array<{ url: string; isPrimary: boolean }>;
+    title: string;
+  };
 }
 
 export interface Order {
   id: string;
   userId: string;
   items: OrderItem[];
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  total: number;
-  paymentMethod: PaymentMethod;
-  shippingAddress: Address;
-  date: string;
+  /** Prisma enum — always UPPERCASE from backend */
+  status: 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'PARTIAL' | 'REFUNDED';
+  /** Payment status from backend */
+  paymentStatus: 'CREATED' | 'ORDER_CREATED' | 'PAID' | 'FAILED' | 'REFUNDED';
+  paymentMethod: string;
+  subtotal: number | string;
+  discount: number | string;
+  shippingCharge: number | string;
+  total: number | string;
+  notes?: string;
+  address?: Address;
+  payment?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type UserRole = 'CUSTOMER' | 'VENDOR' | 'ADMIN';
@@ -165,7 +181,10 @@ export interface OrderSummary {
   total: number;
 }
 
-export type VendorStatus = 'pending' | 'approved' | 'active' | 'suspended';
-export type PaymentMethod = 'card' | 'upi' | 'cod';
+/** Matches Prisma approvalStatus enum — UPPERCASE from backend */
+export type VendorStatus = 'PENDING' | 'APPROVED' | 'ACTIVE' | 'SUSPENDED';
+/** Legacy lowercase aliases for UI labels */
+export type VendorStatusLabel = 'pending' | 'approved' | 'active' | 'suspended';
+export type PaymentMethod = 'COD' | 'RAZORPAY' | 'card' | 'upi' | 'cod';
 export type CheckoutStep = 'address' | 'payment' | 'review';
 export type SortOption = 'relevance' | 'price_asc' | 'price_desc' | 'rating' | 'newest';

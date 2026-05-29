@@ -45,6 +45,10 @@ export default function ProfilePage() {
       toast.error("Name must be at least 2 characters");
       return;
     }
+    if (phone.trim() && !/^(?:\+91|0)?[6-9]\d{9}$/.test(phone.trim())) {
+      toast.error("Please enter a valid 10-digit Indian mobile number.");
+      return;
+    }
 
     setLoading(true);
     try {

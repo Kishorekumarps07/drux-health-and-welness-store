@@ -28,6 +28,8 @@ export function CustomerNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  // Keep a ref to the interval so fetchNotifications can cancel it on 401
+  const intervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchNotifications = useCallback(async () => {
     if (!isAuthenticated) return;
@@ -35,9 +37,13 @@ export function CustomerNotifications() {
       const data = await notificationService.getNotifications();
       setNotifications(data);
     } catch (err: any) {
-      // If it's a 401, the API interceptor automatically cleans up the session.
-      // We handle it silently to avoid logging expected token expirations as console errors.
+      // On 401: the API interceptor already handles logout/session cleanup.
+      // Stop polling immediately to avoid the repeated trigger loop.
       if (err?.response?.status === 401) {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
         return;
       }
       console.error("Failed to fetch customer notifications:", err);
@@ -49,8 +55,13 @@ export function CustomerNotifications() {
     if (isAuthenticated) {
       fetchNotifications();
       // Poll every 30 seconds for real-time updates
-      const interval = setInterval(fetchNotifications, 30000);
-      return () => clearInterval(interval);
+      intervalRef.current = setInterval(fetchNotifications, 30000);
+      return () => {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      };
     }
   }, [isAuthenticated, fetchNotifications]);
 

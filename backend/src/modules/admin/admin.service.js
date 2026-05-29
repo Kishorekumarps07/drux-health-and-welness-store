@@ -1,5 +1,23 @@
 const prisma = require('../../lib/prisma');
 const AppError = require('../../lib/AppError');
+const Cache = require('../../lib/cache');
+
+const CACHE_TTL = 30; // 30 seconds cache TTL
+
+const clearAdminCache = async () => {
+  try {
+    await Cache.clearPattern('admin:*');
+  } catch (err) {
+    // Suppress potential Redis clear errors
+  }
+
+  try {
+    const { clearAuthUserCache } = require('../../middleware/auth');
+    clearAuthUserCache();
+  } catch (err) {
+    // Suppress potential require failures during startup
+  }
+};
 
 class AdminService {
   // ── Vendor Management ──────────────────────────────────────────────────────
@@ -51,40 +69,43 @@ class AdminService {
        });
     }
 
+    await clearAdminCache();
     return updatedVendor;
   }
 
   // ── Analytics ──────────────────────────────────────────────────────────────
 
   async getDashboardStats() {
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+    const cached = await Cache.get('admin:stats');
+    if (cached) {
+      return cached;
+    }
 
-    const [
-      totalUsers, totalVendors, totalProducts, totalOrders,
-      pendingVendors, revenueData, 
-      prevRevenueData, currentOrders, prevOrders,
-      newUsers, prevUsers
-    ] = await Promise.all([
-      prisma.user.count(),
-      prisma.vendor.count(),
-      prisma.product.count({ where: { status: 'ACTIVE' } }),
-      prisma.order.count(),
-      prisma.vendor.count({ where: { approvalStatus: 'PENDING' } }),
-      prisma.order.aggregate({ 
-        _sum: { total: true }, 
-        where: { paymentStatus: 'VERIFIED', createdAt: { gte: thirtyDaysAgo } } 
-      }),
-      prisma.order.aggregate({ 
-        _sum: { total: true }, 
-        where: { paymentStatus: 'VERIFIED', createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } } 
-      }),
-      prisma.order.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
-      prisma.order.count({ where: { createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } } }),
-      prisma.user.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
-      prisma.user.count({ where: { createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } } }),
-    ]);
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000);
+
+    // Run queries sequentially to prevent Supabase connection pooler starvation
+    const totalUsers = await prisma.user.count();
+    const totalVendors = await prisma.vendor.count();
+    const totalProducts = await prisma.product.count({ where: { status: 'ACTIVE' } });
+    const totalOrders = await prisma.order.count();
+    const pendingVendors = await prisma.vendor.count({ where: { approvalStatus: 'PENDING' } });
+    
+    const revenueData = await prisma.order.aggregate({ 
+      _sum: { total: true }, 
+      where: { paymentStatus: 'VERIFIED', createdAt: { gte: thirtyDaysAgo } } 
+    });
+    
+    const prevRevenueData = await prisma.order.aggregate({ 
+      _sum: { total: true }, 
+      where: { paymentStatus: 'VERIFIED', createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } } 
+    });
+    
+    const currentOrders = await prisma.order.count({ where: { createdAt: { gte: thirtyDaysAgo } } });
+    const prevOrders = await prisma.order.count({ where: { createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } } });
+    const newUsers = await prisma.user.count({ where: { createdAt: { gte: thirtyDaysAgo } } });
+    const prevUsers = await prisma.user.count({ where: { createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } } });
 
     const calculateGrowth = (current, previous) => {
       if (!previous || previous === 0) return current > 0 ? `+${current}` : "0%";
@@ -95,7 +116,7 @@ class AdminService {
     const currentRevenue = Number(revenueData._sum.total || 0);
     const prevRevenue = Number(prevRevenueData._sum.total || 0);
 
-    return {
+    const result = {
       totalUsers,
       totalVendors,
       totalProducts,
@@ -109,9 +130,19 @@ class AdminService {
         vendors: `+${newUsers} total` // Showing velocity for vendors
       }
     };
+
+    // Save to cache
+    await Cache.set('admin:stats', result, CACHE_TTL);
+
+    return result;
   }
 
   async getRevenueAnalytics(range = '7d') {
+    const cached = await Cache.get(`admin:revenue:${range}`);
+    if (cached) {
+      return cached;
+    }
+
     const days = range === '30d' ? 30 : 7;
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - (days - 1));
@@ -143,44 +174,65 @@ class AdminService {
       }
     });
 
-    return Object.values(data);
+    const result = Object.values(data);
+
+    // Save to cache
+    await Cache.set(`admin:revenue:${range}`, result, CACHE_TTL);
+
+    return result;
   }
 
   async getTopPerformance() {
-    const [topVendors, topProducts] = await Promise.all([
-      prisma.vendor.findMany({
-        take: 5,
-        orderBy: { totalSales: 'desc' },
-        select: { storeName: true, totalSales: true, rating: true }
-      }),
-      prisma.product.findMany({
-        take: 5,
-        orderBy: { averageRating: 'desc' }, // Placeholder for 'sold count' if available
-        select: { title: true, averageRating: true, price: true, vendor: { select: { storeName: true } } }
-      })
-    ]);
+    const cached = await Cache.get('admin:performance');
+    if (cached) {
+      return cached;
+    }
 
-    return { topVendors, topProducts };
+    // Run sequentially to reduce pool contention
+    const topVendors = await prisma.vendor.findMany({
+      take: 5,
+      orderBy: { totalSales: 'desc' },
+      select: { storeName: true, totalSales: true, rating: true }
+    });
+
+    const topProducts = await prisma.product.findMany({
+      take: 5,
+      orderBy: { averageRating: 'desc' }, // Placeholder for 'sold count' if available
+      select: { title: true, averageRating: true, price: true, vendor: { select: { storeName: true } } }
+    });
+
+    const result = { topVendors, topProducts };
+
+    // Save to cache
+    await Cache.set('admin:performance', result, CACHE_TTL);
+
+    return result;
   }
 
   async getActivityFeed() {
-    const [recentOrders, newUsers, newVendors] = await Promise.all([
-      prisma.order.findMany({
-        take: 5,
-        orderBy: { createdAt: 'desc' },
-        include: { user: { select: { name: true } } }
-      }),
-      prisma.user.findMany({
-        take: 5,
-        orderBy: { createdAt: 'desc' },
-        select: { name: true, createdAt: true, roles: true }
-      }),
-      prisma.vendor.findMany({
-        take: 5,
-        orderBy: { createdAt: 'desc' },
-        select: { storeName: true, createdAt: true, approvalStatus: true }
-      })
-    ]);
+    const cached = await Cache.get('admin:feed');
+    if (cached) {
+      return cached;
+    }
+
+    // Run sequentially to reduce pool contention
+    const recentOrders = await prisma.order.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: { user: { select: { name: true } } }
+    });
+
+    const newUsers = await prisma.user.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      select: { name: true, createdAt: true, roles: true }
+    });
+
+    const newVendors = await prisma.vendor.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      select: { storeName: true, createdAt: true, approvalStatus: true }
+    });
 
     const feed = [
       ...recentOrders.map(o => ({ type: 'ORDER', title: `New Order #${o.id.slice(0, 8)}`, user: o.user?.name, date: o.createdAt, amount: o.total })),
@@ -188,7 +240,12 @@ class AdminService {
       ...newVendors.map(v => ({ type: 'VENDOR', title: `New Vendor Application`, user: v.storeName, date: v.createdAt, status: v.approvalStatus }))
     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-    return feed.slice(0, 10);
+    const result = feed.slice(0, 10);
+
+    // Save to cache
+    await Cache.set('admin:feed', result, CACHE_TTL);
+
+    return result;
   }
 
   // ── Orders (Admin view) ────────────────────────────────────────────────────
@@ -196,24 +253,29 @@ class AdminService {
   async listAllOrders({ page = 1, limit = 20, status }) {
     const skip = (page - 1) * limit;
     const where = status ? { status } : {};
-    const [orders, total] = await Promise.all([
-      prisma.order.findMany({
-        where, skip, take: +limit,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          user: { select: { id: true, name: true, email: true } },
-          items: { include: { product: { select: { id: true, title: true } } } },
-        },
-      }),
-      prisma.order.count({ where }),
-    ]);
+
+    // Run sequentially to prevent connection pooler starvation
+    const orders = await prisma.order.findMany({
+      where, skip, take: +limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        items: { include: { product: { select: { id: true, title: true } } } },
+      },
+    });
+
+    const total = await prisma.order.count({ where });
+
     return { orders, total, page: +page, pages: Math.ceil(total / limit) };
   }
 
   async updateOrderStatus(orderId, status) {
     const order = await prisma.order.findUnique({ where: { id: orderId } });
     if (!order) throw new AppError('Order not found.', 404);
-    return prisma.order.update({ where: { id: orderId }, data: { status } });
+    
+    const updatedOrder = await prisma.order.update({ where: { id: orderId }, data: { status } });
+    await clearAdminCache();
+    return updatedOrder;
   }
 
   // ── User Management ────────────────────────────────────────────────────────

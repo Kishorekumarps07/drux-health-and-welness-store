@@ -473,14 +473,17 @@ model AdvantageItem {
 // ─────────────────────────────────────────────
 
 model Coupon {
-  id              String   @id @default(uuid())
-  code            String   @unique
-  discountPercent Int      @map("discount_percent")
-  isActive        Boolean  @default(true) @map("is_active")
-  productId       String?  @map("product_id")
-  vendorId        String?  @map("vendor_id")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id              String    @id @default(uuid())
+  code            String    @unique
+  discountPercent Int       @map("discount_percent")
+  isActive        Boolean   @default(true) @map("is_active")
+  productId       String?   @map("product_id")
+  vendorId        String?   @map("vendor_id")
+  expiresAt       DateTime? @map("expires_at")
+  usageLimit      Int?      @map("usage_limit")
+  usageCount      Int       @default(0) @map("usage_count")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
   // Relations
   product         Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -507,4 +510,16 @@ model Notification {
 
   @@index([userId])
   @@map("notifications")
+}
+
+// ─────────────────────────────────────────────
+// NEWSLETTER SUBSCRIPTION
+// ─────────────────────────────────────────────
+
+model NewsletterSubscription {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("newsletter_subscriptions")
 }

@@ -76,9 +76,11 @@ export default function AdminOrdersPage() {
     PENDING: { color: "text-amber-400", bg: "bg-amber-500/10", icon: Clock },
     CONFIRMED: { color: "text-blue-400", bg: "bg-blue-500/10", icon: Package },
     PROCESSING: { color: "text-indigo-400", bg: "bg-indigo-500/10", icon: Package },
+    PARTIAL: { color: "text-orange-400", bg: "bg-orange-500/10", icon: Package },
     SHIPPED: { color: "text-purple-400", bg: "bg-purple-500/10", icon: Truck },
     DELIVERED: { color: "text-[#10B981]", bg: "bg-[#10B981]/10", icon: CheckCircle2 },
     CANCELLED: { color: "text-red-400", bg: "bg-red-500/10", icon: XCircle },
+    REFUNDED: { color: "text-rose-400", bg: "bg-rose-500/10", icon: History },
   };
 
   return (
@@ -177,7 +179,7 @@ export default function AdminOrdersPage() {
                                       <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-[#4B5563] px-3 py-2">
                                          Update Status
                                       </DropdownMenuLabel>
-                                      {['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'].map((st) => (
+                                      {['CONFIRMED', 'PROCESSING', 'PARTIAL', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED'].map((st) => (
                                         <DropdownMenuItem 
                                           key={st}
                                           disabled={order.status === st || updating === order.id}

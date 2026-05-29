@@ -11,7 +11,8 @@ const AppError = require('../../lib/AppError');
  */
 const createOrderIntent = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const razorpayOrder = await paymentsService.createPaymentIntent(userId);
+  const { couponCode } = req.body;
+  const razorpayOrder = await paymentsService.createPaymentIntent(userId, { couponCode });
 
   res.status(200).json({
     status: 'success',
@@ -33,7 +34,8 @@ const verifyAndFinalizeOrder = asyncHandler(async (req, res) => {
     razorpayPaymentId, 
     razorpaySignature,
     addressId,
-    notes 
+    notes,
+    couponCode
   } = req.body;
   
   if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature || !addressId) {
@@ -45,7 +47,8 @@ const verifyAndFinalizeOrder = asyncHandler(async (req, res) => {
     razorpayPaymentId,
     razorpaySignature,
     addressId,
-    notes
+    notes,
+    couponCode
   });
 
   res.status(201).json({

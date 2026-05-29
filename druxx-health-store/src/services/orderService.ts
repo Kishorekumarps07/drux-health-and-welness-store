@@ -10,6 +10,7 @@ export const orderService = {
     addressId: string;
     paymentMethod: string;
     notes?: string;
+    couponCode?: string;
   }) {
     const response = await api.post("/orders", data);
     if (response.data.status === "success") {
@@ -21,8 +22,8 @@ export const orderService = {
   /**
    * Create a Razorpay Order ID on the backend.
    */
-  async createPaymentIntent() {
-    const response = await api.post("/payments/create-intent");
+  async createPaymentIntent(data?: { couponCode?: string }) {
+    const response = await api.post("/payments/create-intent", data);
     if (response.data.status === "success") {
       // The backend returns { data: { razorpayOrder: ... } }
       return { razorpayOrder: response.data.data.razorpayOrder };
@@ -39,6 +40,7 @@ export const orderService = {
     razorpaySignature: string;
     addressId: string;
     notes?: string;
+    couponCode?: string;
   }) {
     const response = await api.post("/payments/verify-and-create", data);
     if (response.data.status === "success") {

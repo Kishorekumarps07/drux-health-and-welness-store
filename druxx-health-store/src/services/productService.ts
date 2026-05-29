@@ -1,5 +1,6 @@
 import api from "@/lib/api";
 import { Product } from "@/types";
+import { getDeliveryPerformance } from "@/lib/utils";
 
 export const mapBackendProduct = (p: any): Product => {
   if (!p) return {} as Product;
@@ -36,7 +37,7 @@ export const mapBackendProduct = (p: any): Product => {
       location: "India",
       isVerified: true,
       isTopSeller: false,
-      deliveryPerformance: 98,
+      deliveryPerformance: getDeliveryPerformance(Number(p.vendor?.rating) || 0, p.vendor?.id || ""),
       joinedDate: p.vendor?.createdAt || "",
       specialties: [],
     },

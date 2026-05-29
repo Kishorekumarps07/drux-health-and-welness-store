@@ -3,7 +3,6 @@
 const { port, nodeEnv } = require('./src/config/env');
 const logger = require('./src/config/logger');
 const prisma = require('./src/lib/prisma');
-const app = require('./src/app');
 const { connectRedis } = require('./src/config/redis');
 
 async function bootstrap() {
@@ -17,6 +16,9 @@ async function bootstrap() {
     logger.error('❌ Database connection failed:', err);
     process.exit(1);
   }
+
+  // Load app only after Redis is connected to prevent rate-limit-redis startup crash
+  const app = require('./src/app');
 
   const server = app.listen(port, () => {
     logger.info(`🚀 Druxx Health Store API running in ${nodeEnv} mode on port ${port}`);

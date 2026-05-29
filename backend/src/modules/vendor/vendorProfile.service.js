@@ -2,6 +2,23 @@
 
 const prisma = require('../../lib/prisma');
 const AppError = require('../../lib/AppError');
+const Cache = require('../../lib/cache');
+
+const CACHE_TTL = 30; // 30 seconds cache TTL
+
+const clearVendorProfileCache = async (userId) => {
+  try {
+    if (userId) {
+      await Cache.clearPattern(`vendor:analytics:${userId}:*`);
+      await Cache.del(`vendor:payments:${userId}`);
+    } else {
+      await Cache.clearPattern('vendor:analytics:*');
+      await Cache.clearPattern('vendor:payments:*');
+    }
+  } catch (err) {
+    // Suppress potential invalidation errors
+  }
+};
 
 class VendorProfileService {
   /**
@@ -17,6 +34,12 @@ class VendorProfileService {
    * Get detailed analytics for the vendor
    */
   async getAnalytics(userId, range = '30d') {
+    const cacheKey = `vendor:analytics:${userId}:${range}`;
+    const cached = await Cache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const vendor = await this.getVendor(userId);
     const vendorId = vendor.id;
 
@@ -80,7 +103,7 @@ class VendorProfileService {
       growth = 100;
     }
 
-    return {
+    const result = {
       todayRevenue: todayRev,
       revenueGrowth: `${growth >= 0 ? '+' : ''}${growth.toFixed(1)}%`,
       salesTrend: salesOverTime.map(s => ({
@@ -95,12 +118,22 @@ class VendorProfileService {
         revenue: parseFloat(p._sum.total || 0)
       }))
     };
+
+    await Cache.set(cacheKey, result, CACHE_TTL);
+
+    return result;
   }
 
   /**
    * Get payment and payout info
    */
   async getPayments(userId) {
+    const cacheKey = `vendor:payments:${userId}`;
+    const cached = await Cache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const vendor = await this.getVendor(userId);
     const vendorId = vendor.id;
 
@@ -130,7 +163,7 @@ class VendorProfileService {
     // 4. Calculate Current Balance
     const balance = totalRevenue - totalWithdrawn;
 
-    return {
+    const result = {
       balance: balance.toFixed(2),
       totalWithdrawn: totalWithdrawn.toFixed(2),
       bankInfo: {
@@ -148,6 +181,10 @@ class VendorProfileService {
           : 'N/A'
       }))
     };
+
+    await Cache.set(cacheKey, result, CACHE_TTL);
+
+    return result;
   }
 
   /**
@@ -179,4 +216,6 @@ class VendorProfileService {
   }
 }
 
-module.exports = new VendorProfileService();
+const serviceInstance = new VendorProfileService();
+serviceInstance.clearVendorProfileCache = clearVendorProfileCache;
+module.exports = serviceInstance;

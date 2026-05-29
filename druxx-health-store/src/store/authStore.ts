@@ -1,20 +1,49 @@
 "use client";
 import { create } from "zustand";
 import { supabase } from "@/lib/supabase";
-import { User } from "@supabase/supabase-js";
+import { User as SupabaseUser, Session } from "@supabase/supabase-js";
 import api from "@/lib/api";
 import { userService } from "@/services/userService";
 
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  roles: string[];
+  activeRole: string;
+  isAdmin: boolean;
+  isVendor: boolean;
+  vendorStatus?: string;
+  addresses: any[];
+}
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  roles: string[];
+  avatarUrl?: string | null;
+  avatar?: string | null;
+  phone?: string | null;
+  addresses?: any[];
+  vendor?: {
+    id: string;
+    approvalStatus: string;
+    storeName: string;
+  } | null;
+}
+
 interface AuthState {
-  user: any | null;
-  supabaseUser: User | null;
-  profile: any | null;
+  user: AuthUser | null;
+  supabaseUser: SupabaseUser | null;
+  profile: UserProfile | null;
   /** True while the initial session check is running. False forever after. */
   loading: boolean;
   initialized: boolean;
   isAuthenticated: boolean;
   accessToken: string | null;
-  mismatchError?: any;
+  mismatchError?: { message: string; link: string; cta: string } | null;
 
   initialize: () => Promise<void>;
   logout: () => Promise<void>;
@@ -36,6 +65,7 @@ let _initStarted = false;
 /** Clear all auth artifacts from browser storage and axios defaults. */
 function _clearAuthStorage() {
   if (typeof window !== "undefined") {
+    console.trace("🧹 _clearAuthStorage called by:");
     localStorage.removeItem("token");
     // Also clear Supabase's own session storage keys (sb-<project>-auth-token).
     // These contain the refresh token that triggers "Invalid Refresh Token" errors
@@ -96,8 +126,57 @@ function _applyToken(token: string) {
   api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 }
 
+/**
+ * Shared helper: checks if the actualRole matches requiredRole.
+ * On mismatch: signs out, clears storage, sets mismatchError state, and throws.
+ * Returns void (throws on mismatch, no-op on match).
+ */
+async function _handleRoleMismatch(
+  actualRole: string,
+  requiredRole: string,
+  set: (state: Partial<AuthState>) => void,
+  stateRef: { user: AuthUser | null }
+) {
+  if (requiredRole === actualRole) return; // ✅ match — nothing to do
+
+  await supabase.auth.signOut();
+  _clearAuthStorage();
+
+  let message = `This account is a ${actualRole}. Please use the correct login portal.`;
+  let link = "/login";
+  let cta = "Go to Customer Login";
+
+  if (actualRole === "ADMIN") {
+    message = "This account is registered as an Administrator. Please use the Admin Portal.";
+    link = "/admin/login";
+    cta = "Go to Admin Portal";
+  } else if (actualRole === "VENDOR") {
+    message = "This account is registered as a Merchant/Vendor. Please use the Merchant Portal.";
+    link = "/vendor/login";
+    cta = "Go to Merchant Portal";
+  } else if (requiredRole === "ADMIN") {
+    message = "Access Denied. Administrator privileges required.";
+    link = "/login";
+    cta = "Go to Customer Login";
+  } else if (requiredRole === "VENDOR") {
+    message = "Access Denied. Merchant privileges required.";
+    link = "/login";
+    cta = "Go to Customer Login";
+  }
+
+  set({
+    mismatchError: { message, link, cta },
+    isAuthenticated: false,
+    user: null,
+    supabaseUser: null,
+    profile: null,
+    accessToken: null,
+  });
+  throw new Error("Role mismatch");
+}
+
 /** Fetch the user profile from the backend and return a normalised user object. */
-async function _buildUserFromSession(sUser: User, session: any) {
+async function _buildUserFromSession(sUser: SupabaseUser, session: { access_token: string } & Partial<Session>) {
   _applyToken(session.access_token);
 
   try {
@@ -201,15 +280,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       if (!session || !session.user) {
-        // SIGNED_OUT event — clear everything
-        _clearAuthStorage();
-        set({
-          isAuthenticated: false,
-          user: null,
-          supabaseUser: null,
-          profile: null,
-          accessToken: null,
-        });
+        // Only clear storage if this is a definitive SIGNED_OUT event
+        // or if we don't have a token in localStorage to begin with.
+        // This prevents transient null sessions on initial load from breaking active logins.
+        const hasLocalToken = typeof window !== "undefined" && !!localStorage.getItem("token");
+        if (event === "SIGNED_OUT" || !hasLocalToken) {
+          _clearAuthStorage();
+          set({
+            isAuthenticated: false,
+            user: null,
+            supabaseUser: null,
+            profile: null,
+            accessToken: null,
+          });
+        }
         return;
       }
 
@@ -220,17 +304,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (typeof window !== "undefined") {
           const pathname = window.location.pathname;
           const userRole = state.user?.activeRole || "CUSTOMER";
-          const mismatch = _checkRoleMismatch(pathname, userRole);
+          const mismatch = state.profile ? _checkRoleMismatch(pathname, userRole) : null;
 
           if (mismatch) {
-            await supabase.auth.signOut();
-            _clearAuthStorage();
+            // Under an automatic auth change (e.g. in a background tab), do NOT globally sign out or clear storage,
+            // as this would instantly disrupt a successful login that just occurred in the foreground tab.
+            // Instead, simply flag the mismatchError locally on this page/tab.
             set({
-              isAuthenticated: false,
-              user: null,
-              supabaseUser: null,
-              profile: null,
-              accessToken: null,
               mismatchError: mismatch,
             });
             return;
@@ -254,17 +334,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (typeof window !== "undefined") {
           const pathname = window.location.pathname;
           const userRole = state.user?.activeRole || "CUSTOMER";
-          const mismatch = _checkRoleMismatch(pathname, userRole);
+          const mismatch = state.profile ? _checkRoleMismatch(pathname, userRole) : null;
 
           if (mismatch) {
-            await supabase.auth.signOut();
-            _clearAuthStorage();
+            // Under automatic session checks, do NOT globally sign out or clear storage
+            // if this specific page/tab has a role mismatch, as it may be a background tab.
+            // Simply flag the mismatchError locally.
             set({
-              isAuthenticated: false,
-              user: null,
-              supabaseUser: null,
-              profile: null,
-              accessToken: null,
               mismatchError: mismatch,
             });
             return;
@@ -273,12 +349,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         set({ ...state, mismatchError: null });
       } else {
+        // Only clear storage if we don't have a token in localStorage
+        const hasLocalToken = typeof window !== "undefined" && !!localStorage.getItem("token");
+        if (!hasLocalToken) {
+          _clearAuthStorage();
+          set({ isAuthenticated: false, user: null });
+        } else {
+          // If we have a local token, keep authenticated true so frontend continues using it
+          set({ isAuthenticated: true });
+        }
+      }
+    } catch {
+      const hasLocalToken = typeof window !== "undefined" && !!localStorage.getItem("token");
+      if (!hasLocalToken) {
         _clearAuthStorage();
         set({ isAuthenticated: false, user: null });
       }
-    } catch {
-      _clearAuthStorage();
-      set({ isAuthenticated: false, user: null });
     } finally {
       set({ loading: false, initialized: true });
     }
@@ -309,52 +395,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // Role check after building user from backend profile
     if (requiredRole && state.user) {
-      // Strict role enforcement: determine the primary role (ADMIN > VENDOR > CUSTOMER)
       let actualRole = "CUSTOMER";
-      if (state.user.roles.includes("ADMIN")) {
-        actualRole = "ADMIN";
-      } else if (state.user.roles.includes("VENDOR")) {
-        actualRole = "VENDOR";
-      }
+      if (state.user.roles.includes("ADMIN")) actualRole = "ADMIN";
+      else if (state.user.roles.includes("VENDOR")) actualRole = "VENDOR";
 
-      if (requiredRole !== actualRole) {
-        await supabase.auth.signOut();
-        _clearAuthStorage();
-
-        let customMessage = `This account is a ${actualRole}. Please use the correct login portal.`;
-        let customLink = "/login";
-        let customCta = "Go to Customer Login";
-
-        if (actualRole === "ADMIN") {
-          customMessage = "This account is registered as an Administrator. Please use the Admin Portal.";
-          customLink = "/admin/login";
-          customCta = "Go to Admin Portal";
-        } else if (actualRole === "VENDOR") {
-          customMessage = "This account is registered as a Merchant/Vendor. Please use the Merchant Portal.";
-          customLink = "/vendor/login";
-          customCta = "Go to Merchant Portal";
-        } else if (requiredRole === "ADMIN") {
-          customMessage = "Access Denied. Administrator privileges required.";
-          customLink = "/login";
-          customCta = "Go to Customer Login";
-        } else if (requiredRole === "VENDOR") {
-          customMessage = "Access Denied. Merchant privileges required.";
-          customLink = "/login";
-          customCta = "Go to Customer Login";
-        }
-
-        set({
-          mismatchError: {
-            message: customMessage,
-            link: customLink,
-            cta: customCta,
-          },
-        });
-        throw new Error("Role mismatch");
-      } else {
-        // Force the activeRole to be the required portal role
-        state.user.activeRole = requiredRole;
-      }
+      await _handleRoleMismatch(actualRole, requiredRole, set, state);
+      // If we reach here, roles matched — force the activeRole
+      state.user.activeRole = requiredRole;
     }
 
     set({ ...state, mismatchError: null });
@@ -425,54 +472,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     const state = await _buildUserFromSession(data.user, data.session);
 
-    // Role check after building user from backend profile
     if (requiredRole && state.user) {
-      // Strict role enforcement: determine the primary role (ADMIN > VENDOR > CUSTOMER)
       let actualRole = "CUSTOMER";
-      if (state.user.roles.includes("ADMIN")) {
-        actualRole = "ADMIN";
-      } else if (state.user.roles.includes("VENDOR")) {
-        actualRole = "VENDOR";
-      }
+      if (state.user.roles.includes("ADMIN")) actualRole = "ADMIN";
+      else if (state.user.roles.includes("VENDOR")) actualRole = "VENDOR";
 
-      if (requiredRole !== actualRole) {
-        await supabase.auth.signOut();
-        _clearAuthStorage();
-
-        let customMessage = `This account is a ${actualRole}. Please use the correct login portal.`;
-        let customLink = "/login";
-        let customCta = "Go to Customer Login";
-
-        if (actualRole === "ADMIN") {
-          customMessage = "This account is registered as an Administrator. Please use the Admin Portal.";
-          customLink = "/admin/login";
-          customCta = "Go to Admin Portal";
-        } else if (actualRole === "VENDOR") {
-          customMessage = "This account is registered as a Merchant/Vendor. Please use the Merchant Portal.";
-          customLink = "/vendor/login";
-          customCta = "Go to Merchant Portal";
-        } else if (requiredRole === "ADMIN") {
-          customMessage = "Access Denied. Administrator privileges required.";
-          customLink = "/login";
-          customCta = "Go to Customer Login";
-        } else if (requiredRole === "VENDOR") {
-          customMessage = "Access Denied. Merchant privileges required.";
-          customLink = "/login";
-          customCta = "Go to Customer Login";
-        }
-
-        set({
-          mismatchError: {
-            message: customMessage,
-            link: customLink,
-            cta: customCta,
-          },
-        });
-        throw new Error("Role mismatch");
-      } else {
-        // Force the activeRole to be the required portal role
-        state.user.activeRole = requiredRole;
-      }
+      await _handleRoleMismatch(actualRole, requiredRole, set, state);
+      // If we reach here, roles matched — force the activeRole
+      state.user.activeRole = requiredRole;
     }
 
     set({ ...state, mismatchError: null });

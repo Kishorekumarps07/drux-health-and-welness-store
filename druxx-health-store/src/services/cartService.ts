@@ -1,5 +1,6 @@
 import api from "@/lib/api";
 import { CartItem, Product } from "@/types";
+import { getDeliveryPerformance } from "@/lib/utils";
 
 interface CartResponse {
   status: string;
@@ -38,19 +39,19 @@ const mapBackendCartItem = (item: any): CartItem => {
       location: "",
       isVerified: true,
       isTopSeller: false,
-      deliveryPerformance: 100,
+      deliveryPerformance: getDeliveryPerformance(Number(p.vendor?.rating) || 0, p.vendor?.id || ""),
       joinedDate: "",
       specialties: [],
     },
     stock: p.stockQty || 0,
-    tags: [],
-    isFeatured: false,
-    isBestSeller: false,
-    isNew: false,
-    brand: "Druxx",
+    tags: p.tags || [],
+    isFeatured: p.isFeatured || false,
+    isBestSeller: p.isBestSeller || false,
+    isNew: p.isNew || false,
+    brand: p.brand || "",
     sku: p.sku || "",
-    weight: "500g",
-    shippingInfo: "",
+    weight: p.weight || "",
+    shippingInfo: p.shippingInfo || "",
   };
 
   return {

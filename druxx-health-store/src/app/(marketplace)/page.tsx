@@ -7,19 +7,17 @@ import { productService } from "@/services/productService";
 import { HomeAnimations } from "@/components/home/HomeAnimations";
 import api from "@/lib/api";
 import { NewsletterSection } from "@/components/home/NewsletterSection";
+import { getDeliveryPerformance } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 300; // Cache on Vercel's edge for 5 minutes, regenerating in background
 
 export default async function HomePage() {
-  // Fetch all home data in parallel on the server
-  // Fetch home data sequentially to avoid hitting rate limits (429)
-  const fRes = await productService.getFeatured();
-  const bRes = await productService.getBestSellers();
-  const nRes = await productService.getNewArrivals();
-  const oRes = await productService.getAllProducts({ limit: 12 });
-  
-  const [heroRes, advRes, vRes] = await Promise.all([
+  // Fetch all home data in parallel on the server for instant page load
+  const [fRes, bRes, nRes, oRes, heroRes, advRes, vRes] = await Promise.all([
+    productService.getFeatured(),
+    productService.getBestSellers(),
+    productService.getNewArrivals(),
+    productService.getAllProducts({ limit: 12 }),
     api.get('/cms/hero').catch(() => ({ data: { data: [] } })),
     api.get('/cms/advantages').catch(() => ({ data: { data: [] } })),
     api.get('/vendors', { params: { limit: 3, orderBy: 'latest' } }).catch(() => ({ data: { vendors: [] } }))
@@ -49,7 +47,7 @@ export default async function HomePage() {
     location: "India",
     isVerified: bv.approvalStatus === "ACTIVE",
     isTopSeller: parseFloat(bv.rating) >= 4.5,
-    deliveryPerformance: 99,
+    deliveryPerformance: getDeliveryPerformance(parseFloat(bv.rating) || 0, bv.id),
     joinedDate: bv.createdAt,
     specialties: ["Health", "Wellness"]
   }));

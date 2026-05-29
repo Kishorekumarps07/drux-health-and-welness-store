@@ -5,6 +5,7 @@ import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { orderService } from "@/services/orderService";
 import { userService } from "@/services/userService";
+import { couponService, Coupon } from "@/services/couponService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -83,6 +84,8 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState("RAZORPAY");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
+  const [activeCoupons, setActiveCoupons] = useState<Coupon[]>([]);
+  const [isLoadingCoupons, setIsLoadingCoupons] = useState(true);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [newAddress, setNewAddress] = useState({
     label: "Home",
@@ -111,15 +114,20 @@ export default function CheckoutPage() {
     const loadData = async () => {
       try {
         setIsLoadingAddresses(true);
+        setIsLoadingCoupons(true);
         await syncWithServer();
         const data = await userService.getAddresses();
         setAddresses(data);
         const def = data.find((a: any) => a.isDefault);
         if (def) setAddressId(def.id);
+
+        const activeCps = await couponService.getActiveCoupons();
+        setActiveCoupons(activeCps);
       } catch (error) {
-        console.error("Failed to load addresses", error);
+        console.error("Failed to load checkout data", error);
       } finally {
         setIsLoadingAddresses(false);
+        setIsLoadingCoupons(false);
       }
     };
 
@@ -128,9 +136,24 @@ export default function CheckoutPage() {
 
   const handleAddAddress = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const phoneTrimmed = newAddress.phone.trim();
+    if (!/^(?:\+91|0)?[6-9]\d{9}$/.test(phoneTrimmed)) {
+      toast.error("Please enter a valid 10-digit Indian mobile number.");
+      return;
+    }
+
+    const pincodeTrimmed = newAddress.pincode.trim();
+    if (pincodeTrimmed.length !== 6 || !/^\d{6}$/.test(pincodeTrimmed)) {
+      toast.error("Pincode must be exactly 6 digits.");
+      return;
+    }
+
     try {
       const saved = await userService.createAddress({
         ...newAddress,
+        phone: phoneTrimmed,
+        pincode: pincodeTrimmed,
         street: newAddress.line1 + (newAddress.line2 ? ", " + newAddress.line2 : ""),
       });
       setAddresses([...addresses, saved]);
@@ -155,12 +178,15 @@ export default function CheckoutPage() {
         const order = await orderService.placeOrder({
           addressId,
           paymentMethod: "COD",
+          couponCode: couponCode || undefined,
         });
         toast.success("Order placed successfully!");
         clearCart();
         router.push(`/dashboard/orders/${order.id}?success=true`);
       } else {
-        const { razorpayOrder } = await orderService.createPaymentIntent();
+        const { razorpayOrder } = await orderService.createPaymentIntent({
+          couponCode: couponCode || undefined,
+        });
 
         const options = {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
@@ -176,6 +202,7 @@ export default function CheckoutPage() {
                 razorpayPaymentId: response.razorpay_payment_id,
                 razorpaySignature: response.razorpay_signature,
                 addressId,
+                couponCode: couponCode || undefined,
               });
               toast.success("Payment successful! Order confirmed.");
               clearCart();
@@ -723,9 +750,31 @@ export default function CheckoutPage() {
                   {couponSuccess && (
                     <p className="text-xs text-green-600 font-bold">{couponSuccess}</p>
                   )}
-                  <p className="text-[10px] text-gray-400 font-medium">
-                    Try: DRUXX10, HEALTH20, FIRST15, ORGANIC25
-                  </p>
+                  {activeCoupons.length > 0 ? (
+                    <div className="space-y-1.5 pt-1">
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Available Coupons</p>
+                      <div className="max-h-24 overflow-y-auto space-y-1 pr-1">
+                        {activeCoupons.map((coupon) => (
+                          <div 
+                            key={coupon.id} 
+                            onClick={() => {
+                              setCouponInput(coupon.code);
+                              setCouponError("");
+                              setCouponSuccess("");
+                            }}
+                            className="flex items-center justify-between p-1.5 border border-dashed border-gray-200 hover:border-[#A6D608] hover:bg-[#A6D608]/5 rounded-sm cursor-pointer transition-colors"
+                          >
+                            <span className="font-mono text-xs font-bold text-gray-800 bg-gray-50 px-1 py-0.5 rounded border border-gray-100">{coupon.code}</span>
+                            <span className="text-[11px] font-bold text-green-600">{coupon.discountPercent}% OFF</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    !isLoadingCoupons && (
+                      <p className="text-[10px] text-gray-400 font-medium">No coupons available at the moment.</p>
+                    )
+                  )}
                 </div>
               )}
             </div>

@@ -1,5 +1,6 @@
 import api from "@/lib/api";
 import { Vendor } from "@/types";
+import { getDeliveryPerformance } from "@/lib/utils";
 
 export interface VendorStats {
   totalSales: string;
@@ -63,7 +64,7 @@ const mapVendor = (bv: any): Vendor => ({
   location: "India",
   isVerified: bv.approvalStatus === 'APPROVED' || bv.approvalStatus === 'ACTIVE',
   isTopSeller: parseFloat(bv.rating) >= 4.5,
-  deliveryPerformance: 99,
+  deliveryPerformance: getDeliveryPerformance(parseFloat(bv.rating) || 0, bv.id),
   joinedDate: bv.createdAt,
   specialties: ["Health", "Wellness"]
 });
@@ -93,7 +94,7 @@ export const vendorService = {
           location: "India",
           isVerified: bv.approvalStatus === "ACTIVE",
           isTopSeller: parseFloat(bv.rating) >= 4.5,
-          deliveryPerformance: 99,
+          deliveryPerformance: getDeliveryPerformance(parseFloat(bv.rating) || 0, bv.id),
           joinedDate: bv.createdAt,
           specialties: ["Health", "Wellness"]
         })),

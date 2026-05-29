@@ -50,9 +50,12 @@ const isCouponApplicable = (coupon: Coupon | null, items: CartItem[]): boolean =
   return true;
 };
 
+type SetState = (state: Partial<CartState> | ((state: CartState) => Partial<CartState>)) => void;
+type GetState = () => CartState;
+
 const setItemsAndValidateCoupon = (
-  set: any,
-  get: any,
+  set: SetState,
+  get: GetState,
   updatedItems: CartItem[]
 ) => {
   const coupon = get().couponDetails;
@@ -192,8 +195,9 @@ export const useCartStore = create<CartState>()(
           }
           toast.error("Invalid coupon code");
           return false;
-        } catch (error: any) {
-          toast.error(error.response?.data?.message || error.message || "Failed to apply coupon");
+        } catch (error: unknown) {
+          const err = error as any;
+          toast.error(err.response?.data?.message || err.message || "Failed to apply coupon");
           return false;
         }
       },
@@ -212,6 +216,36 @@ export const useCartStore = create<CartState>()(
           }));
           const mergedItems = await cartService.syncCart(localItems);
           setItemsAndValidateCoupon(set, get, mergedItems);
+
+          // Re-validate coupon if exists
+          const currentCouponCode = get().couponCode;
+          if (currentCouponCode) {
+            try {
+              const { couponService } = await import("@/services/couponService");
+              const coupon = await couponService.validateCoupon(currentCouponCode);
+              if (coupon && isCouponApplicable(coupon, mergedItems)) {
+                set({
+                  couponCode: coupon.code.toUpperCase(),
+                  couponDiscount: coupon.discountPercent,
+                  couponDetails: coupon
+                });
+              } else {
+                set({
+                  couponCode: "",
+                  couponDiscount: 0,
+                  couponDetails: null
+                });
+                toast.info("Applied coupon is no longer applicable to your synced cart.");
+              }
+            } catch (error) {
+              set({
+                couponCode: "",
+                couponDiscount: 0,
+                couponDetails: null
+              });
+              toast.info("Applied coupon has expired or is no longer valid.");
+            }
+          }
         } catch (error) {
           console.error("Cart final sync failed:", error);
         } finally {
@@ -265,6 +299,36 @@ export const useCartStore = create<CartState>()(
         try {
           const serverItems = await cartService.getCart();
           setItemsAndValidateCoupon(set, get, serverItems);
+
+          // Re-validate coupon if exists
+          const currentCouponCode = get().couponCode;
+          if (currentCouponCode) {
+            try {
+              const { couponService } = await import("@/services/couponService");
+              const coupon = await couponService.validateCoupon(currentCouponCode);
+              if (coupon && isCouponApplicable(coupon, serverItems)) {
+                set({
+                  couponCode: coupon.code.toUpperCase(),
+                  couponDiscount: coupon.discountPercent,
+                  couponDetails: coupon
+                });
+              } else {
+                set({
+                  couponCode: "",
+                  couponDiscount: 0,
+                  couponDetails: null
+                });
+                toast.info("Persisted coupon is no longer applicable.");
+              }
+            } catch (error) {
+              set({
+                couponCode: "",
+                couponDiscount: 0,
+                couponDetails: null
+              });
+              toast.info("Persisted coupon has expired or is no longer valid.");
+            }
+          }
         } catch (error) {
           console.error("Fetch cart failed:", error);
         }

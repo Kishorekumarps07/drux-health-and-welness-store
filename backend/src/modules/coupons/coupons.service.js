@@ -35,6 +35,17 @@ class CouponsService {
     if (!coupon || !coupon.isActive) {
       throw new AppError('Invalid or expired coupon code.', 404);
     }
+
+    // Check expiry
+    if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
+      throw new AppError('This coupon code has expired.', 400);
+    }
+
+    // Check usage limits
+    if (coupon.usageLimit !== null && coupon.usageLimit !== undefined && coupon.usageCount >= coupon.usageLimit) {
+      throw new AppError('This coupon code has reached its usage limit.', 400);
+    }
+
     return coupon;
   }
 

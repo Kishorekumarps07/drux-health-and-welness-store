@@ -2,6 +2,7 @@ const prisma = require('../../lib/prisma');
 const AppError = require('../../lib/AppError');
 const { getPagination, getPagingData } = require('../../lib/pagination.util');
 const notificationsService = require('../users/notifications.service');
+const couponsService = require('../coupons/coupons.service');
 
 const ORDER_INCLUDE = {
   items: { 
@@ -19,7 +20,7 @@ const ORDER_INCLUDE = {
 };
 
 class OrdersService {
-  async placeOrder(userId, { addressId, paymentMethod, notes }) {
+  async placeOrder(userId, { addressId, paymentMethod, notes, couponCode }) {
     // Validate address belongs to user
     const address = await prisma.address.findFirst({ where: { id: addressId, userId } });
     if (!address) throw new AppError('Address not found.', 404);
@@ -30,6 +31,16 @@ class OrdersService {
       include: { items: { include: { product: true } } },
     });
     if (!cart || cart.items.length === 0) throw new AppError('Your cart is empty.', 400);
+
+    // Validate coupon (if provided)
+    let coupon = null;
+    if (couponCode) {
+      try {
+        coupon = await couponsService.validateCoupon(couponCode);
+      } catch {
+        throw new AppError('Invalid or expired coupon code.', 400);
+      }
+    }
 
     // Calculate totals
     const orderItems = [];
@@ -53,8 +64,24 @@ class OrdersService {
       });
     }
 
+    // Compute coupon discount on applicable items only
+    let discount = 0;
+    if (coupon) {
+      let applicableSubtotal = subtotal;
+      if (coupon.productId) {
+        applicableSubtotal = cart.items
+          .filter(i => i.product.id === coupon.productId)
+          .reduce((acc, i) => acc + parseFloat(i.product.price) * i.quantity, 0);
+      } else if (coupon.vendorId) {
+        applicableSubtotal = cart.items
+          .filter(i => i.product.vendorId === coupon.vendorId)
+          .reduce((acc, i) => acc + parseFloat(i.product.price) * i.quantity, 0);
+      }
+      discount = Math.round((applicableSubtotal * coupon.discountPercent) / 100);
+    }
+
     const shippingCharge = subtotal >= 499 ? 0 : 49;
-    const total = subtotal + shippingCharge;
+    const total = Math.max(0, subtotal - discount + shippingCharge);
 
     const isCod = paymentMethod === 'COD';
 
@@ -67,7 +94,8 @@ class OrdersService {
           addressId, 
           paymentMethod, 
           notes,
-          subtotal, 
+          subtotal,
+          discount,
           shippingCharge, 
           total,
           status: isCod ? 'CONFIRMED' : 'PENDING',
@@ -89,6 +117,14 @@ class OrdersService {
           }
         }
         await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
+      }
+
+      // If there is a coupon, increment its usageCount inside the transaction
+      if (coupon) {
+        await tx.coupon.update({
+          where: { id: coupon.id },
+          data: { usageCount: { increment: 1 } }
+        });
       }
 
       try {
@@ -165,7 +201,7 @@ class OrdersService {
    * Used by the payment verification flow to ensure atomicity.
    */
   async createOrderFromVerifiedCart(userId, tx, { addressId, totals, paymentMethod = 'RAZORPAY', notes }) {
-    const { subtotal, shippingCharge, total, items } = totals;
+    const { subtotal, shippingCharge, total, items, discount = 0 } = totals;
 
     // Create the order
     const order = await tx.order.create({
@@ -175,6 +211,7 @@ class OrdersService {
         paymentMethod,
         notes,
         subtotal,
+        discount,
         shippingCharge,
         total,
         status: 'CONFIRMED',
@@ -225,16 +262,36 @@ class OrdersService {
   }
 
   async cancel(userId, orderId) {
-    const order = await prisma.order.findFirst({ where: { id: orderId, userId } });
+    const order = await prisma.order.findFirst({ 
+      where: { id: orderId, userId },
+      include: { items: true }
+    });
     if (!order) throw new AppError('Order not found.', 404);
     if (!['PENDING', 'CONFIRMED'].includes(order.status)) {
       throw new AppError('Order cannot be cancelled at this stage.', 400);
     }
 
-    const updated = await prisma.order.update({
-      where: { id: orderId },
-      data: { status: "CANCELLED" },
-      include: ORDER_INCLUDE,
+    const updated = await prisma.$transaction(async (tx) => {
+      const updatedOrder = await tx.order.update({
+        where: { id: orderId },
+        data: { status: "CANCELLED" },
+        include: ORDER_INCLUDE,
+      });
+
+      // IMPORTANT: Only restore stock for CONFIRMED orders.
+      // PENDING orders (online payment initiated but not yet verified) never had
+      // their stock decremented in placeOrder(), so restoring would create phantom stock.
+      const stockWasReserved = order.status === 'CONFIRMED';
+      if (stockWasReserved) {
+        for (const item of order.items) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stockQty: { increment: item.quantity } }
+          });
+        }
+      }
+
+      return updatedOrder;
     });
 
     try {

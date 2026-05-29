@@ -22,7 +22,11 @@ class VendorsService {
     let storeSlug = baseSlug;
     let attempt = 0;
     while (await prisma.vendor.findUnique({ where: { storeSlug } })) {
-      storeSlug = `${baseSlug}-${++attempt}`;
+      attempt++;
+      if (attempt > 50) {
+        throw new AppError('Could not generate a unique store slug after 50 attempts.', 500);
+      }
+      storeSlug = `${baseSlug}-${attempt}`;
     }
 
     const vendor = await prisma.vendor.create({

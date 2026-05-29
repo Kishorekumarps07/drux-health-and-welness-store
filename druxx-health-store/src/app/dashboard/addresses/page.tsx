@@ -99,8 +99,8 @@ export default function AddressesPage() {
       toast.error("Name must be at least 2 characters.");
       return false;
     }
-    if (!/^\d{10,}$/.test(phone.trim())) {
-      toast.error("Phone number must be at least 10 digits.");
+    if (!/^(?:\+91|0)?[6-9]\d{9}$/.test(phone.trim())) {
+      toast.error("Please enter a valid 10-digit Indian mobile number.");
       return false;
     }
     if (street.trim().length < 3) {
