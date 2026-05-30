@@ -48,9 +48,21 @@ const deleteCoupon = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * Automatically generate a unique coupon code for the logged-in vendor
+ */
+const generateCouponCode = asyncHandler(async (req, res) => {
+  const result = await vendorCouponsService.generateCouponCode(req.user.id, req.query.discountPercent);
+  res.json({
+    status: 'success',
+    data: result
+  });
+});
+
 module.exports = {
   listCoupons,
   createCoupon,
   updateCoupon,
-  deleteCoupon
+  deleteCoupon,
+  generateCouponCode
 };

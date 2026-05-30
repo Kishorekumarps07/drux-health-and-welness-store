@@ -132,46 +132,40 @@ export const vendorService = {
    */
   async getMyOrders(params: { page?: number; limit?: number; status?: string } = {}) {
     try {
-      const response = await api.get('/orders/vendor', { params });
+      const response = await api.get('/vendor/orders', { params });
       
-      const orders = response.data.orders || [];
-      const items: VendorOrderItem[] = [];
-
-      orders.forEach((order: any) => {
-        order.items.forEach((item: any) => {
-          items.push({
-            id: item.id,
-            orderId: order.id,
-            productId: item.productId,
-            vendorId: item.vendorId,
-            title: item.title,
-            price: Number(item.price),
-            quantity: Number(item.quantity),
-            total: Number(item.total),
-            status: item.status || 'PENDING',
-            createdAt: item.createdAt,
-            updatedAt: item.updatedAt,
-            order: {
-              id: order.id,
-              status: order.status,
-              paymentStatus: order.paymentStatus,
-              paymentMethod: order.paymentMethod,
-              createdAt: order.createdAt,
-              user: { 
-                name: order.address?.fullName || "Customer", 
-                email: order.user?.email || "", 
-                phone: order.address?.phone || "" 
-              },
-              address: order.address || {},
-            },
-            product: {
-              id: item.productId,
-              title: item.title,
-              images: item.product?.images?.map((img: any) => ({ url: img.url })) || []
-            }
-          });
-        });
-      });
+      const responseItems = response.data.items || [];
+      const items: VendorOrderItem[] = responseItems.map((item: any) => ({
+        id: item.id,
+        orderId: item.orderId,
+        productId: item.productId,
+        vendorId: item.vendorId,
+        title: item.title,
+        price: Number(item.price),
+        quantity: Number(item.quantity),
+        total: Number(item.total),
+        status: item.status || 'PENDING',
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        order: {
+          id: item.order?.id || item.orderId,
+          status: item.order?.status || 'PENDING',
+          paymentStatus: item.order?.paymentStatus || 'PAID',
+          paymentMethod: item.order?.paymentMethod || 'Razorpay',
+          createdAt: item.order?.createdAt || item.createdAt,
+          user: { 
+            name: item.order?.address?.fullName || item.order?.user?.name || "Customer", 
+            email: item.order?.user?.email || "", 
+            phone: item.order?.address?.phone || item.order?.user?.phone || "" 
+          },
+          address: item.order?.address || {},
+        },
+        product: {
+          id: item.productId,
+          title: item.title,
+          images: item.product?.images?.map((img: any) => ({ url: img.url })) || []
+        }
+      }));
 
       return {
         status: "success",

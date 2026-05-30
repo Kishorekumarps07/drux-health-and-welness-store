@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button"
 import { useAuthStore } from "@/store/authStore"
 import { DashboardSidebar } from "@/components/layout/DashboardSidebar"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
+import { VendorNotifications } from "@/components/layout/VendorNotifications"
 
 const navigation = [
   { group: 'Operational', items: [
@@ -81,12 +82,7 @@ export default function VendorDashboardLayout({
                    <input type="text" placeholder="Quick search..." className="pl-11 pr-4 py-2.5 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#A6D608]/20 transition-all w-64" />
                 </div>
                 
-                <div className="relative cursor-pointer group">
-                   <div className="p-2.5 rounded-xl border border-gray-100 hover:bg-gray-50 transition-all">
-                      <Bell className="w-6 h-6 text-gray-400 group-hover:text-gray-900 transition-colors shadow-sm" />
-                   </div>
-                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#FF7A00] text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white animate-bounce-short">3</span>
-                </div>
+                <VendorNotifications />
 
                 <div className="flex items-center gap-3 pl-6 border-l border-gray-100">
                    <div className="text-right">

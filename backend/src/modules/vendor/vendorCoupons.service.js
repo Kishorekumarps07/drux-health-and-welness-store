@@ -164,6 +164,43 @@ class VendorCouponsService {
 
     await prisma.coupon.delete({ where: { id } });
   }
+
+  /**
+   * Automatically generate a unique, beautifully styled coupon code for the vendor
+   */
+  async generateCouponCode(userId, discountPercent = 10) {
+    const vendor = await this.getVendorByUserId(userId);
+    
+    // Create store prefix from storeName (uppercase, alphanumeric, max 6 chars)
+    const prefix = vendor.storeName
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '')
+      .substring(0, 6) || 'COUPON';
+
+    const discount = parseInt(discountPercent, 10) || 10;
+    
+    let attempts = 0;
+    let code = '';
+    let exists = true;
+
+    while (exists && attempts < 10) {
+      attempts++;
+      // Generate a random 4-character alphanumeric string
+      const randomString = Math.random().toString(36).substring(2, 6).toUpperCase();
+      code = `${prefix}${discount}-${randomString}`;
+      
+      const check = await prisma.coupon.findUnique({ where: { code } });
+      if (!check) {
+        exists = false;
+      }
+    }
+
+    if (exists) {
+      throw new AppError('Failed to generate a unique coupon code. Please try again.', 500);
+    }
+
+    return { code };
+  }
 }
 
 module.exports = new VendorCouponsService();

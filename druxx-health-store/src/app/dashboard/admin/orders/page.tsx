@@ -35,17 +35,21 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
 
 export default function AdminOrdersPage() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams ? searchParams.get("search") || "" : "";
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [updating, setUpdating] = useState<string | null>(null);
 
   const fetchOrders = async () => {
     setLoading(true);
     try {
       const data = await adminService.listAllOrders({ search });
+      console.log("FRONTEND ADMIN ORDERS FETCHED:", data.orders);
       setOrders(data.orders);
     } catch (error) {
       toast.error("Failed to fetch platform orders");
@@ -150,8 +154,8 @@ export default function AdminOrdersPage() {
                                 </div>
                              </td>
                              <td className="px-6 py-8">
-                                <p className="font-bold text-[#E5E7EB]">{order.user?.name || "Anonymous"}</p>
-                                <p className="text-[10px] font-medium text-[#9CA3AF] lowercase">{order.user?.email}</p>
+                                <p className="font-bold text-[#E5E7EB]">{order.user?.name || (order.address ? `${order.address.firstName} ${order.address.lastName}` : "Anonymous")}</p>
+                                <p className="text-[10px] font-medium text-[#9CA3AF] lowercase">{order.user?.email || "No Email"}</p>
                              </td>
                              <td className="px-6 py-8">
                                 <div className={cn("inline-flex items-center gap-2 px-3 py-1.5 rounded-md border font-bold text-[10px] uppercase tracking-wider", status.bg, status.color, `border-${status.color.split('-')[1]}/20`)}>
@@ -164,7 +168,7 @@ export default function AdminOrdersPage() {
                                    <IndianRupee className="w-3 h-3 text-[#9CA3AF]" />
                                    {order.total.toLocaleString()}
                                 </div>
-                                <p className="text-[10px] font-medium text-[#6B7280] uppercase tracking-wider mt-1">{order.itemsCount || 0} items</p>
+                                <p className="text-[10px] font-medium text-[#6B7280] uppercase tracking-wider mt-1">{order.items?.length || 0} items</p>
                              </td>
                              <td className="px-10 py-8 text-right">
                                 <DropdownMenu>

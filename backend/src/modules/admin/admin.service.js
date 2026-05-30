@@ -250,9 +250,19 @@ class AdminService {
 
   // ── Orders (Admin view) ────────────────────────────────────────────────────
 
-  async listAllOrders({ page = 1, limit = 20, status }) {
+  async listAllOrders({ page = 1, limit = 20, status, search }) {
     const skip = (page - 1) * limit;
-    const where = status ? { status } : {};
+    
+    const where = {
+      ...(status ? { status } : {}),
+      ...(search ? {
+        OR: [
+          { id: { contains: search, mode: "insensitive" } },
+          { user: { name: { contains: search, mode: "insensitive" } } },
+          { user: { email: { contains: search, mode: "insensitive" } } },
+        ]
+      } : {})
+    };
 
     // Run sequentially to prevent connection pooler starvation
     const orders = await prisma.order.findMany({
@@ -260,6 +270,7 @@ class AdminService {
       orderBy: { createdAt: 'desc' },
       include: {
         user: { select: { id: true, name: true, email: true } },
+        address: true,
         items: { include: { product: { select: { id: true, title: true } } } },
       },
     });

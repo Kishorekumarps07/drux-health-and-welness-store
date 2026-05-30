@@ -17,6 +17,7 @@ const ORDER_INCLUDE = {
   },
   address: true,
   payment: true,
+  user: { select: { id: true, name: true, email: true, phone: true } },
 };
 
 class OrdersService {
@@ -352,15 +353,25 @@ class OrdersService {
 
   async getAllOrders(query) {
     const { skip, take, page, limit } = getPagination(query);
+    const { search } = query;
+
+    const where = search ? {
+      OR: [
+        { id: { contains: search, mode: "insensitive" } },
+        { user: { name: { contains: search, mode: "insensitive" } } },
+        { user: { email: { contains: search, mode: "insensitive" } } },
+      ]
+    } : {};
 
     const [orders, total] = await Promise.all([
       prisma.order.findMany({
+        where,
         skip,
         take,
         include: ORDER_INCLUDE,
         orderBy: { createdAt: "desc" },
       }),
-      prisma.order.count(),
+      prisma.order.count({ where }),
     ]);
 
     return { orders, ...getPagingData(total, page, limit) };

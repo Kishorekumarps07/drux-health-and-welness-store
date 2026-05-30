@@ -84,9 +84,9 @@ export function RecentOrdersTable({ orders, loading = false }: RecentOrdersTable
                   </td>
                   <td className="px-6 py-6">
                     <p className="font-bold text-[#E5E7EB] text-sm truncate max-w-[120px]">
-                      {order.user?.name || "Guest"}
+                      {order.user?.name || (order.address ? `${order.address.firstName} ${order.address.lastName}` : "Guest")}
                     </p>
-                    <p className="text-[10px] text-[#9CA3AF] font-medium truncate">{order.user?.email}</p>
+                    <p className="text-[10px] text-[#9CA3AF] font-medium truncate">{order.user?.email || "No Email"}</p>
                   </td>
                   <td className="px-6 py-6">
                     <div className={cn(
@@ -105,7 +105,7 @@ export function RecentOrdersTable({ orders, loading = false }: RecentOrdersTable
                     </div>
                   </td>
                   <td className="px-6 py-6 text-right">
-                    <Link href={`/dashboard/admin/orders/${order.id}`}>
+                    <Link href={`/dashboard/admin/orders?search=${order.id}`}>
                       <button className="w-8 h-8 rounded-lg bg-transparent group-hover:bg-[#374151] border border-transparent group-hover:border-[#4B5563] flex items-center justify-center transition-all shadow-sm">
                         <ChevronRight size={14} className="text-[#9CA3AF] group-hover:text-white" />
                       </button>

@@ -17,7 +17,8 @@ const {
   listCoupons,
   createCoupon,
   updateCoupon,
-  deleteCoupon
+  deleteCoupon,
+  generateCouponCode
 } = require('./vendorCoupons.controller');
 
 const router = express.Router();
@@ -93,6 +94,12 @@ router.patch('/profile', vendorUpload.fields([
  * @desc    List all coupons belonging to this vendor
  */
 router.get('/coupons', listCoupons);
+
+/**
+ * @route   GET /api/v1/vendor/coupons/generate
+ * @desc    Automatically generate a unique, store-prefixed coupon code for this vendor
+ */
+router.get('/coupons/generate', generateCouponCode);
 
 /**
  * @route   POST /api/v1/vendor/coupons
