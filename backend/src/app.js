@@ -33,7 +33,9 @@ app.use(helmet({
 // ── CORS ─────────────────────────────────────────────────────────────────────
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://druxx-health-store.vercel.app'
+  'https://druxx-health-store.vercel.app',
+  'https://drux.in',
+  'https://www.drux.in'
 ];
 
 if (frontendUrl) {

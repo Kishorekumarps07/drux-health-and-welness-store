@@ -1,7 +1,12 @@
 import axios from "axios";
 
+let baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1";
+if (baseUrl && !baseUrl.includes("/api/v1")) {
+  baseUrl = baseUrl.endsWith("/") ? `${baseUrl}api/v1` : `${baseUrl}/api/v1`;
+}
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1",
+  baseURL: baseUrl,
   timeout: 15000, // 15s timeout — prevents hanging requests
 });
 
