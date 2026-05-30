@@ -66,7 +66,7 @@ export default function VendorCouponsPage() {
   const loadProducts = async () => {
     try {
       const res = await vendorService.getMyProducts({ limit: 100 });
-      setProducts(res.products.map(p => ({ id: p.id, title: p.title })));
+      setProducts(res.products.map((p: any) => ({ id: p.id, title: p.title })));
     } catch (error) {
       console.error("Failed to load vendor products:", error);
     }
