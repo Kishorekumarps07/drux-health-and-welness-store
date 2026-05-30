@@ -236,9 +236,17 @@ export default function VendorLoginPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-1">
-                  Password
-                </label>
+                <div className="flex justify-between items-center px-1">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Password
+                  </label>
+                  <Link 
+                    href="/vendor/forgot-password" 
+                    className="text-[10px] font-black text-[#A6D608] hover:text-[#8ab506] uppercase tracking-widest hover:underline transition-all"
+                  >
+                    Forgot Password?
+                  </Link>
+                </div>
                 <div className="relative">
                   <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
                   <Input

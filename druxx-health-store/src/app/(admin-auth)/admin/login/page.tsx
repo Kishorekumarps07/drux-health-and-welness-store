@@ -210,9 +210,17 @@ export default function AdminLoginPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase tracking-widest text-zinc-500 font-mono px-1">
-                  System Password
-                </label>
+                <div className="flex justify-between items-center px-1">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-zinc-500 font-mono">
+                    System Password
+                  </label>
+                  <Link 
+                    href="/admin/forgot-password" 
+                    className="text-[9px] font-black text-[#08D6A6] hover:text-[#06b88e] uppercase tracking-widest hover:underline transition-all font-mono"
+                  >
+                    Forgot Password?
+                  </Link>
+                </div>
                 <div className="relative">
                   <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" />
                   <Input

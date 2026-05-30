@@ -296,9 +296,19 @@ export default function CustomerLoginPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 px-1">
-                  Password
-                </label>
+                <div className="flex justify-between items-center px-1">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                    Password
+                  </label>
+                  {mode === "login" && (
+                    <Link 
+                      href="/forgot-password" 
+                      className="text-[10px] font-black text-[#2CA7A0] hover:text-[#1c6c68] uppercase tracking-widest hover:underline transition-all"
+                    >
+                      Forgot Password?
+                    </Link>
+                  )}
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                   <Input 
