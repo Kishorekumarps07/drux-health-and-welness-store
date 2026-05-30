@@ -35,6 +35,7 @@ interface NavItem {
 
 const ADMIN_NAV: NavItem[] = [
   { name: 'Overview', href: '/dashboard/admin', icon: LayoutDashboard },
+  { name: 'Platform Analytics', href: '/dashboard/admin/analytics', icon: BarChart3 },
   { name: 'Vendors Hub', href: '/dashboard/admin/vendors', icon: Store },
   { name: 'Category Manager', href: '/dashboard/admin/categories', icon: LayoutGrid },
   { name: 'Global Orders', href: '/dashboard/admin/orders', icon: ShoppingBag },
