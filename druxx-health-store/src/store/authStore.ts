@@ -175,6 +175,18 @@ async function _handleRoleMismatch(
   throw new Error("Role mismatch");
 }
 
+/**
+ * Resolve the highest-privilege active role from a roles array.
+ * Priority order: ADMIN > VENDOR > CUSTOMER (default).
+ * Used by login() and verifyOtp() to determine the effective role before
+ * comparing it against the requiredRole of the login portal.
+ */
+function _resolveActiveRole(roles: string[]): string {
+  if (roles.includes("ADMIN")) return "ADMIN";
+  if (roles.includes("VENDOR")) return "VENDOR";
+  return "CUSTOMER";
+}
+
 /** Fetch the user profile from the backend and return a normalised user object. */
 async function _buildUserFromSession(sUser: SupabaseUser, session: { access_token: string } & Partial<Session>) {
   _applyToken(session.access_token);
@@ -395,10 +407,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // Role check after building user from backend profile
     if (requiredRole && state.user) {
-      let actualRole = "CUSTOMER";
-      if (state.user.roles.includes("ADMIN")) actualRole = "ADMIN";
-      else if (state.user.roles.includes("VENDOR")) actualRole = "VENDOR";
-
+      const actualRole = _resolveActiveRole(state.user.roles);
       await _handleRoleMismatch(actualRole, requiredRole, set, state);
       // If we reach here, roles matched — force the activeRole
       state.user.activeRole = requiredRole;
@@ -473,10 +482,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const state = await _buildUserFromSession(data.user, data.session);
 
     if (requiredRole && state.user) {
-      let actualRole = "CUSTOMER";
-      if (state.user.roles.includes("ADMIN")) actualRole = "ADMIN";
-      else if (state.user.roles.includes("VENDOR")) actualRole = "VENDOR";
-
+      const actualRole = _resolveActiveRole(state.user.roles);
       await _handleRoleMismatch(actualRole, requiredRole, set, state);
       // If we reach here, roles matched — force the activeRole
       state.user.activeRole = requiredRole;
