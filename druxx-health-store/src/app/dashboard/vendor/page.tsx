@@ -176,6 +176,12 @@ export default function VendorOverviewPage() {
                           </div>
                           <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                        </Link>
+                       <Link href="/dashboard/vendor/analytics" className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group/btn">
+                          <div className="flex items-center gap-3">
+                             <BarChart3 size={16} className="text-[#A6D608]" /> <span>Store Analytics</span>
+                          </div>
+                          <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                       </Link>
                        <Link href="/dashboard/vendor/orders" className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group/btn">
                           <div className="flex items-center gap-3">
                              <ShoppingBag size={16} className="text-[#A6D608]" /> <span>View All Orders</span>
