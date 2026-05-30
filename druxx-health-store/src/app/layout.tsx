@@ -19,7 +19,7 @@ const lexend = Lexend({
 
 export const metadata: Metadata = {
   title: {
-    default: "Druxx Health Store ΓÇö Premium Health & Wellness Products",
+    default: "Druxx Health Store - Premium Health & Wellness Products",
     template: "%s | Druxx Health Store",
   },
   description:
