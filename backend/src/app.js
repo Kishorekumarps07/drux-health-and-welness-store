@@ -31,8 +31,23 @@ app.use(helmet({
 }));
 
 // ── CORS ─────────────────────────────────────────────────────────────────────
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://druxx-health-store.vercel.app'
+];
+
+if (frontendUrl) {
+  allowedOrigins.push(frontendUrl);
+}
+
 const corsOptions = {
-  origin: nodeEnv === 'production' ? frontendUrl : true,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin) || nodeEnv !== 'production') {
+      return callback(null, true);
+    }
+    return callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: [
