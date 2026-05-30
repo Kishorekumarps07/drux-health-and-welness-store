@@ -1,28 +1,12 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-
-async function run() {
-  const products = await prisma.product.findMany({
+const prisma = require('../src/lib/prisma');
+async function main() {
+  const vendors = await prisma.vendor.findMany({
     include: {
-      vendor: {
-        include: {
-          user: true
-        }
-      }
+      _count: { select: { products: true } },
+      user: { select: { email: true } }
     }
   });
-
-  console.log("=== PRODUCTS ===");
-  products.forEach(p => {
-    console.log(`Product ID: ${p.id}`);
-    console.log(`Title: ${p.title}`);
-    console.log(`Price: ${p.price}`);
-    console.log(`Status: ${p.status}`);
-    console.log(`Vendor: ${p.vendor ? p.vendor.storeName : 'None'}`);
-    console.log(`Vendor Email: ${p.vendor && p.vendor.user ? p.vendor.user.email : 'None'}`);
-    console.log(`Vendor ID: ${p.vendorId}`);
-    console.log('-----------------------------------');
-  });
+  console.log(vendors.map(v => ({ id: v.id, storeName: v.storeName, email: v.user?.email, productCount: v._count.products })));
+  await prisma.$disconnect();
 }
-
-run().catch(console.error).finally(() => prisma.$disconnect());
+main().catch(console.error);

@@ -91,7 +91,7 @@ export default function DashboardPage() {
       title: "Help Center",
       description: "Get help with your orders and account",
       icon: <HelpCircle size={24} />,
-      link: "/dashboard", // Placeholder
+      link: "/help",
       color: "text-teal-500",
       bgColor: "bg-teal-50"
     }

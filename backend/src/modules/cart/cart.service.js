@@ -76,7 +76,8 @@ class CartService {
 
     // Merge strategy: if item exists, use max(quantity).
     // Skip products that are inactive or deleted to prevent FK errors.
-    for (const item of items) {
+    // Run all item syncs concurrently instead of sequentially (N+1 → 1 parallel batch).
+    await Promise.all(items.map(async (item) => {
       // Validate product exists and is available before touching the DB
       const product = await prisma.product.findUnique({
         where: { id: item.productId },
@@ -85,7 +86,7 @@ class CartService {
 
       if (!product || product.status !== 'ACTIVE') {
         // Product deleted or inactive — skip silently
-        continue;
+        return;
       }
 
       const safeQty = Math.min(item.quantity, product.stockQty || 1);
@@ -104,7 +105,7 @@ class CartService {
           data: { cartId: cart.id, productId: item.productId, quantity: safeQty }
         });
       }
-    }
+    }));
 
     return this.getOrCreate(userId);
   }

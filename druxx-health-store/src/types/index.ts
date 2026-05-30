@@ -82,6 +82,8 @@ export interface OrderItem {
   vendorId: string;
   /** Vendor store name — available from ORDER_INCLUDE join */
   vendor?: { id: string; storeName: string };
+  /** Convenience alias — storeName from the vendor relation */
+  vendorName?: string;
   price: number | string; // Prisma Decimal serialises as string
   quantity: number;
   total: number | string;
