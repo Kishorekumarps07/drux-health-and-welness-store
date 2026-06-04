@@ -101,8 +101,8 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed top-3 left-3 right-3 z-50 flex flex-col transition-all duration-300 rounded-[20px] md:rounded-[24px] border border-gray-100/80 ${
-        scrolled ? "shadow-xl bg-white/95 backdrop-blur-lg" : "shadow-lg bg-white/90 backdrop-blur-md"
+      className={`fixed top-3 left-3 right-3 z-50 flex flex-col transition-all duration-300 rounded-[20px] md:rounded-[24px] border border-white/50 ${
+        scrolled ? "shadow-xl bg-white/75 backdrop-blur-2xl" : "shadow-lg bg-white/60 backdrop-blur-xl"
       }`}
     >
       {/* Top Row: Main Navigation Hub */}
