@@ -250,7 +250,7 @@ export function Navbar() {
       </div>
 
       {/* Mobile Search Row & Location */}
-      <div className="md:hidden px-3 pb-2 flex flex-col gap-2">
+      <div className="md:hidden px-4 pb-3 flex flex-col gap-2">
         <SearchBar />
         
         {/* Mobile Location Display / Trigger */}

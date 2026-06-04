@@ -89,10 +89,15 @@ export function SearchBar() {
 
 
 
-  const [placeholder, setPlaceholder] = useState("Search health products...");
+  const [placeholder, setPlaceholder] = useState("Search...");
 
   useEffect(() => {
-    setPlaceholder(window.innerWidth < 640 ? "Search..." : "Search across thousands of health and wellness products...");
+    const updatePlaceholder = () => {
+      setPlaceholder(window.innerWidth < 768 ? "Search..." : "Search across thousands of health and wellness products...");
+    };
+    updatePlaceholder();
+    window.addEventListener("resize", updatePlaceholder);
+    return () => window.removeEventListener("resize", updatePlaceholder);
   }, []);
 
   return (
@@ -114,7 +119,7 @@ export function SearchBar() {
             onChange={(e) => setLocalQuery(e.target.value)}
             onFocus={() => localQuery && setShowSuggestions(true)}
             placeholder={placeholder}
-            className="w-full h-full px-6 text-[15px] font-medium outline-none bg-transparent text-gray-900 placeholder:text-gray-400"
+            className="w-full h-full pl-5 pr-12 text-[15px] font-medium outline-none bg-transparent text-gray-900 placeholder:text-gray-400"
             id="search-input"
             autoComplete="off"
           />
@@ -137,7 +142,7 @@ export function SearchBar() {
         <button
           type="submit"
           id="search-submit-btn"
-          className="flex items-center justify-center w-12 lg:w-[4rem] bg-[#A6D608] hover:bg-[#8ab506] text-black transition-all duration-300 group/submit border-none"
+          className="flex items-center justify-center w-12 lg:w-[4rem] shrink-0 bg-[#A6D608] hover:bg-[#8ab506] text-black transition-all duration-300 group/submit border-none"
           aria-label="Search"
         >
           <Search size={20} strokeWidth={3} className="transition-transform group-active/submit:scale-90" />
