@@ -92,7 +92,7 @@ export default function PrivacyPage() {
               You maintain full control over your personal records:
             </p>
             <p>
-              You have the right to request deletion of your account and related records, edit address fields inside your profile dashboard, or withdraw consent to promotional newsletter campaigns. For any privacy requests, write to <a href="mailto:privacy@druxx.health" className="text-lime-600 font-bold hover:underline">privacy@druxx.health</a>.
+              You have the right to request deletion of your account and related records, edit address fields inside your profile dashboard, or withdraw consent to promotional newsletter campaigns. For any privacy requests, write to <a href="mailto:druxindia@gmail.com" className="text-lime-600 font-bold hover:underline">druxindia@gmail.com</a>.
             </p>
           </div>
 

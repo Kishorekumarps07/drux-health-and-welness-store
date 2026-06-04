@@ -137,8 +137,8 @@ export default function PressPage() {
               <Mail size={16} className="text-[#A6D608]" />
               <div>
                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Press Email</p>
-                <a href="mailto:press@druxx.health" className="hover:text-white transition-colors">
-                  press@druxx.health
+                <a href="mailto:druxindia@gmail.com" className="hover:text-white transition-colors">
+                  druxindia@gmail.com
                 </a>
               </div>
             </div>

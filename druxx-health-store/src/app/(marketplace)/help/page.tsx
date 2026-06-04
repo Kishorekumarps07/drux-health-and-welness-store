@@ -166,8 +166,8 @@ export default function HelpPage() {
                 <Mail size={16} className="text-[#2CA7A0]" />
                 <div>
                   <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Help Email</p>
-                  <a href="mailto:support@druxx.health" className="hover:text-white transition-colors">
-                    support@druxx.health
+                  <a href="mailto:druxindia@gmail.com" className="hover:text-white transition-colors">
+                    druxindia@gmail.com
                   </a>
                 </div>
               </div>

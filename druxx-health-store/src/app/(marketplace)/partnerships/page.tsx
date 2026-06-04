@@ -108,8 +108,8 @@ export default function PartnershipsPage() {
               If your proposal falls outside these channels, write or call our partnerships team directly.
             </p>
             <div className="space-y-2 text-xs font-semibold text-zinc-300">
-              <a href="mailto:partners@druxx.health" className="flex items-center gap-2 hover:text-white transition-colors">
-                <Mail size={14} className="text-zinc-500" /> partners@druxx.health
+              <a href="mailto:druxindia@gmail.com" className="flex items-center gap-2 hover:text-white transition-colors">
+                <Mail size={14} className="text-zinc-500" /> druxindia@gmail.com
               </a>
               <a href="tel:080-DRUXX-PART" className="flex items-center gap-2 hover:text-white transition-colors">
                 <Phone size={14} className="text-zinc-500" /> +91 80 4422 9900 (Mon - Fri)

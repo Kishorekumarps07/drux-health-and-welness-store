@@ -116,11 +116,11 @@ export function Footer() {
                 1800-DRUXX-HEALTH (Toll Free)
               </a>
               <a
-                href="mailto:support@druxx.health"
+                href="mailto:druxindia@gmail.com"
                 className="flex items-center gap-2 text-sm text-gray-400 hover:text-[#A6D608] transition-colors"
               >
                 <Mail size={14} />
-                support@druxx.health
+                druxindia@gmail.com
               </a>
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <MapPin size={14} />

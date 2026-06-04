@@ -125,12 +125,15 @@ export default function VendorHelpPage() {
                     <p className="text-gray-400 text-sm font-medium leading-relaxed mb-8">Can't find what you're looking for? Our executive support team is available 9 AM - 6 PM IST.</p>
                     
                     <div className="grid gap-4">
-                       <div className="bg-white/5 border border-white/10 p-5 rounded-3xl flex items-center justify-between group/link cursor-pointer hover:bg-white/10 transition-colors">
+                       <div 
+                           onClick={() => window.location.href = 'mailto:druxindia@gmail.com'}
+                           className="bg-white/5 border border-white/10 p-5 rounded-3xl flex items-center justify-between group/link cursor-pointer hover:bg-white/10 transition-colors"
+                        >
                           <div className="flex items-center gap-4">
                              <div className="w-10 h-10 rounded-xl bg-[#A6D608]/10 flex items-center justify-center text-[#A6D608]">@</div>
                              <div>
                                 <p className="text-xs font-black uppercase tracking-widest text-gray-500">Official Email</p>
-                                <p className="text-sm font-bold text-white">vendor-ops@druxx.com</p>
+                                <p className="text-sm font-bold text-white">druxindia@gmail.com</p>
                              </div>
                           </div>
                           <ChevronRight size={18} className="text-gray-600 transition-transform group-hover/link:translate-x-1" />
