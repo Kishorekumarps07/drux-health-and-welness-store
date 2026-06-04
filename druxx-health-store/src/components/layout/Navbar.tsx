@@ -101,7 +101,7 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed top-3 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-1.5rem)] lg:w-[calc(100%-3rem)] max-w-7xl flex flex-col transition-all duration-300 rounded-[20px] md:rounded-[24px] border border-gray-100/80 ${
+      className={`fixed top-3 left-3 right-3 z-50 flex flex-col transition-all duration-300 rounded-[20px] md:rounded-[24px] border border-gray-100/80 ${
         scrolled ? "shadow-xl bg-white/95 backdrop-blur-lg" : "shadow-lg bg-white/90 backdrop-blur-md"
       }`}
     >
