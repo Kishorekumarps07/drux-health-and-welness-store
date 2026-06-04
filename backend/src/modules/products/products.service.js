@@ -63,8 +63,12 @@ class ProductsService {
   }
 
   async getById(id) {
-    const product = await prisma.product.findUnique({
-      where: { id },
+    const product = await prisma.product.findFirst({
+      where: {
+        id,
+        status: 'ACTIVE',
+        vendor: { approvalStatus: { in: ['APPROVED', 'ACTIVE'] } }
+      },
       include: {
         ...PRODUCT_INCLUDE,
         reviews: { include: { user: { select: { id: true, name: true, avatarUrl: true } } }, orderBy: { createdAt: 'desc' }, take: 10 },
@@ -75,8 +79,12 @@ class ProductsService {
   }
 
   async getBySlug(slug) {
-    const product = await prisma.product.findUnique({
-      where: { slug },
+    const product = await prisma.product.findFirst({
+      where: {
+        slug,
+        status: 'ACTIVE',
+        vendor: { approvalStatus: { in: ['APPROVED', 'ACTIVE'] } }
+      },
       include: { ...PRODUCT_INCLUDE, reviews: { include: { user: { select: { id: true, name: true, avatarUrl: true } } }, take: 10 } },
     });
     if (!product) throw new AppError('Product not found.', 404);

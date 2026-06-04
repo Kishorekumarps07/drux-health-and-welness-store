@@ -70,6 +70,16 @@ class AdminService {
     }
 
     await clearAdminCache();
+
+    // Clear product, vendor route caches, and vendor stats cache
+    try {
+      await Cache.clearPattern('cache:*products*');
+      await Cache.clearPattern('cache:*vendors*');
+      await Cache.clearPattern('vendor:*');
+    } catch (err) {
+      // Suppress potential clear errors
+    }
+
     return updatedVendor;
   }
 

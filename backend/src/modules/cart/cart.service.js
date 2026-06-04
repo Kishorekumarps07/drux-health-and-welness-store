@@ -3,6 +3,12 @@ const AppError = require('../../lib/AppError');
 
 const CART_INCLUDE = {
   items: {
+    where: {
+      product: {
+        status: 'ACTIVE',
+        vendor: { approvalStatus: { in: ['APPROVED', 'ACTIVE'] } }
+      }
+    },
     include: {
       product: {
         include: { images: { where: { isPrimary: true }, take: 1 }, vendor: { select: { id: true, storeName: true } } },
@@ -21,8 +27,14 @@ class CartService {
   }
 
   async addItem(userId, { productId, quantity = 1 }) {
-    const product = await prisma.product.findUnique({ where: { id: productId } });
-    if (!product || product.status !== 'ACTIVE') throw new AppError('Product not available.', 404);
+    const product = await prisma.product.findFirst({
+      where: {
+        id: productId,
+        status: 'ACTIVE',
+        vendor: { approvalStatus: { in: ['APPROVED', 'ACTIVE'] } }
+      }
+    });
+    if (!product) throw new AppError('Product not available.', 404);
     if (product.stockQty < quantity) throw new AppError(`Only ${product.stockQty} units available.`, 400);
 
     const cart = await this.getOrCreate(userId);
@@ -79,13 +91,17 @@ class CartService {
     // Run all item syncs concurrently instead of sequentially (N+1 → 1 parallel batch).
     await Promise.all(items.map(async (item) => {
       // Validate product exists and is available before touching the DB
-      const product = await prisma.product.findUnique({
-        where: { id: item.productId },
+      const product = await prisma.product.findFirst({
+        where: {
+          id: item.productId,
+          status: 'ACTIVE',
+          vendor: { approvalStatus: { in: ['APPROVED', 'ACTIVE'] } }
+        },
         select: { id: true, status: true, stockQty: true }
       });
 
-      if (!product || product.status !== 'ACTIVE') {
-        // Product deleted or inactive — skip silently
+      if (!product) {
+        // Product deleted, inactive, or belongs to suspended vendor — skip silently
         return;
       }
 
@@ -113,7 +129,17 @@ class CartService {
   async calculateTotals(userId) {
     const cart = await prisma.cart.findUnique({
       where: { userId },
-      include: { items: { include: { product: true } } },
+      include: {
+        items: {
+          where: {
+            product: {
+              status: 'ACTIVE',
+              vendor: { approvalStatus: { in: ['APPROVED', 'ACTIVE'] } }
+            }
+          },
+          include: { product: true }
+        }
+      },
     });
 
     if (!cart || cart.items.length === 0) {
