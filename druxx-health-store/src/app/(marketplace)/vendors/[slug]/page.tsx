@@ -86,17 +86,17 @@ export default function VendorStorefrontPage() {
   return (
     <div className="min-h-screen bg-[#F7F7F7] pb-24">
       {/* Banner */}
-      <div className="relative h-48 sm:h-64 lg:h-80 bg-gray-100 overflow-hidden">
+      <div className="relative h-64 sm:h-80 md:h-[360px] lg:h-[420px] xl:h-[460px] bg-gray-100 overflow-hidden">
         {vendor.banner && (
           <Image
             src={vendor.banner}
             alt={`${vendor.name} banner`}
             fill
-            className="object-cover"
+            className="object-cover object-top"
             priority
           />
         )}
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-transparent to-black/60" />
         
         {/* Back Link */}
         <div className="absolute top-6 left-6 z-10">
