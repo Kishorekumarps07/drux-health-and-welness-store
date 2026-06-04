@@ -11,10 +11,16 @@ export function WelcomeScreen() {
 
   useEffect(() => {
     setMounted(true);
-    // Check if we've already shown it this session
-    const shown = sessionStorage.getItem("drux_welcome_shown");
-    if (shown) {
-      return;
+    // Check if we've already shown it in the last 24 hours
+    const lastShown = localStorage.getItem("drux_welcome_last_shown");
+    const now = Date.now();
+    const oneDay = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+    if (lastShown) {
+      const lastShownTime = parseInt(lastShown, 10);
+      if (!isNaN(lastShownTime) && now - lastShownTime < oneDay) {
+        return;
+      }
     }
 
     setShow(true);
@@ -35,7 +41,7 @@ export function WelcomeScreen() {
         // Final exit delay after reaching 100
         setTimeout(() => {
           setShow(false);
-          sessionStorage.setItem("drux_welcome_shown", "true");
+          localStorage.setItem("drux_welcome_last_shown", Date.now().toString());
         }, 500);
       } else {
         setProgress(currentProgress);
