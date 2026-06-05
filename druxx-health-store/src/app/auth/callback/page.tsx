@@ -15,10 +15,16 @@ export default function AuthCallbackPage() {
   const { user, initialized, loading: authLoading, logout } = useAuthStore();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [errorMessage, setErrorMessage] = useState("");
-
   useEffect(() => {
     async function handleCallback() {
       try {
+        // Exchange authorization code for session in PKCE flow
+        const code = searchParams.get("code");
+        if (code) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (exchangeError) throw exchangeError;
+        }
+
         // Wait for Supabase to finish parsing the hash/query params and establish a session
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
