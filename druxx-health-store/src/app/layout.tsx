@@ -5,7 +5,6 @@ import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/layout/CartDrawer";
-import { BottomNav } from "@/components/layout/BottomNav";
 import { SessionManager } from "@/components/auth/SessionManager";
 import { Toaster } from "sonner";
 import { WelcomeScreen } from "@/components/layout/WelcomeScreen";

@@ -16,7 +16,7 @@ export function NavAccountDropdown() {
             <Link href="/login">Sign In</Link>
           </Button>
           <p className="mt-3 text-xs text-gray-500">
-            New customer? <Link href="/register" className="text-[#A6D608] font-bold hover:underline">Start here</Link>
+            New customer? <Link href="/login?mode=signup" className="text-[#A6D608] font-bold hover:underline">Start here</Link>
           </p>
         </div>
       ) : (

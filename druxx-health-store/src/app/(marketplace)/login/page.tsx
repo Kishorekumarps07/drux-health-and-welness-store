@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { toast } from "sonner";
@@ -23,18 +23,47 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export default function CustomerLoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-tr from-emerald-50/40 via-white to-lime-50/30 flex flex-col items-center justify-center p-6">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="animate-spin text-[#A6D608] h-10 w-10" />
+          <span className="text-xs font-black uppercase tracking-widest text-gray-400">Loading auth...</span>
+        </div>
+      </div>
+    }>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function LoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const paramMode = searchParams.get("mode");
   
   // Guard: if already logged in as a CUSTOMER, redirect to "/" (or redirect param)
   useAuthRedirect("CUSTOMER");
 
   const { login, register, sendOtp, verifyOtp, loginWithGoogle, mismatchError, clearMismatchError } = useAuthStore();
 
-  const [mode, setMode] = useState<"login" | "signup" | "otp">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "otp">(
+    paramMode === "signup" || paramMode === "otp" ? paramMode : "login"
+  );
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (paramMode === "signup") {
+      setMode("signup");
+    } else if (paramMode === "otp") {
+      setMode("otp");
+    } else {
+      setMode("login");
+    }
+  }, [paramMode]);
   
   const [formData, setFormData] = useState({
     email: "",

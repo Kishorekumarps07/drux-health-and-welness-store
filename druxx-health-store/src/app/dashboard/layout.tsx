@@ -5,7 +5,12 @@ import { usePathname } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/layout/CartDrawer";
-import { BottomNav } from "@/components/layout/BottomNav";
+import dynamic from "next/dynamic";
+
+const BottomNav = dynamic(
+  () => import("@/components/layout/BottomNav").then((m) => m.BottomNav),
+  { ssr: false }
+);
 
 export default function DashboardLayout({
   children,
