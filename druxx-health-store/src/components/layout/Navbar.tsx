@@ -101,12 +101,20 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed top-3 left-3 right-3 z-50 flex flex-col transition-all duration-300 rounded-[20px] md:rounded-[24px] border border-white/50 ${
-        scrolled ? "shadow-xl bg-white/75 backdrop-blur-2xl" : "shadow-lg bg-white/60 backdrop-blur-xl"
+      className={`fixed z-50 flex flex-col transition-all duration-300 ${
+        scrolled
+          ? "shadow-none bg-transparent backdrop-blur-none top-0 left-0 right-0 rounded-none md:top-3 md:left-3 md:right-3 md:rounded-[24px] md:border md:border-white/50 md:shadow-xl md:bg-white/95 md:backdrop-blur-2xl"
+          : "shadow-lg bg-white/60 backdrop-blur-xl top-3 left-3 right-3 rounded-[20px] md:rounded-[24px] border border-white/50"
       }`}
     >
       {/* Top Row: Main Navigation Hub */}
-      <div className="text-[#1E1E1E] px-4 py-2 border-b border-gray-100/50">
+      <div
+        className={`text-[#1E1E1E] px-4 transition-all duration-300 ${
+          scrolled
+            ? "h-0 opacity-0 overflow-hidden py-0 border-b-0 pointer-events-none"
+            : "py-2 border-b border-gray-100/50"
+        } md:h-auto md:opacity-100 md:overflow-visible md:py-2 md:border-b md:border-gray-100/50 md:pointer-events-auto`}
+      >
         <div className="w-full flex md:flex-row items-center relative lg:h-24 px-0">
           {/* Mobile Grid Layout */}
           <div className="flex items-center justify-between w-full md:hidden h-14">
@@ -250,13 +258,19 @@ export function Navbar() {
       </div>
 
       {/* Mobile Search Row & Location */}
-      <div className="md:hidden px-4 pb-3 flex flex-col gap-2">
+      <div
+        className={`md:hidden px-4 flex flex-col transition-all duration-300 ${
+          scrolled ? "py-2 gap-0" : "pb-3 pt-0 gap-2"
+        }`}
+      >
         <SearchBar />
         
         {/* Mobile Location Display / Trigger */}
         <button 
           onClick={() => setShowLocationModal(true)}
-          className="flex items-center justify-between w-full px-3 py-2 bg-gray-50/80 hover:bg-gray-100 rounded-xl border border-gray-100/80 transition-all text-left group active:scale-[0.99]"
+          className={`flex items-center justify-between w-full px-3 py-2 bg-gray-50/80 hover:bg-gray-100 rounded-xl border border-gray-100/80 transition-all text-left group active:scale-[0.99] ${
+            scrolled ? "max-h-0 opacity-0 overflow-hidden py-0 border-0 pointer-events-none mt-0 mb-0" : "max-h-12 opacity-100 mt-1"
+          }`}
         >
           <div className="flex items-center gap-2 min-w-0">
             <MapPin size={15} className={`shrink-0 ${location.city ? 'text-[#A6D608]' : 'text-gray-400'}`} />

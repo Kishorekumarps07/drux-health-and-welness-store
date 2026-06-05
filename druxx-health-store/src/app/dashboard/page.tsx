@@ -24,7 +24,7 @@ import { orderService } from "@/services/orderService";
 import { toast } from "sonner";
 
 export default function DashboardPage() {
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [orderCount, setOrderCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -98,161 +98,123 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-700">
-      {/* Header Profile Section */}
-      <div className="bg-white rounded-[2.5rem] border border-gray-100 overflow-hidden shadow-sm relative">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#A6D608]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+    <div className="max-w-md mx-auto space-y-5 animate-in fade-in duration-500">
+      {/* Hello Greeting Header */}
+      <div className="flex items-center justify-between px-1">
+        <div>
+          <h1 className="text-2xl font-black text-gray-900 leading-none mb-1.5">
+            Hello, <span className="text-[#A6D608]">{user?.name?.split(' ')[0] || "User"}</span>
+          </h1>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{user?.email}</p>
+        </div>
+        <Badge className="bg-[#A6D608]/10 text-[#A6D608] border border-[#A6D608]/20 font-black text-[9px] tracking-widest px-3 py-1 rounded-full uppercase">
+          Elite Member
+        </Badge>
+      </div>
+
+      {/* 2x2 Grid of Main Buttons (Amazon Style) */}
+      <div className="grid grid-cols-2 gap-3">
+        <Link 
+          href="/dashboard/orders" 
+          className="bg-white border border-gray-100 rounded-2xl p-4 text-center hover:border-gray-200 active:scale-[0.98] transition-all shadow-sm flex flex-col items-center justify-center gap-1.5 min-h-[84px]"
+        >
+          <span className="text-xs font-black text-gray-800">Your Orders</span>
+        </Link>
         
-        <div className="p-8 sm:p-10 flex flex-col md:flex-row items-center gap-8 relative z-10">
-          <div className="relative">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-[#A6D608]/20 bg-white flex items-center justify-center overflow-hidden shadow-xl ring-4 ring-white">
-              {user?.avatar ? (
-                <Image src={user.avatar} alt={user.name} width={128} height={128} className="object-cover" />
-              ) : (
-                <User size={48} className="text-[#A6D608]" />
-              )}
-            </div>
-            <button className="absolute bottom-1 right-1 w-8 h-8 bg-[#A6D608] text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-              <Plus size={16} strokeWidth={3} />
-            </button>
-          </div>
-
-          <div className="flex-1 text-center md:text-left">
-            <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2">
-              <h1 className="text-3xl sm:text-4xl font-black text-[#1E1E1E]">Hello, {user?.name.split(' ')[0]}!</h1>
-              <Badge className="w-fit mx-auto md:mx-0 bg-gray-900 text-white font-black text-[10px] tracking-widest px-3 py-1 rounded-full border-none">
-                PREMIUM MEMBER
-              </Badge>
-            </div>
-            <p className="text-gray-500 font-medium mb-6">{user?.email} • Member since {new Date().getFullYear()}</p>
-            
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-              <div className="flex flex-col bg-gray-50 px-5 py-3 rounded-2xl border border-gray-100 min-w-[120px]">
-                <span className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Total Orders</span>
-                <span className="text-xl font-black text-[#1E1E1E]">{loading ? "..." : orderCount}</span>
-              </div>
-              <div className="flex flex-col bg-gray-50 px-5 py-3 rounded-2xl border border-gray-100 min-w-[120px]">
-                <span className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Active Status</span>
-                <span className="text-xl font-black text-[#A6D608]">Healthy</span>
-              </div>
-            </div>
-          </div>
-
-          <Button asChild className="hidden lg:flex bg-[#1E1E1E] hover:bg-black text-white font-bold px-8 h-14 rounded-2xl gap-2 shadow-xl">
-             <Link href="/products">Shop Latest Drops</Link>
-          </Button>
-        </div>
+        <Link 
+          href="/dashboard/wishlist" 
+          className="bg-white border border-gray-100 rounded-2xl p-4 text-center hover:border-gray-200 active:scale-[0.98] transition-all shadow-sm flex flex-col items-center justify-center gap-1.5 min-h-[84px]"
+        >
+          <span className="text-xs font-black text-gray-800">Your Wishlist</span>
+        </Link>
+        
+        <Link 
+          href="/dashboard/security" 
+          className="bg-white border border-gray-100 rounded-2xl p-4 text-center hover:border-gray-200 active:scale-[0.98] transition-all shadow-sm flex flex-col items-center justify-center gap-1.5 min-h-[84px]"
+        >
+          <span className="text-xs font-black text-gray-800">Login & Security</span>
+        </Link>
+        
+        <Link 
+          href="/dashboard/addresses" 
+          className="bg-white border border-gray-100 rounded-2xl p-4 text-center hover:border-gray-200 active:scale-[0.98] transition-all shadow-sm flex flex-col items-center justify-center gap-1.5 min-h-[84px]"
+        >
+          <span className="text-xs font-black text-gray-800">Your Addresses</span>
+        </Link>
       </div>
 
-      {/* Navigation Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {dashCards.map((card, idx) => (
-          <Link 
-            key={idx} 
-            href={card.link}
-            className="group bg-white p-6 rounded-[2rem] border border-gray-100 hover:border-[#A6D608]/30 hover:shadow-xl hover:shadow-[#A6D608]/5 transition-all duration-300 flex flex-col gap-4 relative overflow-hidden"
-          >
-            <div className={`w-14 h-14 ${card.bgColor} ${card.color} rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 duration-300`}>
-              {card.icon}
-            </div>
-            <div>
-              <h3 className="font-black text-[#1E1E1E] text-lg mb-1 flex items-center gap-2">
-                {card.title}
-                <ChevronRight size={16} className="text-gray-300 group-hover:text-[#A6D608] group-hover:translate-x-1 transition-all" />
-              </h3>
-              <p className="text-gray-500 text-sm leading-relaxed">{card.description}</p>
-            </div>
+      {/* Recent Orders Section (Amazon style - single compact card) */}
+      <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm space-y-3">
+        <div className="flex items-center justify-between border-b border-gray-50 pb-2">
+          <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Your Recent Order</h2>
+          <Link href="/dashboard/orders" className="text-xs font-bold text-[#A6D608] hover:text-[#8ab506] transition-colors flex items-center gap-0.5">
+            View All <ChevronRight size={12} />
           </Link>
-        ))}
-      </div>
-
-      {/* Recent Activity Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between px-4">
-            <h2 className="text-xl font-black text-[#1E1E1E] flex items-center gap-2">
-              <Clock size={20} className="text-[#A6D608]" />
-              Recent Orders
-            </h2>
-            <Link href="/dashboard/orders" className="text-sm font-bold text-[#A6D608] hover:underline flex items-center gap-1">
-              View All <ExternalLink size={14} />
-            </Link>
-          </div>
-
-          <div className="bg-white rounded-[2rem] border border-gray-100 overflow-hidden divide-y divide-gray-50 shadow-sm">
-            {loading ? (
-              [1, 2].map((i) => (
-                <div key={i} className="p-6 flex items-center gap-4 animate-pulse">
-                  <div className="w-12 h-12 bg-gray-100 rounded-xl" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-100 rounded w-1/4" />
-                    <div className="h-3 bg-gray-50 rounded w-1/2" />
-                  </div>
-                </div>
-              ))
-            ) : recentOrders.length > 0 ? (
-              recentOrders.map((order) => (
-                <Link 
-                  key={order.id} 
-                  href={`/dashboard/orders/${order.id}`} 
-                  className="p-6 flex items-center justify-between hover:bg-gray-50/50 transition-colors group"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 group-hover:text-[#A6D608] transition-colors">
-                      <Package size={24} />
-                    </div>
-                    <div>
-                      <p className="font-bold text-[#1E1E1E]">Order #{order.id.slice(-8).toUpperCase()}</p>
-                      <p className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString()} • {order.items.length} items</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-black text-[#1E1E1E]">₹{order.total.toLocaleString()}</p>
-                    <Badge variant="outline" className="text-[9px] uppercase tracking-widest border-gray-100">
-                      {order.status}
-                    </Badge>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <div className="p-10 text-center">
-                <p className="text-gray-400 text-sm font-medium">No recent orders found.</p>
-                <Button asChild variant="link" className="text-[#A6D608] font-bold">
-                  <Link href="/products">Browse Products</Link>
-                </Button>
-              </div>
-            )}
-          </div>
         </div>
-
-        <div className="space-y-4">
-          <h2 className="text-xl font-black text-[#1E1E1E] px-4">Membership</h2>
-          <div className="bg-[#1E1E1E] rounded-[2rem] p-8 text-white relative overflow-hidden shadow-xl shadow-gray-200">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#A6D608]/20 rounded-full blur-2xl translate-x-1/2 -translate-y-1/2" />
-            <p className="text-[#A6D608] text-[10px] font-black tracking-[0.2em] uppercase mb-4">Current Plan</p>
-            <h3 className="text-2xl font-black mb-2">Druxx Elite</h3>
-            <p className="text-white/60 text-sm mb-8 leading-relaxed">Enjoy free shipping on all orders and 5% cashback on premium supplements.</p>
-            
-            <div className="space-y-4 mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full bg-[#A6D608]/20 flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-[#A6D608]" />
-                </div>
-                <span className="text-sm font-bold">Free Priority Shipping</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full bg-[#A6D608]/20 flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-[#A6D608]" />
-                </div>
-                <span className="text-sm font-bold">Early access to Sales</span>
-              </div>
+        
+        {loading ? (
+          <div className="animate-pulse flex items-center gap-3 py-2">
+            <div className="w-10 h-10 bg-gray-100 rounded-xl" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 bg-gray-100 rounded w-1/3" />
+              <div className="h-2.5 bg-gray-50 rounded w-1/2" />
             </div>
-
-            <Button className="w-full bg-[#A6D608] hover:bg-[#8ab506] text-[#1E1E1E] font-bold h-12 rounded-xl">
-              View Benefits
+          </div>
+        ) : recentOrders.length > 0 ? (
+          (() => {
+            const order = recentOrders[0];
+            return (
+              <Link 
+                href={`/dashboard/orders/${order.id}`} 
+                className="flex items-center justify-between group active:scale-[0.99] transition-transform py-1"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400 group-hover:text-[#A6D608] transition-colors border border-gray-100/80 shrink-0">
+                    <Package size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm text-gray-900 truncate">Order #{order.id.slice(-8).toUpperCase()}</p>
+                    <p className="text-[11px] text-gray-400 font-medium mt-0.5">
+                      {new Date(order.createdAt).toLocaleDateString()} · {order.items.length} {order.items.length === 1 ? "item" : "items"}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right shrink-0 ml-2">
+                  <p className="font-black text-sm text-gray-900">₹{order.total.toLocaleString()}</p>
+                  <span className="inline-block px-1.5 py-0.5 bg-gray-50 text-[9px] font-black text-gray-500 rounded uppercase tracking-wider mt-1 border border-gray-100/50 leading-none">
+                    {order.status}
+                  </span>
+                </div>
+              </Link>
+            );
+          })()
+        ) : (
+          <div className="text-center py-4">
+            <p className="text-xs text-gray-400 font-medium mb-2">No recent orders found.</p>
+            <Button asChild variant="outline" className="h-8 rounded-lg text-xs font-bold px-4 border-gray-200">
+              <Link href="/products">Browse Products</Link>
             </Button>
           </div>
-        </div>
+        )}
+      </div>
+
+      {/* Account Settings List (Amazon Style) */}
+      <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm divide-y divide-gray-100">
+        <Link href="/dashboard/profile" className="flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors">
+          <span className="text-xs font-bold text-gray-700">Account Settings</span>
+          <ChevronRight size={14} className="text-gray-300" />
+        </Link>
+        <Link href="/help" className="flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors">
+          <span className="text-xs font-bold text-gray-700">Help Center</span>
+          <ChevronRight size={14} className="text-gray-300" />
+        </Link>
+        <button 
+          onClick={logout} 
+          className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors text-left border-none"
+        >
+          <span className="text-xs font-bold text-rose-500">Sign Out</span>
+          <ChevronRight size={14} className="text-rose-300" />
+        </button>
       </div>
     </div>
   );

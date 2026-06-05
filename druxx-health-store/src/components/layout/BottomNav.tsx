@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Search, ShoppingBag, ShoppingCart, User, Grid, Heart } from "lucide-react";
@@ -13,9 +13,32 @@ export function BottomNav() {
   const toggleCart = useCartStore((s) => s.toggleCart);
   const { isAuthenticated } = useAuthStore();
   const [mounted, setMounted] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     setMounted(true);
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Always show bottom bar at the very top of the page
+      if (currentScrollY <= 10) {
+        setIsVisible(true);
+      } else {
+        // Scrolling down -> hide; Scrolling up -> show
+        if (currentScrollY > lastScrollY.current) {
+          setIsVisible(false);
+        } else {
+          setIsVisible(true);
+        }
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const navItems = [
@@ -28,7 +51,11 @@ export function BottomNav() {
   if (!mounted || pathname === "/cart" || pathname === "/checkout") return null;
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 w-full z-50">
+    <div 
+      className={`lg:hidden fixed bottom-0 left-0 w-full z-50 transition-transform duration-300 ${
+        isVisible ? "translate-y-0" : "translate-y-full"
+      }`}
+    >
       <nav 
         className="bg-[#121212]/95 backdrop-blur-2xl border-t border-white/10 px-4 py-2 pb-safe flex items-center justify-between relative overflow-hidden"
         style={{ 
