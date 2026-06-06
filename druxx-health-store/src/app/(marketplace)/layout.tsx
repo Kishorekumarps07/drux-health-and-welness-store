@@ -4,8 +4,12 @@ import { Suspense } from "react";
 import { usePathname } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { CartDrawer } from "@/components/layout/CartDrawer";
 import dynamic from "next/dynamic";
+
+const CartDrawer = dynamic(
+  () => import("@/components/layout/CartDrawer").then((m) => m.CartDrawer),
+  { ssr: false }
+);
 
 const BottomNav = dynamic(
   () => import("@/components/layout/BottomNav").then((m) => m.BottomNav),
