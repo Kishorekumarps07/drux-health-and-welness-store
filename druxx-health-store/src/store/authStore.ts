@@ -65,7 +65,6 @@ let _initStarted = false;
 /** Clear all auth artifacts from browser storage and axios defaults. */
 function _clearAuthStorage() {
   if (typeof window !== "undefined") {
-    console.trace("🧹 _clearAuthStorage called by:");
     localStorage.removeItem("token");
     // Also clear Supabase's own session storage keys (sb-<project>-auth-token).
     // These contain the refresh token that triggers "Invalid Refresh Token" errors
