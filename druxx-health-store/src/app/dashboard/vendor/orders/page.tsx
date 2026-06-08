@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
+import { useRouter } from "next/navigation"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export default function VendorOrdersPage() {
+  const router = useRouter()
   const [items, setItems] = React.useState<VendorOrderItem[]>([])
   const [loading, setLoading] = React.useState(true)
   const [searchQuery, setSearchQuery] = React.useState("")
@@ -301,20 +303,28 @@ export default function VendorOrdersPage() {
                               
                               {order.status === 'PROCESSING' && (
                                 <DropdownMenuItem 
-                                  onClick={() => handleStatusUpdate(order.id, 'SHIPPED')}
+                                  onClick={() => router.push(`/dashboard/vendor/shipments?orderId=${order.orderId}&book=true`)}
                                   className="flex items-center gap-2 px-3 py-2 text-xs font-black rounded-xl text-purple-500 hover:bg-purple-50 focus:bg-purple-50 cursor-pointer"
                                 >
-                                  <Truck className="w-4 h-4" /> Mark as Shipped
+                                  <Truck className="w-4 h-4" /> Book Shipment (Shiprocket)
                                 </DropdownMenuItem>
                               )}
 
                               {order.status === 'SHIPPED' && (
-                                <DropdownMenuItem 
-                                  onClick={() => handleStatusUpdate(order.id, 'DELIVERED')}
-                                  className="flex items-center gap-2 px-3 py-2 text-xs font-black rounded-xl text-[#A6D608] hover:bg-[#A6D608]/5 focus:bg-[#A6D608]/5 cursor-pointer"
-                                >
-                                  <CheckCircle className="w-4 h-4" /> Mark as Delivered
-                                </DropdownMenuItem>
+                                <>
+                                  <DropdownMenuItem 
+                                    onClick={() => router.push(`/dashboard/vendor/shipments?orderId=${order.orderId}&track=true`)}
+                                    className="flex items-center gap-2 px-3 py-2 text-xs font-black rounded-xl text-purple-500 hover:bg-purple-50 focus:bg-purple-50 cursor-pointer"
+                                  >
+                                    <Activity className="w-4 h-4" /> Track Courier
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => handleStatusUpdate(order.id, 'DELIVERED')}
+                                    className="flex items-center gap-2 px-3 py-2 text-xs font-black rounded-xl text-[#A6D608] hover:bg-[#A6D608]/5 focus:bg-[#A6D608]/5 cursor-pointer"
+                                  >
+                                    <CheckCircle className="w-4 h-4" /> Mark as Delivered
+                                  </DropdownMenuItem>
+                                </>
                               )}
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -540,27 +550,38 @@ export default function VendorOrdersPage() {
                                 </Button>
                              )}
                              {selectedOrder.status === 'PROCESSING' && (
-                                <Button 
-                                  onClick={() => {
-                                    handleStatusUpdate(selectedOrder.id, 'SHIPPED');
-                                    setShowModal(false);
-                                  }}
-                                  className="w-full bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-black text-xs uppercase tracking-widest h-11 gap-2 shadow-md shadow-purple-500/10 active:scale-95 transition-all"
-                                >
-                                   <Truck size={14} /> Ship Order
-                                </Button>
-                             )}
-                             {selectedOrder.status === 'SHIPPED' && (
-                                <Button 
-                                  onClick={() => {
-                                    handleStatusUpdate(selectedOrder.id, 'DELIVERED');
-                                    setShowModal(false);
-                                  }}
-                                  className="w-full bg-[#A6D608] hover:bg-[#8ab506] text-white rounded-xl font-black text-xs uppercase tracking-widest h-11 gap-2 shadow-md shadow-[#A6D608]/10 active:scale-95 transition-all"
-                                >
-                                   <CheckCircle size={14} /> Complete Delivery
-                                </Button>
-                             )}
+                                 <Button 
+                                   onClick={() => {
+                                     setShowModal(false);
+                                     router.push(`/dashboard/vendor/shipments?orderId=${selectedOrder.orderId}&book=true`);
+                                   }}
+                                   className="w-full bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-black text-xs uppercase tracking-widest h-11 gap-2 shadow-md shadow-purple-500/10 active:scale-95 transition-all"
+                                 >
+                                    <Truck size={14} /> Book Shipment (Shiprocket)
+                                 </Button>
+                              )}
+                              {selectedOrder.status === 'SHIPPED' && (
+                                 <div className="flex gap-2 w-full">
+                                    <Button 
+                                      onClick={() => {
+                                        setShowModal(false);
+                                        router.push(`/dashboard/vendor/shipments?orderId=${selectedOrder.orderId}&track=true`);
+                                      }}
+                                      className="w-1/2 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-black text-xs uppercase tracking-widest h-11 gap-2 shadow-md shadow-purple-500/10 active:scale-95 transition-all"
+                                    >
+                                       <Activity size={14} /> Track Courier
+                                    </Button>
+                                    <Button 
+                                      onClick={() => {
+                                        handleStatusUpdate(selectedOrder.id, 'DELIVERED');
+                                        setShowModal(false);
+                                      }}
+                                      className="w-1/2 bg-[#A6D608] hover:bg-[#8ab506] text-white rounded-xl font-black text-xs uppercase tracking-widest h-11 gap-2 shadow-md shadow-[#A6D608]/10 active:scale-95 transition-all"
+                                    >
+                                       <CheckCircle size={14} /> Complete Delivery
+                                    </Button>
+                                 </div>
+                              )}
                           </div>
                        </div>
                     </div>
@@ -600,12 +621,6 @@ export default function VendorOrdersPage() {
                 className="bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-100 rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-wider transition-all active:scale-95 shadow-sm"
               >
                  Bulk Accept
-              </Button>
-              <Button
-                onClick={() => handleBulkStatusUpdate('SHIPPED')}
-                className="bg-purple-50 hover:bg-purple-100 text-purple-600 border border-purple-100 rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-wider transition-all active:scale-95 shadow-sm"
-              >
-                 Bulk Ship
               </Button>
               <Button
                 onClick={() => handleBulkStatusUpdate('DELIVERED')}

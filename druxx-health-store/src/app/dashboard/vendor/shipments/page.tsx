@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute"
+import { useSearchParams } from "next/navigation"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,7 +79,14 @@ interface ShipmentItem {
   };
 }
 
-export default function VendorShipmentsPage() {
+function VendorShipmentsPageContent() {
+  const searchParams = useSearchParams()
+  const queryOrderId = searchParams.get('orderId')
+  const queryBook = searchParams.get('book')
+  const queryTrack = searchParams.get('track')
+  
+  const processedParamsRef = React.useRef(false)
+
   const [shipments, setShipments] = React.useState<ShipmentItem[]>([])
   const [loading, setLoading] = React.useState(true)
   const [searchQuery, setSearchQuery] = React.useState("")
@@ -206,6 +214,28 @@ export default function VendorShipmentsPage() {
       setTrackingLoading(false)
     }
   }
+
+  React.useEffect(() => {
+    if (loading || shipments.length === 0 || processedParamsRef.current) return;
+
+    if (queryOrderId) {
+      setSearchQuery(queryOrderId);
+
+      const matched = shipments.find(
+        s => s.orderId.toLowerCase() === queryOrderId.toLowerCase()
+      );
+
+      if (matched) {
+        if (queryBook === 'true' && matched.status === 'READY_TO_SHIP') {
+          handleOpenBookModal(matched);
+          processedParamsRef.current = true;
+        } else if (queryTrack === 'true' && matched.awbCode) {
+          handleOpenTrackingModal(matched);
+          processedParamsRef.current = true;
+        }
+      }
+    }
+  }, [loading, shipments, queryOrderId, queryBook, queryTrack]);
 
   const getStatusColor = (status: string) => {
     const s = status.toUpperCase()
@@ -717,5 +747,17 @@ export default function VendorShipmentsPage() {
 
       </div>
     </ProtectedRoute>
+  )
+}
+
+export default function VendorShipmentsPage() {
+  return (
+    <React.Suspense fallback={
+      <div className="py-24 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A6D608]"></div>
+      </div>
+    }>
+      <VendorShipmentsPageContent />
+    </React.Suspense>
   )
 }
