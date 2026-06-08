@@ -1,0 +1,296 @@
+'use strict';
+
+const prisma = require('../../lib/prisma');
+const AppError = require('../../lib/AppError');
+const { getPagination, getPagingData } = require('../../lib/pagination.util');
+const shiprocketClient = require('../../lib/shiprocket');
+
+class VendorShipmentsService {
+  /**
+   * Helper to get the vendor context for a user
+   */
+  async getVendorId(userId) {
+    const vendor = await prisma.vendor.findUnique({ where: { userId } });
+    if (!vendor) throw new AppError('Vendor profile not found.', 404);
+    return vendor.id;
+  }
+
+  /**
+   * List shipments belonging to the vendor
+   */
+  async getShipments(userId, query) {
+    const vendorId = await this.getVendorId(userId);
+    const { skip, take, page, limit } = getPagination(query);
+    const { status } = query;
+
+    const where = { vendorId };
+    if (status) where.status = status;
+
+    const [shipments, total] = await Promise.all([
+      prisma.shipment.findMany({
+        where,
+        skip,
+        take,
+        include: {
+          order: {
+            include: {
+              user: { select: { id: true, name: true, email: true, phone: true } },
+              address: true,
+              items: {
+                where: { vendorId },
+                include: {
+                  product: {
+                    include: {
+                      images: { where: { isPrimary: true }, take: 1 }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.shipment.count({ where }),
+    ]);
+
+    return { shipments, ...getPagingData(total, page, limit) };
+  }
+
+  /**
+   * Fetch details of a single vendor shipment
+   */
+  async getShipmentDetails(userId, shipmentId) {
+    const vendorId = await this.getVendorId(userId);
+    const shipment = await prisma.shipment.findFirst({
+      where: { id: shipmentId, vendorId },
+      include: {
+        order: {
+          include: {
+            user: { select: { id: true, name: true, email: true, phone: true } },
+            address: true,
+            items: {
+              where: { vendorId },
+              include: {
+                product: {
+                  include: {
+                    images: { where: { isPrimary: true }, take: 1 }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!shipment) throw new AppError('Shipment not found.', 404);
+    return shipment;
+  }
+
+  /**
+   * Book a shipment on Shiprocket and generate AWB/courier info
+   */
+  async bookShipment(userId, shipmentId, bookingDetails = {}) {
+    const vendorId = await this.getVendorId(userId);
+
+    // 1. Fetch shipment and verify vendor ownership
+    const shipment = await prisma.shipment.findFirst({
+      where: { id: shipmentId, vendorId },
+      include: {
+        order: {
+          include: {
+            user: true,
+            address: true,
+            items: {
+              where: { vendorId },
+              include: { product: true }
+            }
+          }
+        }
+      }
+    });
+
+    if (!shipment) throw new AppError('Shipment not found.', 404);
+    if (shipment.shiprocketOrderId || shipment.status !== 'READY_TO_SHIP') {
+      throw new AppError(`Shipment cannot be booked (current status: ${shipment.status}).`, 400);
+    }
+
+    const vendor = await prisma.vendor.findUnique({ where: { id: vendorId } });
+    const vendorPickupNickname = vendor?.pickupLocation;
+
+    const { order } = shipment;
+    const { address, user } = order;
+
+    if (!address) {
+      throw new AppError('Shipping address is missing for this order.', 400);
+    }
+
+    // 2. Parse billing / shipping customer name
+    const fullName = address.fullName || user.name || 'Customer';
+    const nameParts = fullName.trim().split(/\s+/);
+    const firstName = nameParts[0] || 'Customer';
+    const lastName = nameParts.slice(1).join(' ') || ' ';
+
+    // 3. Format order date for Shiprocket (YYYY-MM-DD HH:mm)
+    const orderDate = new Date(order.createdAt);
+    const formattedDate = orderDate.toISOString().replace(/T/, ' ').replace(/\..+/, '').slice(0, 16);
+
+    // 4. Calculate total of vendor items
+    const subtotal = order.items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
+
+    // 5. Map order items to Shiprocket schema
+    const orderItems = order.items.map(item => ({
+      name: item.title,
+      sku: item.product.sku || item.productId,
+      units: item.quantity,
+      selling_price: Number(item.price),
+    }));
+
+    // 6. Build the Shiprocket API payload
+    const pickupLocation = bookingDetails.pickupLocation || vendorPickupNickname || process.env.SHIPROCKET_DEFAULT_PICKUP_LOCATION || 'Primary';
+    const paymentMethod = order.paymentMethod === 'COD' ? 'COD' : 'Prepaid';
+
+    const shiprocketPayload = {
+      order_id: `${order.id}-${shipment.id.slice(0, 8)}`,
+      order_date: formattedDate,
+      pickup_location: pickupLocation,
+      billing_customer_name: firstName,
+      billing_last_name: lastName,
+      billing_address: address.street,
+      billing_city: address.city,
+      billing_pincode: address.pincode,
+      billing_state: address.state,
+      billing_country: address.country || 'India',
+      billing_email: user.email || 'customer@druxstore.com',
+      billing_phone: address.phone || user.phone || '9999999999',
+      shipping_is_billing: true,
+      order_items: orderItems,
+      payment_method: paymentMethod,
+      sub_total: subtotal,
+      length: Number(bookingDetails.length || 15),
+      width: Number(bookingDetails.width || 10),
+      height: Number(bookingDetails.height || 5),
+      weight: Number(bookingDetails.weight || 0.5),
+    };
+
+    // 7. Call Shiprocket API to create the order
+    let srOrder;
+    try {
+      srOrder = await shiprocketClient.createOrder(shiprocketPayload);
+    } catch (err) {
+      throw new AppError(`Shiprocket order creation failed: ${err.message}`, 400);
+    }
+
+    if (!srOrder || !srOrder.shipment_id) {
+      throw new AppError('Shiprocket did not return a valid shipment ID.', 500);
+    }
+
+    // 8. Try to assign AWB immediately
+    let awbCode = null;
+    let courierName = null;
+    try {
+      const awbResponse = await shiprocketClient.assignAwb(srOrder.shipment_id);
+      if (awbResponse && awbResponse.response && awbResponse.response.data) {
+        const awbData = awbResponse.response.data;
+        awbCode = awbData.awb_code;
+        courierName = awbData.courier_name;
+      }
+    } catch (awbErr) {
+      console.error('Failed to automatically assign AWB on booking:', awbErr);
+      // We don't block the booking flow if AWB assignment fails or is delayed.
+    }
+
+    // 9. Update database shipment record
+    const updatedShipment = await prisma.shipment.update({
+      where: { id: shipment.id },
+      data: {
+        shiprocketOrderId: String(srOrder.order_id),
+        shipmentId: String(srOrder.shipment_id),
+        awbCode,
+        courierName,
+        status: awbCode ? 'SHIPPED' : 'READY_TO_SHIP',
+      },
+    });
+
+    // 10. Automatically update the corresponding order item statuses to PROCESSING or SHIPPED
+    try {
+      await prisma.orderItem.updateMany({
+        where: {
+          orderId: order.id,
+          vendorId,
+          status: { in: ['PENDING', 'PROCESSING'] }
+        },
+        data: {
+          status: awbCode ? 'SHIPPED' : 'PROCESSING',
+          shippedAt: awbCode ? new Date() : null
+        }
+      });
+    } catch (updateErr) {
+      console.error('Failed to update order item statuses after booking shipment:', updateErr);
+    }
+
+    return updatedShipment;
+  }
+
+  /**
+   * Retrieve PDF label URL for a booked shipment
+   */
+  async getShipmentLabel(userId, shipmentId) {
+    const vendorId = await this.getVendorId(userId);
+    const shipment = await prisma.shipment.findFirst({
+      where: { id: shipmentId, vendorId }
+    });
+
+    if (!shipment) throw new AppError('Shipment not found.', 404);
+    if (!shipment.shipmentId) {
+      throw new AppError('This shipment has not been booked on Shiprocket yet.', 400);
+    }
+
+    // Return cached URL if exists
+    if (shipment.labelUrl) {
+      return shipment.labelUrl;
+    }
+
+    // Otherwise fetch from Shiprocket and update DB
+    try {
+      const labelUrl = await shiprocketClient.generateLabel(shipment.shipmentId);
+      if (!labelUrl) {
+        throw new AppError('Shiprocket did not return a valid label URL.', 500);
+      }
+
+      await prisma.shipment.update({
+        where: { id: shipment.id },
+        data: { labelUrl }
+      });
+
+      return labelUrl;
+    } catch (err) {
+      throw new AppError(`Failed to retrieve shipping label: ${err.message}`, 400);
+    }
+  }
+
+  /**
+   * Track shipment events
+   */
+  async trackShipment(userId, shipmentId) {
+    const vendorId = await this.getVendorId(userId);
+    const shipment = await prisma.shipment.findFirst({
+      where: { id: shipmentId, vendorId }
+    });
+
+    if (!shipment) throw new AppError('Shipment not found.', 404);
+    if (!shipment.awbCode) {
+      throw new AppError('No AWB code is assigned to this shipment yet.', 400);
+    }
+
+    try {
+      const trackingData = await shiprocketClient.trackShipment(shipment.awbCode);
+      return trackingData;
+    } catch (err) {
+      throw new AppError(`Failed to fetch tracking data: ${err.message}`, 400);
+    }
+  }
+}
+
+module.exports = new VendorShipmentsService();

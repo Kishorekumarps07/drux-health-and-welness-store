@@ -118,6 +118,18 @@ class OrdersService {
           }
         }
         await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
+
+        // Initialize Shipment records for COD orders (one per vendor)
+        const vendorIds = [...new Set(newOrder.items.map(item => item.vendorId))];
+        for (const vendorId of vendorIds) {
+          await tx.shipment.create({
+            data: {
+              orderId: newOrder.id,
+              vendorId,
+              status: 'READY_TO_SHIP',
+            },
+          });
+        }
       }
 
       // If there is a coupon, increment its usageCount inside the transaction
@@ -181,6 +193,25 @@ class OrdersService {
         where: { cart: { userId } },
       });
 
+      // Initialize Shipment records (one per vendor)
+      const vendorIds = [...new Set(result.items.map(item => item.vendorId))];
+      for (const vendorId of vendorIds) {
+        await tx.shipment.upsert({
+          where: {
+            orderId_vendorId: {
+              orderId: result.id,
+              vendorId,
+            },
+          },
+          update: {},
+          create: {
+            orderId: result.id,
+            vendorId,
+            status: 'READY_TO_SHIP',
+          },
+        });
+      }
+
       try {
         await notificationsService.createNotification(
           userId,
@@ -240,6 +271,25 @@ class OrdersService {
       if (product.stockQty < 0) {
         throw new AppError(`Insufficient stock for ${product.title} after payment.`, 400);
       }
+    }
+
+    // Initialize Shipment records (one per vendor)
+    const vendorIds = [...new Set(order.items.map(item => item.vendorId))];
+    for (const vendorId of vendorIds) {
+      await tx.shipment.upsert({
+        where: {
+          orderId_vendorId: {
+            orderId: order.id,
+            vendorId,
+          },
+        },
+        update: {},
+        create: {
+          orderId: order.id,
+          vendorId,
+          status: 'READY_TO_SHIP',
+        },
+      });
     }
 
     return order;

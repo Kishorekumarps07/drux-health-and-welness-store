@@ -20,6 +20,13 @@ const {
   deleteCoupon,
   generateCouponCode
 } = require('./vendorCoupons.controller');
+const {
+  listShipments,
+  getShipmentDetails,
+  bookShipment,
+  getShipmentLabel,
+  trackShipment
+} = require('./vendorShipments.controller');
 
 const router = express.Router();
 
@@ -64,6 +71,36 @@ router.get('/orders/:id', getOrderDetails);
  * @desc    Update order item status & sync with parent
  */
 router.patch('/orders/:id/status', updateOrderItemStatus);
+
+/**
+ * @route   GET /api/v1/vendor/shipments
+ * @desc    Get vendor's shipments
+ */
+router.get('/shipments', listShipments);
+
+/**
+ * @route   GET /api/v1/vendor/shipments/:id
+ * @desc    Get details of a single vendor shipment
+ */
+router.get('/shipments/:id', getShipmentDetails);
+
+/**
+ * @route   POST /api/v1/vendor/shipments/:id/book
+ * @desc    Book a shipment on Shiprocket and assign AWB/courier info
+ */
+router.post('/shipments/:id/book', bookShipment);
+
+/**
+ * @route   GET /api/v1/vendor/shipments/:id/label
+ * @desc    Generate printable PDF shipping label
+ */
+router.get('/shipments/:id/label', getShipmentLabel);
+
+/**
+ * @route   GET /api/v1/vendor/shipments/:id/track
+ * @desc    Get live tracking events for a shipment
+ */
+router.get('/shipments/:id/track', trackShipment);
 
 /**
  * @route   GET /api/v1/vendor/analytics

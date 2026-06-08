@@ -33,7 +33,13 @@ export default function VendorSettingsPage() {
     storeDescription: "",
     storeLogo: "",
     storeBanner: "",
-    gstNumber: ""
+    gstNumber: "",
+    pickupLocation: "",
+    pickupAddress: "",
+    pickupCity: "",
+    pickupState: "",
+    pickupPincode: "",
+    pickupPhone: ""
   });
   const [files, setFiles] = useState<{ logo?: File; banner?: File }>({});
   const [previews, setPreviews] = useState<{ logo?: string; banner?: string }>({});
@@ -48,7 +54,13 @@ export default function VendorSettingsPage() {
         storeDescription: data.storeDescription || "",
         storeLogo: data.storeLogo || "",
         storeBanner: data.storeBanner || "",
-        gstNumber: data.gstNumber || ""
+        gstNumber: data.gstNumber || "",
+        pickupLocation: data.pickupLocation || "",
+        pickupAddress: data.pickupAddress || "",
+        pickupCity: data.pickupCity || "",
+        pickupState: data.pickupState || "",
+        pickupPincode: data.pickupPincode || "",
+        pickupPhone: data.pickupPhone || ""
       });
       setPreviews({
         logo: data.storeLogo || "",
@@ -90,6 +102,12 @@ export default function VendorSettingsPage() {
       uploadData.append('storeName', formData.storeName);
       uploadData.append('storeDescription', formData.storeDescription);
       uploadData.append('gstNumber', formData.gstNumber);
+      uploadData.append('pickupLocation', formData.pickupLocation);
+      uploadData.append('pickupAddress', formData.pickupAddress);
+      uploadData.append('pickupCity', formData.pickupCity);
+      uploadData.append('pickupState', formData.pickupState);
+      uploadData.append('pickupPincode', formData.pickupPincode);
+      uploadData.append('pickupPhone', formData.pickupPhone);
       
       if (files.logo) uploadData.append('logo', files.logo);
       else if (previews.logo === "") uploadData.append('storeLogo', ""); // Signal deletion
@@ -118,7 +136,7 @@ export default function VendorSettingsPage() {
 
   return (
     <ProtectedRoute requiredRole="VENDOR">
-      <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 italic">
+      <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
@@ -139,7 +157,7 @@ export default function VendorSettingsPage() {
              >
                 {saving ? "Saving Changes..." : "Save Configuration"}
                 {!saving && <Save className="ml-2 w-4 h-4" />}
-             </Button>
+              </Button>
           </div>
         </div>
 
@@ -171,6 +189,19 @@ export default function VendorSettingsPage() {
                        </div>
                     </div>
 
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <div className="space-y-3">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-2">Shiprocket Pickup Location Nickname</label>
+                          <Input 
+                            value={formData.pickupLocation}
+                            onChange={(e) => setFormData({...formData, pickupLocation: e.target.value})}
+                            className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 font-black text-gray-800 focus:bg-white transition-all px-6"
+                            placeholder="e.g. Primary or WAREHOUSE_MUMBAI"
+                          />
+                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest pl-2">Nickname must match the configured pickup location name in your Shiprocket account.</p>
+                       </div>
+                    </div>
+
                     <div className="space-y-3">
                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-2">Store Bio / Description</label>
                        <Textarea 
@@ -180,6 +211,64 @@ export default function VendorSettingsPage() {
                          placeholder="Describe your health mission and product quality standards..."
                        />
                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest pl-2">This is displayed on your public store and product pages.</p>
+                    </div>
+                 </div>
+              </Card>
+
+              <Card className="rounded-[3rem] p-10 border-gray-100 shadow-xl shadow-black/5 bg-white">
+                 <h3 className="text-2xl font-black text-gray-900 mb-8 tracking-tight">Warehouse / Pickup Address</h3>
+                 
+                 <div className="space-y-8">
+                    <div className="space-y-3">
+                       <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-2">Street Address</label>
+                       <Input 
+                         value={formData.pickupAddress}
+                         onChange={(e) => setFormData({...formData, pickupAddress: e.target.value})}
+                         className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 font-black text-gray-800 focus:bg-white transition-all px-6"
+                         placeholder="e.g. 102, Green Valley Industrial Area"
+                       />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <div className="space-y-3">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-2">City</label>
+                          <Input 
+                            value={formData.pickupCity}
+                            onChange={(e) => setFormData({...formData, pickupCity: e.target.value})}
+                            className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 font-black text-gray-800 focus:bg-white transition-all px-6"
+                            placeholder="e.g. Mumbai"
+                          />
+                       </div>
+                       <div className="space-y-3">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-2">State</label>
+                          <Input 
+                            value={formData.pickupState}
+                            onChange={(e) => setFormData({...formData, pickupState: e.target.value})}
+                            className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 font-black text-gray-800 focus:bg-white transition-all px-6"
+                            placeholder="e.g. Maharashtra"
+                          />
+                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <div className="space-y-3">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-2">Pincode</label>
+                          <Input 
+                            value={formData.pickupPincode}
+                            onChange={(e) => setFormData({...formData, pickupPincode: e.target.value})}
+                            className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 font-black text-gray-800 focus:bg-white transition-all px-6"
+                            placeholder="e.g. 400001"
+                          />
+                       </div>
+                       <div className="space-y-3">
+                          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-2">Contact Phone</label>
+                          <Input 
+                            value={formData.pickupPhone}
+                            onChange={(e) => setFormData({...formData, pickupPhone: e.target.value})}
+                            className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 font-black text-gray-800 focus:bg-white transition-all px-6"
+                            placeholder="e.g. 9876543210"
+                          />
+                       </div>
                     </div>
                  </div>
               </Card>
@@ -301,7 +390,7 @@ export default function VendorSettingsPage() {
 
            {/* Side Status Panel */}
            <div className="space-y-8">
-              <Card className="rounded-[2.5rem] p-8 border-gray-100 shadow-xl shadow-black/5 bg-[#1E1E1E] text-white italic">
+              <Card className="rounded-[2.5rem] p-8 border-gray-100 shadow-xl shadow-black/5 bg-[#1E1E1E] text-white">
                  <h4 className="text-xl font-black mb-6 flex items-center gap-3">
                     <ShieldCheck className="text-[#A6D608] w-6 h-6" />
                     Store Compliance
@@ -329,8 +418,8 @@ export default function VendorSettingsPage() {
                  <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-6">
                     <Store className="text-gray-300 w-8 h-8" />
                  </div>
-                 <h4 className="text-lg font-black text-gray-900 mb-2 italic tracking-tight">Public Presence</h4>
-                 <p className="text-xs text-gray-400 font-bold mb-6 italic leading-relaxed px-4">Your store slug is permanently fixed to ensure SEO stability and broken link prevention.</p>
+                 <h4 className="text-lg font-black text-gray-900 mb-2 tracking-tight">Public Presence</h4>
+                 <p className="text-xs text-gray-400 font-bold mb-6 leading-relaxed px-4">Your store slug is permanently fixed to ensure SEO stability and broken link prevention.</p>
                  <Badge variant="outline" className="rounded-full border-[#A6D608]/20 text-[#A6D608] font-black px-4 py-1.5 bg-[#A6D608]/5">
                     /vendors/{vendor?.storeSlug}
                  </Badge>

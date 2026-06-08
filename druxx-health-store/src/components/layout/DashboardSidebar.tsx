@@ -21,7 +21,8 @@ import {
   ChevronRight,
   Monitor,
   LayoutGrid,
-  Tag
+  Tag,
+  Truck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,7 @@ const VENDOR_NAV: NavItem[] = [
   { name: 'Overview', href: '/dashboard/vendor', icon: LayoutDashboard },
   { name: 'My Products', href: '/dashboard/vendor/inventory', icon: Package },
   { name: 'Manage Orders', href: '/dashboard/vendor/orders', icon: ShoppingBag },
+  { name: 'Shipments', href: '/dashboard/vendor/shipments', icon: Truck },
   { name: 'Coupon Manager', href: '/dashboard/vendor/coupons', icon: Tag },
   { name: 'Analytics', href: '/dashboard/vendor/analytics', icon: BarChart3 },
   { name: 'Payments', href: '/dashboard/vendor/payments', icon: CreditCard },

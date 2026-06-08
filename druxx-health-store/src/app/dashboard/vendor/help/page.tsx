@@ -44,7 +44,7 @@ export default function VendorHelpPage() {
 
   return (
     <ProtectedRoute requiredRole="VENDOR">
-      <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 italic">
+      <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
@@ -112,16 +112,14 @@ export default function VendorHelpPage() {
                     </AccordionItem>
                  ))}
               </Accordion>
-           </Card>
-
-           {/* Contact Support */}
+           </Card>           {/* Contact Support */}
            <div className="space-y-8">
               <Card className="rounded-[3rem] p-10 bg-[#1E1E1E] text-white shadow-2xl relative overflow-hidden group">
                  <div className="relative z-10 w-full">
                     <div className="w-14 h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
                        <Mail className="w-7 h-7 text-[#A6D608]" />
                     </div>
-                    <h3 className="text-2xl font-black mb-2 italic">Priority Assistance</h3>
+                    <h3 className="text-2xl font-black mb-2">Priority Assistance</h3>
                     <p className="text-gray-400 text-sm font-medium leading-relaxed mb-8">Can't find what you're looking for? Our executive support team is available 9 AM - 6 PM IST.</p>
                     
                     <div className="grid gap-4">
@@ -142,13 +140,13 @@ export default function VendorHelpPage() {
                  </div>
                  <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-[#A6D608]/5 rounded-full blur-3xl" />
               </Card>
-
+ 
               <Card className="rounded-[3rem] p-10 border-gray-100 shadow-xl shadow-black/5 bg-white border-2 border-dashed border-gray-100 flex flex-col items-center justify-center text-center">
                  <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-6">
                     <HelpCircle className="text-gray-300 w-8 h-8" />
                  </div>
-                 <h4 className="text-lg font-black text-gray-900 mb-2 italic tracking-tight">Report a Technical Bug</h4>
-                 <p className="text-xs text-gray-400 font-bold mb-6 italic leading-relaxed px-4">Encountering an error in the dashboard? File a tracker to help our engineers resolve it faster.</p>
+                 <h4 className="text-lg font-black text-gray-900 mb-2 tracking-tight">Report a Technical Bug</h4>
+                 <p className="text-xs text-gray-400 font-bold mb-6 leading-relaxed px-4">Encountering an error in the dashboard? File a tracker to help our engineers resolve it faster.</p>
                  <Button variant="ghost" className="rounded-xl font-black text-[#A6D608] hover:bg-[#A6D608]/5 h-10 px-6 uppercase text-[10px] tracking-widest">
                     Open Dev Console
                  </Button>

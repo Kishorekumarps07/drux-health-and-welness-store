@@ -194,7 +194,19 @@ class VendorProfileService {
     const vendor = await this.getVendor(userId);
     
     // Only allow specific fields to be updated
-    const allowedFields = ['storeName', 'storeDescription', 'storeLogo', 'storeBanner', 'gstNumber'];
+    const allowedFields = [
+      'storeName', 
+      'storeDescription', 
+      'storeLogo', 
+      'storeBanner', 
+      'gstNumber', 
+      'pickupLocation',
+      'pickupAddress',
+      'pickupCity',
+      'pickupState',
+      'pickupPincode',
+      'pickupPhone'
+    ];
     const updateData = {};
     
     allowedFields.forEach(field => {
@@ -211,6 +223,31 @@ class VendorProfileService {
       where: { id: vendor.id },
       data: updateData
     });
+
+    // Automatically register the pickup location on Shiprocket if nickname and address details are provided
+    const hasPickupDetails = updateData.pickupLocation && updateData.pickupAddress && 
+                             updateData.pickupCity && updateData.pickupState && 
+                             updateData.pickupPincode && updateData.pickupPhone;
+    if (hasPickupDetails) {
+      try {
+        const shiprocketClient = require('../../lib/shiprocket');
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        
+        await shiprocketClient.addPickupLocation({
+          pickup_location: updateData.pickupLocation,
+          name: user?.name || updatedVendor.storeName || 'Vendor Contact',
+          email: user?.email || 'vendor@druxx.com',
+          phone: Number(updateData.pickupPhone.replace(/\D/g, '')),
+          address: updateData.pickupAddress,
+          city: updateData.pickupCity,
+          state: updateData.pickupState,
+          country: 'India',
+          pin_code: Number(updateData.pickupPincode)
+        });
+      } catch (srErr) {
+        console.error('Failed to automatically register pickup location on Shiprocket:', srErr.message);
+      }
+    }
 
     return updatedVendor;
   }

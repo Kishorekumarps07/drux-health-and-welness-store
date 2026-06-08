@@ -293,5 +293,42 @@ export const vendorService = {
   async updateProduct(id: string, data: any) {
     const response = await api.put(`/products/${id}`, data);
     return response.data;
+  },
+
+  /**
+   * Get paginated shipments for the current vendor
+   */
+  async getMyShipments(params: { page?: number; limit?: number; status?: string } = {}) {
+    try {
+      const response = await api.get('/vendor/shipments', { params });
+      return response.data.data;
+    } catch (err) {
+      console.error("Vendor shipments fetch error:", err);
+      return { shipments: [], total: 0, pages: 1, page: 1 };
+    }
+  },
+
+  /**
+   * Book a shipment on Shiprocket
+   */
+  async bookShipment(id: string, data: { length?: number; width?: number; height?: number; weight?: number; pickupLocation?: string } = {}) {
+    const response = await api.post(`/vendor/shipments/${id}/book`, data);
+    return response.data;
+  },
+
+  /**
+   * Retrieve the shipping label URL (PDF)
+   */
+  async getShipmentLabel(id: string) {
+    const response = await api.get<{ status: string; data: { labelUrl: string } }>(`/vendor/shipments/${id}/label`);
+    return response.data.data;
+  },
+
+  /**
+   * Track shipment events by ID
+   */
+  async getShipmentTracking(id: string) {
+    const response = await api.get<{ status: string; data: { tracking: any } }>(`/vendor/shipments/${id}/track`);
+    return response.data.data.tracking;
   }
 };

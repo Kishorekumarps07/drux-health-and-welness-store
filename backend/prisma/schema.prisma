@@ -139,6 +139,12 @@ model Vendor {
   totalSales         Decimal      @default(0) @map("total_sales") @db.Decimal(12, 2)
   rating             Decimal      @default(0) @db.Decimal(3, 2)
   gstNumber          String?      @map("gst_number")
+  pickupLocation     String?      @map("pickup_location")
+  pickupAddress      String?      @map("pickup_address")
+  pickupCity         String?      @map("pickup_city")
+  pickupState        String?      @map("pickup_state")
+  pickupPincode      String?      @map("pickup_pincode")
+  pickupPhone        String?      @map("pickup_phone")
   bankAccountNumber  String?      @map("bank_account_number")
   bankIfscCode       String?      @map("bank_ifsc_code")
   rejectionReason    String?      @map("rejection_reason") @db.Text
@@ -151,6 +157,7 @@ model Vendor {
   payouts    VendorPayout[]
   orderItems OrderItem[]
   coupons    Coupon[]
+  shipments  Shipment[]
 
   @@index([approvalStatus])
   @@index([rating])
@@ -319,10 +326,11 @@ model Order {
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 
-  user     User        @relation(fields: [userId], references: [id])
-  address  Address     @relation(fields: [addressId], references: [id])
-  items    OrderItem[]
-  payment  Payment?
+  user      User        @relation(fields: [userId], references: [id])
+  address   Address     @relation(fields: [addressId], references: [id])
+  items     OrderItem[]
+  payment   Payment?
+  shipments Shipment[]
 
   @@index([userId])
   @@index([status])
@@ -351,6 +359,31 @@ model OrderItem {
   vendor  Vendor  @relation(fields: [vendorId], references: [id])
 
   @@map("order_items")
+}
+
+// ─────────────────────────────────────────────
+// SHIPMENT (Shiprocket Integration)
+// ─────────────────────────────────────────────
+
+model Shipment {
+  id                String    @id @default(uuid())
+  orderId           String    @map("order_id")
+  vendorId          String    @map("vendor_id")
+  shiprocketOrderId String?   @map("shiprocket_order_id")
+  shipmentId        String?   @map("shipment_id")
+  awbCode           String?   @map("awb_code")
+  courierName       String?   @map("courier_name")
+  status            String    @default("READY_TO_SHIP") // READY_TO_SHIP, SHIPPED, DELIVERED, CANCELLED
+  trackingUrl       String?   @map("tracking_url")
+  labelUrl          String?   @map("label_url")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  order  Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@unique([orderId, vendorId])
+  @@map("shipments")
 }
 
 // ─────────────────────────────────────────────
@@ -523,3 +556,12 @@ model NewsletterSubscription {
 
   @@map("newsletter_subscriptions")
 }
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model profiles {
+  id         String  @id @db.Uuid
+  full_name  String?
+  role       String? @default("CUSTOMER")
+  avatar_url String?
+}
+
