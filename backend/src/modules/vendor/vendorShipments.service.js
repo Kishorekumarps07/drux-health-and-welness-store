@@ -209,21 +209,20 @@ class VendorShipmentsService {
         shipmentId: String(srOrder.shipment_id),
         awbCode,
         courierName,
-        status: awbCode ? 'SHIPPED' : 'READY_TO_SHIP',
+        status: 'READY_TO_SHIP',
       },
     });
 
-    // 10. Automatically update the corresponding order item statuses to PROCESSING or SHIPPED
+    // 10. Automatically update the corresponding order item statuses to PROCESSING
     try {
       await prisma.orderItem.updateMany({
         where: {
           orderId: order.id,
           vendorId,
-          status: { in: ['PENDING', 'PROCESSING'] }
+          status: { in: ['PENDING'] }
         },
         data: {
-          status: awbCode ? 'SHIPPED' : 'PROCESSING',
-          shippedAt: awbCode ? new Date() : null
+          status: 'PROCESSING'
         }
       });
     } catch (updateErr) {
@@ -268,6 +267,50 @@ class VendorShipmentsService {
     } catch (err) {
       throw new AppError(`Failed to retrieve shipping label: ${err.message}`, 400);
     }
+  }
+
+  /**
+   * Mark shipment as handed over / dispatched to courier
+   */
+  async handoverShipment(userId, shipmentId) {
+    const vendorId = await this.getVendorId(userId);
+
+    const shipment = await prisma.shipment.findFirst({
+      where: { id: shipmentId, vendorId }
+    });
+
+    if (!shipment) throw new AppError('Shipment not found.', 404);
+    if (shipment.status !== 'READY_TO_SHIP') {
+      throw new AppError(`Shipment must be booked and ready to ship to be handed over (current status: ${shipment.status}).`, 400);
+    }
+    if (!shipment.awbCode) {
+      throw new AppError('Cannot handover a shipment that has no AWB generated.', 400);
+    }
+
+    // Update shipment status to SHIPPED
+    const updatedShipment = await prisma.shipment.update({
+      where: { id: shipment.id },
+      data: { status: 'SHIPPED' }
+    });
+
+    // Automatically update the corresponding order item statuses to SHIPPED and set shippedAt timestamp
+    try {
+      await prisma.orderItem.updateMany({
+        where: {
+          orderId: shipment.orderId,
+          vendorId,
+          status: { in: ['PENDING', 'PROCESSING'] }
+        },
+        data: {
+          status: 'SHIPPED',
+          shippedAt: new Date()
+        }
+      });
+    } catch (updateErr) {
+      console.error('Failed to update order item statuses to SHIPPED after handover:', updateErr);
+    }
+
+    return updatedShipment;
   }
 
   /**

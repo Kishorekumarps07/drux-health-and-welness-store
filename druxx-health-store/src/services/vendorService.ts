@@ -330,5 +330,13 @@ export const vendorService = {
   async getShipmentTracking(id: string) {
     const response = await api.get<{ status: string; data: { tracking: any } }>(`/vendor/shipments/${id}/track`);
     return response.data.data.tracking;
+  },
+
+  /**
+   * Mark shipment as handed over to courier
+   */
+  async handoverShipment(id: string) {
+    const response = await api.post(`/vendor/shipments/${id}/handover`);
+    return response.data;
   }
 };

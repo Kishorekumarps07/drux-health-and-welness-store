@@ -25,7 +25,8 @@ const {
   getShipmentDetails,
   bookShipment,
   getShipmentLabel,
-  trackShipment
+  trackShipment,
+  handoverShipment
 } = require('./vendorShipments.controller');
 
 const router = express.Router();
@@ -101,6 +102,12 @@ router.get('/shipments/:id/label', getShipmentLabel);
  * @desc    Get live tracking events for a shipment
  */
 router.get('/shipments/:id/track', trackShipment);
+
+/**
+ * @route   POST /api/v1/vendor/shipments/:id/handover
+ * @desc    Mark a shipment as handed over / dispatched to courier
+ */
+router.post('/shipments/:id/handover', handoverShipment);
 
 /**
  * @route   GET /api/v1/vendor/analytics

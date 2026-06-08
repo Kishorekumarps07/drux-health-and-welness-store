@@ -69,10 +69,26 @@ const trackShipment = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Handover shipment to courier
+ * @route   POST /api/v1/vendor/shipments/:id/handover
+ * @access  Private (Vendor)
+ */
+const handoverShipment = asyncHandler(async (req, res) => {
+  const shipment = await vendorShipmentsService.handoverShipment(req.user.id, req.params.id);
+  res.status(200).json({
+    status: 'success',
+    message: 'Shipment successfully handed over to courier.',
+    data: { shipment }
+  });
+});
+
 module.exports = {
   listShipments,
   getShipmentDetails,
   bookShipment,
   getShipmentLabel,
-  trackShipment
+  trackShipment,
+  handoverShipment
 };
+

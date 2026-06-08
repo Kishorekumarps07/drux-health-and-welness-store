@@ -215,6 +215,17 @@ function VendorShipmentsPageContent() {
     }
   }
 
+  const handleHandoverShipment = async (shipment: ShipmentItem) => {
+    const toastId = toast.loading("Processing courier handover...")
+    try {
+      await vendorService.handoverShipment(shipment.id)
+      toast.success("Shipment successfully handed over to courier!", { id: toastId })
+      fetchShipments()
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to handover shipment", { id: toastId })
+    }
+  }
+
   React.useEffect(() => {
     if (loading || shipments.length === 0 || processedParamsRef.current) return;
 
@@ -401,6 +412,15 @@ function VendorShipmentsPageContent() {
                                  </DropdownMenuItem>
                                )}
 
+                               {shipment.status === 'READY_TO_SHIP' && shipment.shiprocketOrderId && (
+                                 <DropdownMenuItem 
+                                   onClick={() => handleHandoverShipment(shipment)}
+                                   className="flex items-center gap-2 px-3 py-2 text-xs font-black rounded-xl text-blue-500 hover:bg-blue-50 focus:bg-blue-50 cursor-pointer"
+                                 >
+                                   <CheckCircle className="w-4 h-4" /> Handover to Courier
+                                 </DropdownMenuItem>
+                               )}
+
                                {shipment.shipmentId && (
                                  <DropdownMenuItem 
                                    onClick={() => handlePrintLabel(shipment)}
@@ -543,6 +563,17 @@ function VendorShipmentsPageContent() {
                        className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl px-6 font-black text-xs uppercase tracking-widest h-11"
                      >
                        Book Courier
+                     </Button>
+                   )}
+                   {selectedShipment.status === 'READY_TO_SHIP' && selectedShipment.shiprocketOrderId && (
+                     <Button 
+                       onClick={() => {
+                         setShowDetailsModal(false)
+                         handleHandoverShipment(selectedShipment)
+                       }}
+                       className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl px-6 font-black text-xs uppercase tracking-widest h-11"
+                     >
+                       Handover to Courier
                      </Button>
                    )}
                    <Button 
