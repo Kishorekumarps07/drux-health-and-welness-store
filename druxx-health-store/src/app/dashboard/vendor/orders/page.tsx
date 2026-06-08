@@ -303,7 +303,10 @@ export default function VendorOrdersPage() {
                               
                               {order.status === 'PROCESSING' && (
                                 <DropdownMenuItem 
-                                  onClick={() => router.push(`/dashboard/vendor/shipments?orderId=${order.orderId}&book=true`)}
+                                  onClick={() => {
+                                    console.log("Book shipment clicked in dropdown. Order details:", order);
+                                    router.push(`/dashboard/vendor/shipments?orderId=${order.orderId}&book=true`);
+                                  }}
                                   className="flex items-center gap-2 px-3 py-2 text-xs font-black rounded-xl text-purple-500 hover:bg-purple-50 focus:bg-purple-50 cursor-pointer"
                                 >
                                   <Truck className="w-4 h-4" /> Book Shipment (Shiprocket)
@@ -553,6 +556,7 @@ export default function VendorOrdersPage() {
                                  <Button 
                                    onClick={() => {
                                      setShowModal(false);
+                                     console.log("Book shipment clicked in modal. SelectedOrder details:", selectedOrder);
                                      router.push(`/dashboard/vendor/shipments?orderId=${selectedOrder.orderId}&book=true`);
                                    }}
                                    className="w-full bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-black text-xs uppercase tracking-widest h-11 gap-2 shadow-md shadow-purple-500/10 active:scale-95 transition-all"
@@ -564,6 +568,7 @@ export default function VendorOrdersPage() {
                                  <div className="flex gap-2 w-full">
                                     <Button 
                                       onClick={() => {
+                                        console.log("Track courier clicked in modal. SelectedOrder:", selectedOrder);
                                         setShowModal(false);
                                         router.push(`/dashboard/vendor/shipments?orderId=${selectedOrder.orderId}&track=true`);
                                       }}

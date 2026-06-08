@@ -20,6 +20,40 @@ class VendorShipmentsService {
    */
   async getShipments(userId, query) {
     const vendorId = await this.getVendorId(userId);
+
+    // Dynamic Self-Healing: Auto-create missing Shipment records for pre-existing orders
+    try {
+      const orderItems = await prisma.orderItem.findMany({
+        where: { vendorId },
+        select: { orderId: true },
+        distinct: ['orderId']
+      });
+      const orderIds = orderItems.map(item => item.orderId);
+
+      if (orderIds.length > 0) {
+        const existingShipments = await prisma.shipment.findMany({
+          where: { vendorId, orderId: { in: orderIds } },
+          select: { orderId: true }
+        });
+        const existingOrderIds = new Set(existingShipments.map(s => s.orderId));
+        const missingOrderIds = orderIds.filter(id => !existingOrderIds.has(id));
+
+        if (missingOrderIds.length > 0) {
+          await Promise.all(missingOrderIds.map(orderId => 
+            prisma.shipment.create({
+              data: {
+                orderId,
+                vendorId,
+                status: 'READY_TO_SHIP'
+              }
+            }).catch(err => console.error('Failed to auto-create missing shipment:', err))
+          ));
+        }
+      }
+    } catch (healErr) {
+      console.error('Failed to self-heal missing shipments:', healErr);
+    }
+
     const { skip, take, page, limit } = getPagination(query);
     const { status } = query;
 

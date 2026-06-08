@@ -227,23 +227,46 @@ function VendorShipmentsPageContent() {
   }
 
   React.useEffect(() => {
+    console.log("Shipments query param hook triggered:", {
+      loading,
+      shipmentsCount: shipments.length,
+      processedParams: processedParamsRef.current,
+      queryOrderId,
+      queryBook,
+      queryTrack
+    });
+
     if (loading || shipments.length === 0 || processedParamsRef.current) return;
 
     if (queryOrderId) {
+      console.log("Setting search query to:", queryOrderId);
       setSearchQuery(queryOrderId);
 
       const matched = shipments.find(
         s => s.orderId.toLowerCase() === queryOrderId.toLowerCase()
       );
 
+      console.log("Matched shipment search result:", matched);
+
       if (matched) {
         if (queryBook === 'true' && matched.status === 'READY_TO_SHIP') {
+          console.log("Auto-opening book modal for:", matched);
           handleOpenBookModal(matched);
           processedParamsRef.current = true;
         } else if (queryTrack === 'true' && matched.awbCode) {
+          console.log("Auto-opening tracking modal for:", matched);
           handleOpenTrackingModal(matched);
           processedParamsRef.current = true;
+        } else {
+          console.log("Condition not met for auto-modal:", {
+            queryBook,
+            status: matched.status,
+            queryTrack,
+            awbCode: matched.awbCode
+          });
         }
+      } else {
+        console.log("No matched shipment found in shipments list for orderId:", queryOrderId);
       }
     }
   }, [loading, shipments, queryOrderId, queryBook, queryTrack]);
