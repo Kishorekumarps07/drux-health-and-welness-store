@@ -101,6 +101,52 @@ class VendorOrdersService {
     if (newStatus === 'SHIPPED' && !item.shippedAt) auditUpdates.shippedAt = new Date();
     if (newStatus === 'DELIVERED' && !item.deliveredAt) auditUpdates.deliveredAt = new Date();
 
+    // Check Shipment state if canceling
+    let shipmentCancelAction = null; // 'CANCEL_SHIPMENT_AND_ORDER' or 'RESET_SHIPMENT_BOOKING' or null
+    let shipmentIdToUpdate = null;
+    let srOrderIdToCancel = null;
+
+    if (newStatus === 'CANCELLED') {
+      const shipment = await prisma.shipment.findFirst({
+        where: { orderId: item.orderId, vendorId }
+      });
+
+      if (shipment) {
+        shipmentIdToUpdate = shipment.id;
+        if (shipment.shiprocketOrderId) {
+          srOrderIdToCancel = shipment.shiprocketOrderId;
+        }
+
+        // Count other non-cancelled items in this order for this vendor
+        const otherActiveItemsCount = await prisma.orderItem.count({
+          where: {
+            orderId: item.orderId,
+            vendorId,
+            id: { not: itemId },
+            status: { not: 'CANCELLED' }
+          }
+        });
+
+        if (otherActiveItemsCount === 0) {
+          shipmentCancelAction = 'CANCEL_SHIPMENT_AND_ORDER';
+        } else if (shipment.shiprocketOrderId) {
+          // Some items remain, but shipment was booked -> need to reset booking on Shiprocket
+          shipmentCancelAction = 'RESET_SHIPMENT_BOOKING';
+        }
+      }
+    }
+
+    // Call Shiprocket if needed (outside database transaction)
+    if (srOrderIdToCancel) {
+      try {
+        const shiprocketClient = require('../../lib/shiprocket');
+        await shiprocketClient.cancelOrder(srOrderIdToCancel);
+      } catch (srErr) {
+        console.error(`Failed to cancel Shiprocket order ${srOrderIdToCancel} during item cancellation:`, srErr.message);
+        // Proceed with DB update even if Shiprocket fails to keep consistency
+      }
+    }
+
     // 4. ATOMIC TRANSACTION: Update Item & Sync Order
     const result = await prisma.$transaction(async (tx) => {
       // Update the line item
@@ -114,6 +160,29 @@ class VendorOrdersService {
 
       // Recalculate parent order status
       await this.syncParentOrderStatus(updatedItem.orderId, tx);
+
+      // Perform shipment updates if cancelling
+      if (shipmentIdToUpdate) {
+        if (shipmentCancelAction === 'CANCEL_SHIPMENT_AND_ORDER') {
+          await tx.shipment.update({
+            where: { id: shipmentIdToUpdate },
+            data: { status: 'CANCELLED' }
+          });
+        } else if (shipmentCancelAction === 'RESET_SHIPMENT_BOOKING') {
+          // Reset Shiprocket integration fields but keep READY_TO_SHIP so they can re-book
+          await tx.shipment.update({
+            where: { id: shipmentIdToUpdate },
+            data: {
+              shiprocketOrderId: null,
+              shipmentId: null,
+              awbCode: null,
+              courierName: null,
+              labelUrl: null,
+              status: 'READY_TO_SHIP'
+            }
+          });
+        }
+      }
 
       return updatedItem;
     });

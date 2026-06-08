@@ -368,6 +368,64 @@ class VendorShipmentsService {
       throw new AppError(`Failed to fetch tracking data: ${err.message}`, 400);
     }
   }
+
+  /**
+   * Cancel a vendor shipment and its associated order items / Shiprocket booking
+   */
+  async cancelShipment(userId, shipmentId) {
+    const vendorId = await this.getVendorId(userId);
+
+    const shipment = await prisma.shipment.findFirst({
+      where: { id: shipmentId, vendorId }
+    });
+
+    if (!shipment) throw new AppError('Shipment not found.', 404);
+
+    // Block cancellation if already shipped/delivered
+    if (shipment.status === 'SHIPPED' || shipment.status === 'DELIVERED') {
+      throw new AppError(`Cannot cancel a shipment that is already ${shipment.status.toLowerCase()}.`, 400);
+    }
+
+    if (shipment.status === 'CANCELLED') {
+      throw new AppError('Shipment is already cancelled.', 400);
+    }
+
+    // 1. If booked on Shiprocket, cancel the order there
+    if (shipment.shiprocketOrderId) {
+      try {
+        await shiprocketClient.cancelOrder(shipment.shiprocketOrderId);
+      } catch (err) {
+        console.error(`Failed to cancel order ${shipment.shiprocketOrderId} on Shiprocket:`, err.message);
+        // Do not block local cancellation if Shiprocket API has an issue (e.g. order already cancelled or invalid state)
+      }
+    }
+
+    // 2. Perform updates in a transaction to ensure all order items and shipment are cancelled atomically
+    const updatedShipment = await prisma.$transaction(async (tx) => {
+      const updated = await tx.shipment.update({
+        where: { id: shipmentId },
+        data: { status: 'CANCELLED' }
+      });
+
+      // Update all items for this vendor-order to CANCELLED
+      await tx.orderItem.updateMany({
+        where: {
+          orderId: shipment.orderId,
+          vendorId,
+          status: { not: 'CANCELLED' }
+        },
+        data: { status: 'CANCELLED' }
+      });
+
+      // Sync parent order status
+      const vendorOrdersService = require('./vendorOrders.service');
+      await vendorOrdersService.syncParentOrderStatus(shipment.orderId, tx);
+
+      return updated;
+    });
+
+    return updatedShipment;
+  }
 }
 
 module.exports = new VendorShipmentsService();

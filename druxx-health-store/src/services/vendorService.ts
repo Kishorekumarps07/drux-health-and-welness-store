@@ -338,5 +338,13 @@ export const vendorService = {
   async handoverShipment(id: string) {
     const response = await api.post(`/vendor/shipments/${id}/handover`);
     return response.data;
+  },
+
+  /**
+   * Cancel shipment on Shiprocket and local database
+   */
+  async cancelShipment(id: string) {
+    const response = await api.post(`/vendor/shipments/${id}/cancel`);
+    return response.data;
   }
 };

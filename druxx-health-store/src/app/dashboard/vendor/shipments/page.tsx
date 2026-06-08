@@ -226,6 +226,24 @@ function VendorShipmentsPageContent() {
     }
   }
 
+  const handleCancelShipment = async (shipment: ShipmentItem) => {
+    const isBooked = !!shipment.shiprocketOrderId
+    const confirmMsg = isBooked 
+      ? "Are you sure you want to cancel this shipment? This will also cancel the order booked on Shiprocket."
+      : "Are you sure you want to cancel this shipment?"
+      
+    if (!window.confirm(confirmMsg)) return
+
+    const toastId = toast.loading("Cancelling shipment...")
+    try {
+      await vendorService.cancelShipment(shipment.id)
+      toast.success("Shipment successfully cancelled!", { id: toastId })
+      fetchShipments()
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to cancel shipment", { id: toastId })
+    }
+  }
+
   React.useEffect(() => {
     console.log("Shipments query param hook triggered:", {
       loading,
@@ -460,6 +478,18 @@ function VendorShipmentsPageContent() {
                                  >
                                    <Activity className="w-4 h-4" /> Track Courier
                                  </DropdownMenuItem>
+                               )}
+
+                               {shipment.status === 'READY_TO_SHIP' && (
+                                 <>
+                                   <DropdownMenuSeparator className="my-1 border-gray-50" />
+                                   <DropdownMenuItem 
+                                     onClick={() => handleCancelShipment(shipment)}
+                                     className="flex items-center gap-2 px-3 py-2 text-xs font-black rounded-xl text-red-500 hover:bg-red-50 focus:bg-red-50 cursor-pointer"
+                                   >
+                                     <X className="w-4 h-4" /> Cancel Shipment
+                                   </DropdownMenuItem>
+                                 </>
                                )}
                              </DropdownMenuContent>
                            </DropdownMenu>

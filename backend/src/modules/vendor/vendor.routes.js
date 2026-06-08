@@ -26,10 +26,12 @@ const {
   bookShipment,
   getShipmentLabel,
   trackShipment,
-  handoverShipment
+  handoverShipment,
+  cancelShipment
 } = require('./vendorShipments.controller');
 
 const router = express.Router();
+
 
 // Require Authentication
 router.use(protect);
@@ -108,6 +110,12 @@ router.get('/shipments/:id/track', trackShipment);
  * @desc    Mark a shipment as handed over / dispatched to courier
  */
 router.post('/shipments/:id/handover', handoverShipment);
+
+/**
+ * @route   POST /api/v1/vendor/shipments/:id/cancel
+ * @desc    Cancel a shipment and its booked courier order
+ */
+router.post('/shipments/:id/cancel', cancelShipment);
 
 /**
  * @route   GET /api/v1/vendor/analytics

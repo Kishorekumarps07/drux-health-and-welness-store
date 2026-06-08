@@ -83,12 +83,27 @@ const handoverShipment = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Cancel a shipment on Shiprocket and local DB
+ * @route   POST /api/v1/vendor/shipments/:id/cancel
+ * @access  Private (Vendor)
+ */
+const cancelShipment = asyncHandler(async (req, res) => {
+  const shipment = await vendorShipmentsService.cancelShipment(req.user.id, req.params.id);
+  res.status(200).json({
+    status: 'success',
+    message: 'Shipment successfully cancelled.',
+    data: { shipment }
+  });
+});
+
 module.exports = {
   listShipments,
   getShipmentDetails,
   bookShipment,
   getShipmentLabel,
   trackShipment,
-  handoverShipment
+  handoverShipment,
+  cancelShipment
 };
 

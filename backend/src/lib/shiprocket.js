@@ -164,6 +164,16 @@ class ShiprocketClient {
       body: JSON.stringify(pickupData),
     });
   }
+
+  /**
+   * Cancel an order in Shiprocket
+   */
+  async cancelOrder(shiprocketOrderId) {
+    return this.request('/orders/cancel', {
+      method: 'POST',
+      body: JSON.stringify({ ids: [Number(shiprocketOrderId)] }),
+    });
+  }
 }
 
 module.exports = new ShiprocketClient();
