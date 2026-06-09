@@ -4,19 +4,67 @@ const prisma = require('../../lib/prisma');
 const AppError = require('../../lib/AppError');
 const { jwt: jwtConfig } = require('../../config/env');
 
+function normalizeEmail(email) {
+  if (!email) return '';
+  let [localPart, domain] = email.toLowerCase().trim().split('@');
+  if (!domain) return email;
+  
+  if (domain === 'gmail.com' || domain === 'googlemail.com') {
+    localPart = localPart.split('+')[0];
+    localPart = localPart.replace(/\./g, '');
+    domain = 'gmail.com';
+  }
+  
+  return `${localPart}@${domain}`;
+}
+
+function normalizePhone(phone) {
+  if (!phone) return null;
+  const clean = phone.replace(/\D/g, '');
+  return clean.length >= 10 ? clean.slice(-10) : clean;
+}
+
 class AuthService {
   /**
    * Register a new user (customer or vendor).
    */
   async register({ name, email, password, phone, role }) {
-    // Check duplicate
-    const exists = await prisma.user.findUnique({ where: { email } });
+    const normalizedEmail = normalizeEmail(email);
+    const normalizedPhone = normalizePhone(phone);
+
+    // Check duplicate email (support both normalized and raw formats)
+    const exists = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: normalizedEmail },
+          { email: email.toLowerCase().trim() }
+        ]
+      }
+    });
     if (exists) throw new AppError('An account with this email already exists.', 409);
+
+    // Check duplicate phone (using endsWith to match local/international format codes)
+    if (normalizedPhone) {
+      const phoneExists = await prisma.user.findFirst({
+        where: {
+          phone: {
+            endsWith: normalizedPhone
+          }
+        }
+      });
+      if (phoneExists) throw new AppError('An account with this phone number already exists.', 409);
+    }
 
     const passwordHash = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.create({
-      data: { name, email, phone, passwordHash, roles: Array.isArray(role) ? role : [role || 'CUSTOMER'] },
+      data: { 
+        name, 
+        email: normalizedEmail, 
+        phone: normalizedPhone, 
+        passwordHash, 
+        roles: Array.isArray(role) ? role : [role || 'CUSTOMER'] 
+      },
       select: { id: true, name: true, email: true, roles: true, createdAt: true },
     });
 
@@ -29,7 +77,15 @@ class AuthService {
    * Login with email and password.
    */
   async login({ email, password }) {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const normalizedEmail = normalizeEmail(email);
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: normalizedEmail },
+          { email: email.toLowerCase().trim() }
+        ]
+      }
+    });
     if (!user) throw new AppError('Invalid email or password.', 401);
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
