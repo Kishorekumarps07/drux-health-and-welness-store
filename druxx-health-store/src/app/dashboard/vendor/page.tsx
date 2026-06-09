@@ -35,6 +35,7 @@ export default function VendorOverviewPage() {
   const [analytics, setAnalytics] = useState<any>(null)
   const [orders, setOrders] = useState<VendorOrderItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [chartType, setChartType] = useState<'revenue' | 'orders'>('revenue')
   const { user } = useAuthStore()
 
   useEffect(() => {
@@ -72,9 +73,10 @@ export default function VendorOverviewPage() {
   }
 
   // Format analytics trend for chart
-  const revenueTrend = (analytics?.salesTrend || []).map((day: any) => ({
+  const trendData = (analytics?.salesTrend || []).map((day: any) => ({
     date: day.date,
-    revenue: day.revenue
+    revenue: day.revenue,
+    orders: day.orders
   }));
 
   const metricCards = [
@@ -148,12 +150,34 @@ export default function VendorOverviewPage() {
                     <h3 className="text-2xl font-black text-gray-900 tracking-tight">Revenue Analytics</h3>
                     <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Weekly Store Growth</p>
                  </div>
-                 <div className="flex bg-gray-50 p-1.5 rounded-2xl border border-gray-100/50">
-                    <Button variant="ghost" className="h-9 px-4 rounded-xl text-xs font-black bg-white text-gray-900 shadow-sm">Revenue</Button>
-                    <Button variant="ghost" className="h-9 px-4 rounded-xl text-xs font-bold text-gray-400 hover:text-gray-600">Orders</Button>
-                 </div>
-              </div>
-              <VendorRevenueChart data={revenueTrend} />
+                  <div className="flex bg-gray-50 p-1.5 rounded-2xl border border-gray-100/50">
+                     <Button 
+                       variant="ghost" 
+                       onClick={() => setChartType('revenue')}
+                       className={cn(
+                         "h-9 px-4 rounded-xl text-xs transition-all",
+                         chartType === 'revenue' 
+                           ? "font-black bg-white text-gray-900 shadow-sm" 
+                           : "font-bold text-gray-400 hover:text-gray-600"
+                       )}
+                     >
+                       Revenue
+                     </Button>
+                     <Button 
+                       variant="ghost" 
+                       onClick={() => setChartType('orders')}
+                       className={cn(
+                         "h-9 px-4 rounded-xl text-xs transition-all",
+                         chartType === 'orders' 
+                           ? "font-black bg-white text-gray-900 shadow-sm" 
+                           : "font-bold text-gray-400 hover:text-gray-600"
+                       )}
+                     >
+                       Orders
+                     </Button>
+                  </div>
+               </div>
+               <VendorRevenueChart data={trendData} type={chartType} />
               
               <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-[#A6D608]/5 rounded-full blur-3xl pointer-events-none" />
            </div>
