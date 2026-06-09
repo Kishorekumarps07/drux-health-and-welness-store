@@ -244,6 +244,17 @@ function VendorShipmentsPageContent() {
     }
   }
 
+  const handleGenerateAwb = async (shipment: ShipmentItem) => {
+    const toastId = toast.loading("Requesting AWB from Shiprocket...")
+    try {
+      await vendorService.generateAwb(shipment.id)
+      toast.success("AWB generated and courier assigned successfully!", { id: toastId })
+      fetchShipments()
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to generate AWB", { id: toastId })
+    }
+  }
+
   React.useEffect(() => {
     console.log("Shipments query param hook triggered:", {
       loading,
@@ -453,12 +464,21 @@ function VendorShipmentsPageContent() {
                                  </DropdownMenuItem>
                                )}
 
-                               {shipment.status === 'READY_TO_SHIP' && shipment.shiprocketOrderId && (
+                               {shipment.status === 'READY_TO_SHIP' && shipment.shiprocketOrderId && shipment.awbCode && (
                                  <DropdownMenuItem 
                                    onClick={() => handleHandoverShipment(shipment)}
                                    className="flex items-center gap-2 px-3 py-2 text-xs font-black rounded-xl text-blue-500 hover:bg-blue-50 focus:bg-blue-50 cursor-pointer"
                                  >
                                    <CheckCircle className="w-4 h-4" /> Handover to Courier
+                                 </DropdownMenuItem>
+                               )}
+
+                               {shipment.status === 'READY_TO_SHIP' && shipment.shiprocketOrderId && !shipment.awbCode && (
+                                 <DropdownMenuItem 
+                                   onClick={() => handleGenerateAwb(shipment)}
+                                   className="flex items-center gap-2 px-3 py-2 text-xs font-black rounded-xl text-blue-600 hover:bg-blue-50 focus:bg-blue-50 cursor-pointer"
+                                 >
+                                   <Activity className="w-4 h-4" /> Generate AWB
                                  </DropdownMenuItem>
                                )}
 
@@ -618,7 +638,7 @@ function VendorShipmentsPageContent() {
                        Book Courier
                      </Button>
                    )}
-                   {selectedShipment.status === 'READY_TO_SHIP' && selectedShipment.shiprocketOrderId && (
+                   {selectedShipment.status === 'READY_TO_SHIP' && selectedShipment.shiprocketOrderId && selectedShipment.awbCode && (
                      <Button 
                        onClick={() => {
                          setShowDetailsModal(false)
@@ -627,6 +647,17 @@ function VendorShipmentsPageContent() {
                        className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl px-6 font-black text-xs uppercase tracking-widest h-11"
                      >
                        Handover to Courier
+                     </Button>
+                   )}
+                   {selectedShipment.status === 'READY_TO_SHIP' && selectedShipment.shiprocketOrderId && !selectedShipment.awbCode && (
+                     <Button 
+                       onClick={() => {
+                         setShowDetailsModal(false)
+                         handleGenerateAwb(selectedShipment)
+                       }}
+                       className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 font-black text-xs uppercase tracking-widest h-11"
+                     >
+                       Generate AWB
                      </Button>
                    )}
                    <Button 

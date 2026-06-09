@@ -346,5 +346,13 @@ export const vendorService = {
   async cancelShipment(id: string) {
     const response = await api.post(`/vendor/shipments/${id}/cancel`);
     return response.data;
+  },
+
+  /**
+   * Generate/Assign AWB for a booked shipment
+   */
+  async generateAwb(id: string) {
+    const response = await api.post(`/vendor/shipments/${id}/awb`);
+    return response.data;
   }
 };

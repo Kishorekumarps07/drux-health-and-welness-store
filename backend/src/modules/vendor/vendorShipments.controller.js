@@ -97,6 +97,20 @@ const cancelShipment = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Generate/Assign AWB for a booked shipment
+ * @route   POST /api/v1/vendor/shipments/:id/awb
+ * @access  Private (Vendor)
+ */
+const generateAwb = asyncHandler(async (req, res) => {
+  const shipment = await vendorShipmentsService.generateAwb(req.user.id, req.params.id);
+  res.status(200).json({
+    status: 'success',
+    message: 'Courier AWB successfully generated and assigned.',
+    data: { shipment }
+  });
+});
+
 module.exports = {
   listShipments,
   getShipmentDetails,
@@ -104,6 +118,7 @@ module.exports = {
   getShipmentLabel,
   trackShipment,
   handoverShipment,
-  cancelShipment
+  cancelShipment,
+  generateAwb
 };
 

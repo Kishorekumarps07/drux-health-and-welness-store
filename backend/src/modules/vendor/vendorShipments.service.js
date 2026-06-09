@@ -267,6 +267,48 @@ class VendorShipmentsService {
   }
 
   /**
+   * Assign/generate AWB for a booked shipment if it was not assigned during booking
+   */
+  async generateAwb(userId, shipmentId) {
+    const vendorId = await this.getVendorId(userId);
+
+    const shipment = await prisma.shipment.findFirst({
+      where: { id: shipmentId, vendorId }
+    });
+
+    if (!shipment) throw new AppError('Shipment not found.', 404);
+    if (!shipment.shipmentId) {
+      throw new AppError('This shipment has not been booked on Shiprocket yet.', 400);
+    }
+
+    if (shipment.awbCode) {
+      return shipment; // Already assigned
+    }
+
+    // Call Shiprocket API to assign AWB
+    try {
+      const awbResponse = await shiprocketClient.assignAwb(shipment.shipmentId);
+      if (awbResponse && awbResponse.response && awbResponse.response.data) {
+        const awbData = awbResponse.response.data;
+        
+        const updated = await prisma.shipment.update({
+          where: { id: shipment.id },
+          data: {
+            awbCode: awbData.awb_code,
+            courierName: awbData.courier_name,
+          }
+        });
+        
+        return updated;
+      } else {
+        throw new Error(awbResponse?.message || 'No AWB data returned from Shiprocket.');
+      }
+    } catch (err) {
+      throw new AppError(`Courier assignment failed: ${err.message}`, 400);
+    }
+  }
+
+  /**
    * Retrieve PDF label URL for a booked shipment
    */
   async getShipmentLabel(userId, shipmentId) {
@@ -283,6 +325,16 @@ class VendorShipmentsService {
     // Return cached URL if exists
     if (shipment.labelUrl) {
       return shipment.labelUrl;
+    }
+
+    // Auto-assign AWB if missing
+    if (!shipment.awbCode) {
+      try {
+        const updatedShipment = await this.generateAwb(userId, shipmentId);
+        shipment.awbCode = updatedShipment.awbCode;
+      } catch (autoErr) {
+        throw new AppError('Cannot generate a label for a shipment that has no AWB generated.', 400);
+      }
     }
 
     // Otherwise fetch from Shiprocket and update DB
@@ -317,8 +369,16 @@ class VendorShipmentsService {
     if (shipment.status !== 'READY_TO_SHIP') {
       throw new AppError(`Shipment must be booked and ready to ship to be handed over (current status: ${shipment.status}).`, 400);
     }
+
+    // Auto-assign AWB if missing
     if (!shipment.awbCode) {
-      throw new AppError('Cannot handover a shipment that has no AWB generated.', 400);
+      try {
+        const updatedShipment = await this.generateAwb(userId, shipmentId);
+        shipment.awbCode = updatedShipment.awbCode;
+        shipment.courierName = updatedShipment.courierName;
+      } catch (autoErr) {
+        throw new AppError('Cannot handover a shipment that has no AWB generated.', 400);
+      }
     }
 
     // Update shipment status to SHIPPED
