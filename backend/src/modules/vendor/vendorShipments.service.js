@@ -304,6 +304,30 @@ class VendorShipmentsService {
         throw new Error(awbResponse?.message || 'No AWB data returned from Shiprocket.');
       }
     } catch (err) {
+      // Self-Healing: If Shiprocket says order is cancelled, sync our DB to CANCELLED
+      if (err.message && err.message.toLowerCase().includes('cancel')) {
+        console.warn(`Shiprocket indicated order is cancelled. Syncing shipment ${shipment.id} to CANCELLED in DB.`);
+        try {
+          await prisma.$transaction(async (tx) => {
+            await tx.shipment.update({
+              where: { id: shipment.id },
+              data: { status: 'CANCELLED' }
+            });
+            await tx.orderItem.updateMany({
+              where: {
+                orderId: shipment.orderId,
+                vendorId,
+                status: { not: 'CANCELLED' }
+              },
+              data: { status: 'CANCELLED' }
+            });
+            const vendorOrdersService = require('./vendorOrders.service');
+            await vendorOrdersService.syncParentOrderStatus(shipment.orderId, tx);
+          });
+        } catch (syncErr) {
+          console.error('Failed to auto-sync cancelled shipment in database:', syncErr);
+        }
+      }
       throw new AppError(`Courier assignment failed: ${err.message}`, 400);
     }
   }
