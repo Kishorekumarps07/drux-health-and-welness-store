@@ -55,10 +55,19 @@
              tickLine={false} 
              tick={{ fill: '#9ca3af', fontSize: 10, fontWeight: 700 }}
              tickFormatter={(val) => isRevenue ? `₹${val >= 1000 ? (val/1000).toFixed(1) + 'k' : val}` : val}
+             allowDecimals={false}
            />
            <Tooltip 
              contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
              labelClassName="font-black text-gray-900"
+             labelFormatter={(label) => {
+               try {
+                 const d = new Date(label);
+                 return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+               } catch (e) {
+                 return label;
+               }
+             }}
              formatter={(value: any) => [
                isRevenue ? `₹${value.toLocaleString()}` : `${value} Orders`,
                isRevenue ? "Revenue" : "Orders"
