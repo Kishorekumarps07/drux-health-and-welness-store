@@ -256,7 +256,9 @@ export function ProductCard({ product, className }: ProductCardProps) {
                 disabled={product.stock === 0 || cartStatus === "loading"}
                 className={cn(
                   "w-full h-9 sm:h-11 rounded-lg sm:rounded-xl font-black text-[11px] sm:text-[10px] uppercase tracking-[0.1em] transition-all duration-300 pointer-events-auto",
-                  "bg-[#FFD814] hover:bg-[#F7DF15] text-[#0F1111] hover:text-[#0F1111] border border-[#FCD200] shadow-sm"
+                  product.stock === 0 
+                    ? "bg-red-600 hover:bg-red-700 text-white border-none disabled:opacity-100 cursor-not-allowed shadow-none" 
+                    : "bg-[#FFD814] hover:bg-[#F7DF15] text-[#0F1111] hover:text-[#0F1111] border border-[#FCD200] shadow-sm"
                 )}
               >
                 {cartStatus === "loading" ? (
