@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 const DropdownMenuContext = React.createContext<{
   open: boolean
   setOpen: (open: boolean) => void
+  triggerRef: React.RefObject<any>
 } | null>(null)
 
 function DropdownMenu({ children, open: controlledOpen, onOpenChange }: { 
@@ -22,9 +23,10 @@ function DropdownMenu({ children, open: controlledOpen, onOpenChange }: {
   const [internalOpen, setInternalOpen] = React.useState(false)
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen
   const setOpen = onOpenChange !== undefined ? onOpenChange : setInternalOpen
+  const triggerRef = React.useRef<any>(null)
 
   return (
-    <DropdownMenuContext.Provider value={{ open, setOpen }}>
+    <DropdownMenuContext.Provider value={{ open, setOpen, triggerRef }}>
       <div className="relative inline-block text-left" data-slot="dropdown-menu">
         {children}
       </div>
@@ -46,7 +48,11 @@ function DropdownMenuTrigger({
   return (
     <Comp
       type="button"
-      onClick={() => context.setOpen(!context.open)}
+      ref={context.triggerRef}
+      onClick={(e) => {
+        props.onClick?.(e)
+        context.setOpen(!context.open)
+      }}
       className={cn("focus:outline-none cursor-pointer", className)}
       data-slot="dropdown-menu-trigger"
       {...props}
@@ -70,34 +76,83 @@ function DropdownMenuContent({
   const context = React.useContext(DropdownMenuContext)
   const [mounted, setMounted] = React.useState(false)
   const menuRef = React.useRef<HTMLDivElement>(null)
+  const [coords, setCoords] = React.useState({ top: 0, left: 0 })
+
+  const updatePosition = React.useCallback(() => {
+    if (!context?.triggerRef.current) return
+    const rect = context.triggerRef.current.getBoundingClientRect()
+    const scrollTop = window.scrollY || document.documentElement.scrollTop
+    const scrollLeft = window.scrollX || document.documentElement.scrollLeft
+    
+    const top = rect.bottom + scrollTop + sideOffset
+    const left = align === "end" 
+      ? rect.right + scrollLeft 
+      : align === "start" 
+        ? rect.left + scrollLeft 
+        : rect.left + scrollLeft + (rect.width / 2)
+
+    setCoords({ top, left })
+  }, [context?.triggerRef, sideOffset, align])
 
   React.useEffect(() => {
     setMounted(true)
+  }, [])
+
+  React.useEffect(() => {
+    if (!context?.open) return
+
+    updatePosition()
+    window.addEventListener("scroll", updatePosition, true)
+    window.addEventListener("resize", updatePosition)
+
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        context?.setOpen(false)
+      if (
+        menuRef.current && !menuRef.current.contains(event.target as Node) &&
+        context?.triggerRef.current && !context.triggerRef.current.contains(event.target as Node)
+      ) {
+        context.setOpen(false)
       }
     }
-    if (context?.open) {
-      document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("mousedown", handleClickOutside)
+
+    return () => {
+      window.removeEventListener("scroll", updatePosition, true)
+      window.removeEventListener("resize", updatePosition)
+      document.removeEventListener("mousedown", handleClickOutside)
     }
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [context?.open])
+  }, [context?.open, updatePosition])
 
   if (!mounted || !context?.open) return null
 
-  return (
+  let transform = "none"
+  if (align === "end") {
+    transform = "translateX(-100%)"
+  } else if (align === "center") {
+    transform = "translateX(-50%)"
+  }
+
+  const dropdownStyle: React.CSSProperties = {
+    position: "absolute",
+    top: `${coords.top}px`,
+    left: `${coords.left}px`,
+    right: "auto",
+    transform,
+    zIndex: 9999,
+  }
+
+  return createPortal(
     <div
       ref={menuRef}
       className={cn(
-        "absolute right-0 z-50 mt-2 min-w-[8rem] origin-top-right overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95",
+        "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95",
         className
       )}
-      style={{ top: "100%", marginTop: sideOffset }}
+      style={dropdownStyle}
       data-slot="dropdown-menu-content"
     >
       {children}
-    </div>
+    </div>,
+    document.body
   )
 }
 
