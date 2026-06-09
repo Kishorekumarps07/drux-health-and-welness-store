@@ -326,34 +326,53 @@ export function ProductView({ product, related, reviews }: ProductViewProps) {
                 <div className="text-xs text-gray-600 leading-snug">
                   <span className="text-[#007185] font-semibold">FREE delivery</span> on eligible items.
                 </div>
-                <div className="text-xs font-semibold text-[#007600]">In stock</div>
-                <div className="flex items-center justify-between text-xs pt-1">
-                  <span className="text-gray-700 font-medium">Quantity:</span>
-                  <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-gray-50/50">
-                    <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 font-bold">-</button>
-                    <span className="w-8 text-center text-xs font-bold text-gray-800">{quantity}</span>
-                    <button onClick={() => setQuantity((q) => Math.min(10, q + 1))} className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 font-bold">+</button>
+                {product.stock === 0 ? (
+                  <div className="text-sm font-black text-red-600">Currently Out of Stock</div>
+                ) : product.stock <= 5 ? (
+                  <div className="text-xs font-semibold text-orange-500">Only {product.stock} left in stock - order soon.</div>
+                ) : (
+                  <div className="text-xs font-semibold text-[#007600]">In stock</div>
+                )}
+                {product.stock > 0 && (
+                  <div className="flex items-center justify-between text-xs pt-1">
+                    <span className="text-gray-700 font-medium">Quantity:</span>
+                    <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-gray-50/50">
+                      <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 font-bold">-</button>
+                      <span className="w-8 text-center text-xs font-bold text-gray-800">{quantity}</span>
+                      <button onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))} className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 font-bold">+</button>
+                    </div>
                   </div>
-                </div>
+                )}
                 <div className="space-y-2 pt-2">
-                  {addedToCart ? (
+                  {product.stock === 0 ? (
                     <Button
-                      asChild
-                      className="w-full h-10 rounded-full font-bold text-xs bg-green-600 hover:bg-green-700 text-white transition-all shadow-md flex items-center justify-center"
+                      disabled
+                      className="w-full h-10 rounded-full font-bold text-xs bg-red-600 text-white disabled:opacity-100 cursor-not-allowed shadow-none"
                     >
-                      <Link href="/cart">Go to Cart</Link>
+                      Sold Out
                     </Button>
                   ) : (
-                    <Button
-                      onClick={handleAddToCart}
-                      className="w-full h-10 rounded-full font-bold text-xs bg-[#FFD814] hover:bg-[#F7CA00] text-gray-900 transition-all shadow-sm"
-                    >
-                      Add to Cart
-                    </Button>
+                    <>
+                      {addedToCart ? (
+                        <Button
+                          asChild
+                          className="w-full h-10 rounded-full font-bold text-xs bg-green-600 hover:bg-green-700 text-white transition-all shadow-md flex items-center justify-center"
+                        >
+                          <Link href="/cart">Go to Cart</Link>
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={handleAddToCart}
+                          className="w-full h-10 rounded-full font-bold text-xs bg-[#FFD814] hover:bg-[#F7CA00] text-gray-900 transition-all shadow-sm"
+                        >
+                          Add to Cart
+                        </Button>
+                      )}
+                      <Button asChild className="w-full h-10 rounded-full font-bold text-xs bg-[#FFA41C] hover:bg-[#FA8900] text-gray-900 shadow-sm block text-center leading-10">
+                        <Link href="/checkout" onClick={() => addItem(product, quantity)}>Buy Now</Link>
+                      </Button>
+                    </>
                   )}
-                  <Button asChild className="w-full h-10 rounded-full font-bold text-xs bg-[#FFA41C] hover:bg-[#FA8900] text-gray-900 shadow-sm block text-center leading-10">
-                    <Link href="/checkout" onClick={() => addItem(product, quantity)}>Buy Now</Link>
-                  </Button>
                 </div>
               </div>
             </div>
