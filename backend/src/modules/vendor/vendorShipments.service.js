@@ -203,7 +203,7 @@ class VendorShipmentsService {
       payment_method: paymentMethod,
       sub_total: subtotal,
       length: Number(bookingDetails.length || 15),
-      width: Number(bookingDetails.width || 10),
+      breadth: Number(bookingDetails.width || bookingDetails.breadth || 10),
       height: Number(bookingDetails.height || 5),
       weight: Number(bookingDetails.weight || 0.5),
     };

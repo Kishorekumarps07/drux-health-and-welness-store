@@ -96,6 +96,7 @@ class ShiprocketClient {
 
     const data = await response.json();
     if (!response.ok) {
+      console.error('Shiprocket API Error Response:', JSON.stringify(data, null, 2));
       throw new Error(data.message || `Shiprocket request failed with status ${response.status}`);
     }
 
