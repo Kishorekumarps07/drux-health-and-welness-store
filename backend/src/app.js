@@ -104,6 +104,52 @@ app.get('/api/v1/db-test', async (req, res) => {
   }
 });
 
+app.get('/api/v1/email-test', async (req, res) => {
+  try {
+    const { getTransporter } = require('./lib/email');
+    const transporter = getTransporter();
+
+    // Check if SMTP configuration is present
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'SMTP credentials (SMTP_USER or SMTP_PASS) are not configured in environment variables.'
+      });
+    }
+
+    console.log('[Email Test] Verifying SMTP transporter connection and credentials...');
+    // Attempt to verify SMTP connection handshake and credentials
+    await transporter.verify();
+
+    console.log('[Email Test] Transporter verified. Sending test email...');
+    // Attempt to send a test email to the configured user
+    const info = await transporter.sendMail({
+      from: process.env.EMAIL_FROM || '"Drux Health Store" <druxindia@gmail.com>',
+      to: process.env.SMTP_USER,
+      subject: 'Drux Health Store — Live SMTP Test',
+      html: '<h3>Live SMTP Test</h3><p>SMTP connection and credentials verified successfully on the backend server!</p>'
+    });
+
+    res.json({
+      status: 'success',
+      message: 'SMTP connection verified and test email sent successfully!',
+      info: {
+        messageId: info.messageId,
+        response: info.response
+      }
+    });
+  } catch (err) {
+    console.error('[Email Test] SMTP Verification failed:', err);
+    res.status(500).json({
+      status: 'error',
+      message: err.message,
+      code: err.code,
+      command: err.command,
+      stack: err.stack
+    });
+  }
+});
+
 // ── API Routes ────────────────────────────────────────────────────────────────
 app.use('/api/v1', routes);
 
