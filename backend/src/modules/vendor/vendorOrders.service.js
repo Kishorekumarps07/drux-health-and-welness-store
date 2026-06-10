@@ -3,6 +3,8 @@
 const prisma = require('../../lib/prisma');
 const AppError = require('../../lib/AppError');
 const { getPagination, getPagingData } = require('../../lib/pagination.util');
+const { sendEmail } = require('../../lib/email');
+const emailTemplates = require('../../lib/emailTemplates');
 
 class VendorOrdersService {
   /**
@@ -195,6 +197,32 @@ class VendorOrdersService {
       vendorProfileService.clearVendorProfileCache(userId);
     } catch (err) {
       // Suppress invalidation errors
+    }
+
+    // 6. Send customer status update email (fire-and-forget)
+    try {
+      const orderRecord = await prisma.order.findUnique({
+        where: { id: result.orderId },
+        include: { user: { select: { name: true, email: true } } },
+      });
+      if (orderRecord?.user?.email) {
+        const shipment = await prisma.shipment.findFirst({
+          where: { orderId: result.orderId, vendorId }
+        });
+        sendEmail({
+          to: orderRecord.user.email,
+          subject: `Update on your Drux order #${result.orderId.slice(0, 8)}`,
+          html: emailTemplates.orderStatusUpdate({
+            customerName: orderRecord.user.name,
+            orderId: result.orderId,
+            status: newStatus,
+            awbCode: shipment?.awbCode || null,
+            courierName: shipment?.courierName || null,
+          }),
+        });
+      }
+    } catch (emailErr) {
+      console.error('[Email] Failed to send item status update email to customer:', emailErr.message);
     }
 
     return result;

@@ -3,6 +3,8 @@ const AppError = require('../../lib/AppError');
 const { getPagination, getPagingData } = require('../../lib/pagination.util');
 const notificationsService = require('../users/notifications.service');
 const couponsService = require('../coupons/coupons.service');
+const { sendEmail } = require('../../lib/email');
+const emailTemplates = require('../../lib/emailTemplates');
 
 const ORDER_INCLUDE = {
   items: { 
@@ -155,6 +157,53 @@ class OrdersService {
       return newOrder;
     });
 
+    // ── Send emails (fire-and-forget, outside transaction) ────────────────
+    // Customer email
+    sendEmail({
+      to: order.user.email,
+      subject: `Your Drux order #${order.id.slice(0, 8)} has been placed!`,
+      html: emailTemplates.orderPlaced({
+        customerName: order.user.name,
+        orderId: order.id,
+        items: order.items,
+        total: order.total,
+        shippingCharge: order.shippingCharge,
+        discount: order.discount,
+        paymentMethod: order.paymentMethod,
+      }),
+    });
+
+    // Vendor emails — one per unique vendor in the order
+    const vendorGroups = {};
+    for (const item of order.items) {
+      if (!vendorGroups[item.vendorId]) vendorGroups[item.vendorId] = [];
+      vendorGroups[item.vendorId].push(item);
+    }
+    for (const [vendorId, vendorItems] of Object.entries(vendorGroups)) {
+      try {
+        const vendorRecord = await prisma.vendor.findUnique({
+          where: { id: vendorId },
+          include: { user: { select: { email: true, name: true } } },
+        });
+        if (vendorRecord?.user?.email) {
+          sendEmail({
+            to: vendorRecord.user.email,
+            subject: `New order #${order.id.slice(0, 8)} received on Drux`,
+            html: emailTemplates.newOrderForVendor({
+              vendorName: vendorRecord.storeName,
+              orderId: order.id,
+              customerName: order.user.name,
+              items: vendorItems,
+              total: vendorItems.reduce((s, i) => s + parseFloat(i.total), 0),
+              address: order.address,
+            }),
+          });
+        }
+      } catch (vendorEmailErr) {
+        console.error(`[Email] Failed to send new order email to vendor ${vendorId}:`, vendorEmailErr.message);
+      }
+    }
+
     return order;
   }
 
@@ -223,6 +272,17 @@ class OrdersService {
       } catch (err) {
         console.error('Failed to create notification for verified order:', err);
       }
+
+      // Send confirmation email (fire-and-forget)
+      sendEmail({
+        to: result.user.email,
+        subject: `Payment confirmed — Drux order #${result.id.slice(0, 8)}`,
+        html: emailTemplates.orderConfirmed({
+          customerName: result.user.name,
+          orderId: result.id,
+          total: result.total,
+        }),
+      });
 
       return result;
     });
@@ -357,6 +417,46 @@ class OrdersService {
       console.error('Failed to create notification for cancelled order:', err);
     }
 
+    // Customer cancellation email (fire-and-forget)
+    sendEmail({
+      to: updated.user.email,
+      subject: `Your Drux order #${updated.id.slice(0, 8)} has been cancelled`,
+      html: emailTemplates.orderCancelled({
+        customerName: updated.user.name,
+        orderId: updated.id,
+        total: updated.total,
+      }),
+    });
+
+    // Vendor cancellation emails — one per unique vendor in the order
+    const cancelledVendorGroups = {};
+    for (const item of updated.items) {
+      if (!cancelledVendorGroups[item.vendorId]) cancelledVendorGroups[item.vendorId] = [];
+      cancelledVendorGroups[item.vendorId].push(item);
+    }
+    for (const [vendorId, vendorItems] of Object.entries(cancelledVendorGroups)) {
+      try {
+        const vendorRecord = await prisma.vendor.findUnique({
+          where: { id: vendorId },
+          include: { user: { select: { email: true, name: true } } },
+        });
+        if (vendorRecord?.user?.email) {
+          sendEmail({
+            to: vendorRecord.user.email,
+            subject: `Order #${updated.id.slice(0, 8)} cancelled — Drux Vendor Portal`,
+            html: emailTemplates.itemCancelledForVendor({
+              vendorName: vendorRecord.storeName,
+              orderId: updated.id,
+              customerName: updated.user.name,
+              items: vendorItems,
+            }),
+          });
+        }
+      } catch (vendorEmailErr) {
+        console.error(`[Email] Failed to send cancellation email to vendor ${vendorId}:`, vendorEmailErr.message);
+      }
+    }
+
     return updated;
   }
 
@@ -445,6 +545,17 @@ class OrdersService {
     } catch (err) {
       console.error('Failed to create notification for order status update:', err);
     }
+
+    // Customer status update email (fire-and-forget)
+    sendEmail({
+      to: updated.user.email,
+      subject: `Your Drux order #${updated.id.slice(0, 8)} is now ${status}`,
+      html: emailTemplates.orderStatusUpdate({
+        customerName: updated.user.name,
+        orderId: updated.id,
+        status,
+      }),
+    });
 
     return updated;
   }

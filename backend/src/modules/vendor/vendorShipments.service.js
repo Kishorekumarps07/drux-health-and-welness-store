@@ -4,6 +4,8 @@ const prisma = require('../../lib/prisma');
 const AppError = require('../../lib/AppError');
 const { getPagination, getPagingData } = require('../../lib/pagination.util');
 const shiprocketClient = require('../../lib/shiprocket');
+const { sendEmail } = require('../../lib/email');
+const emailTemplates = require('../../lib/emailTemplates');
 
 class VendorShipmentsService {
   /**
@@ -428,6 +430,29 @@ class VendorShipmentsService {
       console.error('Failed to update order item statuses to SHIPPED after handover:', updateErr);
     }
 
+    // Send SHIPPED email to customer (fire-and-forget)
+    try {
+      const orderRecord = await prisma.order.findUnique({
+        where: { id: shipment.orderId },
+        include: { user: { select: { name: true, email: true } } },
+      });
+      if (orderRecord?.user?.email) {
+        sendEmail({
+          to: orderRecord.user.email,
+          subject: `Your Drux order #${shipment.orderId.slice(0, 8)} has been shipped! 🚚`,
+          html: emailTemplates.orderStatusUpdate({
+            customerName: orderRecord.user.name,
+            orderId: shipment.orderId,
+            status: 'SHIPPED',
+            awbCode: updatedShipment.awbCode || shipment.awbCode,
+            courierName: updatedShipment.courierName || shipment.courierName,
+          }),
+        });
+      }
+    } catch (emailErr) {
+      console.error('[Email] Failed to send SHIPPED email to customer after handover:', emailErr.message);
+    }
+
     return updatedShipment;
   }
 
@@ -507,6 +532,47 @@ class VendorShipmentsService {
 
       return updated;
     });
+
+    // Send cancellation emails (fire-and-forget)
+    try {
+      const orderRecord = await prisma.order.findUnique({
+        where: { id: shipment.orderId },
+        include: { user: { select: { name: true, email: true } } },
+      });
+      // Customer email
+      if (orderRecord?.user?.email) {
+        sendEmail({
+          to: orderRecord.user.email,
+          subject: `Your Drux order #${shipment.orderId.slice(0, 8)} shipment has been cancelled`,
+          html: emailTemplates.orderCancelled({
+            customerName: orderRecord.user.name,
+            orderId: shipment.orderId,
+          }),
+        });
+      }
+      // Vendor email
+      const vendorRecord = await prisma.vendor.findUnique({
+        where: { id: vendorId },
+        include: { user: { select: { email: true, name: true } } },
+      });
+      if (vendorRecord?.user?.email) {
+        const cancelledItems = await prisma.orderItem.findMany({
+          where: { orderId: shipment.orderId, vendorId }
+        });
+        sendEmail({
+          to: vendorRecord.user.email,
+          subject: `Shipment cancelled for order #${shipment.orderId.slice(0, 8)}`,
+          html: emailTemplates.itemCancelledForVendor({
+            vendorName: vendorRecord.storeName,
+            orderId: shipment.orderId,
+            customerName: orderRecord?.user?.name || 'Customer',
+            items: cancelledItems,
+          }),
+        });
+      }
+    } catch (emailErr) {
+      console.error('[Email] Failed to send cancellation emails for shipment cancel:', emailErr.message);
+    }
 
     return updatedShipment;
   }
