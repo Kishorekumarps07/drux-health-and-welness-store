@@ -2,16 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, ShoppingBag, Tag, ArrowRight, ShieldCheck, Truck, RefreshCw, Heart } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Tag, ShieldCheck, Truck, RefreshCw, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/store/cartStore";
 import { useMarketplaceStore } from "@/store/marketplaceStore";
 import { useState } from "react";
 import { SuggestedProducts } from "@/components/cart/SuggestedProducts";
 import { LocationModal } from "@/components/layout/navbar/LocationModal";
+import { Drawer } from "vaul";
 
 export default function CartPage() {
   const {
@@ -35,12 +35,21 @@ export default function CartPage() {
   const [couponError, setCouponError] = useState("");
   const [couponSuccess, setCouponSuccess] = useState("");
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showPriceDrawer, setShowPriceDrawer] = useState(false);
 
   const subTotal = subtotal();
   const shipCost = shipping();
-  const taxAmt = tax();
   const totalAmt = total();
   const discountAmt = couponDiscountAmount();
+
+  // MRP = sum of originalPrice (if available) else price
+  const mrpTotal = items.reduce(
+    (acc, { product, quantity }) =>
+      acc + ((product.originalPrice ?? product.price) * quantity),
+    0
+  );
+  // Item-level discount (from compare price / originalPrice difference)
+  const itemSavings = Math.max(0, mrpTotal - subTotal);
 
   const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;
@@ -195,10 +204,15 @@ export default function CartPage() {
               </div>
 
               {/* Sticky Place Order Bar (Mobile only) */}
-              <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex items-center justify-between z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+              <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex items-center justify-between z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.08)]">
                 <div className="flex flex-col">
-                  <span className="text-lg font-bold text-gray-900">₹{totalAmt.toLocaleString("en-IN")}</span>
-                  <span className="text-[10px] text-[#2874F0] font-bold cursor-pointer">View Price Details</span>
+                  <span className="text-lg font-bold text-gray-900">&#8377;{totalAmt.toLocaleString("en-IN")}</span>
+                  <button
+                    onClick={() => setShowPriceDrawer(true)}
+                    className="text-[11px] text-[#2874F0] font-bold flex items-center gap-0.5 mt-0.5"
+                  >
+                    View Price Details <ChevronUp size={12} />
+                  </button>
                 </div>
                 <Button
                   asChild
@@ -333,6 +347,136 @@ export default function CartPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Price Details Bottom Drawer (Mobile) ───────────────────────── */}
+      <Drawer.Root open={showPriceDrawer} onOpenChange={setShowPriceDrawer}>
+        <Drawer.Portal>
+          {/* Backdrop */}
+          <Drawer.Overlay className="fixed inset-0 bg-black/40 z-[60]" />
+
+          {/* Sheet */}
+          <Drawer.Content
+            className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-2xl outline-none"
+            style={{ maxHeight: "85dvh" }}
+          >
+            {/* Drag Handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full bg-gray-300" />
+            </div>
+
+            {/* Header */}
+            <div className="px-5 pt-2 pb-3 border-b border-gray-100">
+              <Drawer.Title className="text-base font-bold text-gray-900 tracking-wide uppercase">
+                Price Details
+              </Drawer.Title>
+              {items.length > 0 && (
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {items.reduce((a, i) => a + i.quantity, 0)} item
+                  {items.reduce((a, i) => a + i.quantity, 0) > 1 ? "s" : ""}
+                </p>
+              )}
+            </div>
+
+            {/* Breakdown rows */}
+            <div className="px-5 py-4 space-y-0 overflow-y-auto" style={{ maxHeight: "55dvh" }}>
+
+              {/* MRP */}
+              <div className="flex items-center justify-between py-3 border-b border-gray-50">
+                <span className="text-sm text-gray-700">
+                  Price ({items.reduce((a, i) => a + i.quantity, 0)} item
+                  {items.reduce((a, i) => a + i.quantity, 0) > 1 ? "s" : ""})
+                </span>
+                <span className="text-sm text-gray-900 font-medium">
+                  ₹{mrpTotal.toLocaleString("en-IN")}
+                </span>
+              </div>
+
+              {/* Item-level discount (from originalPrice vs price) */}
+              {itemSavings > 0 && (
+                <div className="flex items-center justify-between py-3 border-b border-gray-50">
+                  <span className="text-sm text-gray-700">Discount</span>
+                  <span className="text-sm text-[#388E3C] font-semibold">
+                    − ₹{itemSavings.toLocaleString("en-IN")}
+                  </span>
+                </div>
+              )}
+
+              {/* Coupon discount */}
+              {discountAmt > 0 && (
+                <div className="flex items-center justify-between py-3 border-b border-gray-50">
+                  <div>
+                    <span className="text-sm text-gray-700">Coupon Discount</span>
+                    {couponCode && (
+                      <span className="ml-2 text-[10px] font-bold text-[#388E3C] bg-green-50 border border-green-200 px-1.5 py-0.5 rounded">
+                        {couponCode}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-sm text-[#388E3C] font-semibold">
+                    − ₹{discountAmt.toLocaleString("en-IN")}
+                  </span>
+                </div>
+              )}
+
+              {/* Delivery */}
+              <div className="flex items-center justify-between py-3 border-b border-gray-50">
+                <div>
+                  <span className="text-sm text-gray-700">Delivery Charges</span>
+                  {shipCost === 0 && subTotal > 0 && (
+                    <span className="ml-2 text-[10px] font-bold text-[#388E3C] bg-green-50 border border-green-200 px-1.5 py-0.5 rounded">
+                      FREE
+                    </span>
+                  )}
+                </div>
+                {shipCost === 0 ? (
+                  <div className="text-right">
+                    <span className="text-sm text-gray-400 line-through mr-1">₹49</span>
+                    <span className="text-sm text-[#388E3C] font-semibold">FREE</span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-gray-900 font-medium">₹{shipCost}</span>
+                )}
+              </div>
+
+              {/* Divider before total */}
+              <div className="border-t-2 border-dashed border-gray-200 my-1" />
+
+              {/* Total */}
+              <div className="flex items-center justify-between py-3">
+                <span className="text-base font-bold text-gray-900">Total Amount</span>
+                <span className="text-base font-bold text-gray-900">
+                  ₹{totalAmt.toLocaleString("en-IN")}
+                </span>
+              </div>
+
+              {/* Savings banner */}
+              {(itemSavings > 0 || discountAmt > 0 || shipCost === 0) && (
+                <div className="bg-[#F0FDF4] border border-green-200 rounded-xl px-4 py-3 mt-2">
+                  <p className="text-sm font-bold text-[#15803D] text-center">
+                    🎉 You will save ₹
+                    {(itemSavings + discountAmt + (shipCost === 0 && subTotal > 0 ? 49 : 0)).toLocaleString("en-IN")}
+                    {" "}on this order
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom CTA */}
+            <div className="px-5 py-4 border-t border-gray-100 bg-white">
+              <Button
+                asChild
+                className="w-full bg-[#FB641B] hover:bg-[#e85a15] text-white font-bold rounded-sm h-12 text-sm shadow-md"
+              >
+                <Link href="/checkout" onClick={() => setShowPriceDrawer(false)}>
+                  Place Order · ₹{totalAmt.toLocaleString("en-IN")}
+                </Link>
+              </Button>
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
+
     </div>
   );
 }
+
