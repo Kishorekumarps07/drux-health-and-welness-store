@@ -8,6 +8,8 @@ const AppError = require('../../lib/AppError');
 const cartService = require('../cart/cart.service');
 const ordersService = require('../orders/orders.service');
 const logger = require('../../config/logger');
+const { sendEmail } = require('../../lib/email');
+const emailTemplates = require('../../lib/emailTemplates');
 
 class PaymentsService {
   /**
@@ -179,6 +181,54 @@ class PaymentsService {
       });
 
       logger.info(`[PaymentsService] Order finalized: ${finalOrder.id} for payment ${razorpayPaymentId}`);
+
+      // ── Send emails (fire-and-forget, outside transaction) ────────────────
+      // Customer email
+      sendEmail({
+        to: finalOrder.user.email,
+        subject: `Your Drux order #${finalOrder.id.slice(0, 8)} has been placed!`,
+        html: emailTemplates.orderPlaced({
+          customerName: finalOrder.user.name,
+          orderId: finalOrder.id,
+          items: finalOrder.items,
+          total: finalOrder.total,
+          shippingCharge: finalOrder.shippingCharge,
+          discount: finalOrder.discount,
+          paymentMethod: finalOrder.paymentMethod,
+        }),
+      });
+
+      // Vendor emails — one per unique vendor in the order
+      const vendorGroups = {};
+      for (const item of finalOrder.items) {
+        if (!vendorGroups[item.vendorId]) vendorGroups[item.vendorId] = [];
+        vendorGroups[item.vendorId].push(item);
+      }
+      for (const [vendorId, vendorItems] of Object.entries(vendorGroups)) {
+        try {
+          const vendorRecord = await prisma.vendor.findUnique({
+            where: { id: vendorId },
+            include: { user: { select: { email: true, name: true } } },
+          });
+          if (vendorRecord?.user?.email) {
+            sendEmail({
+              to: vendorRecord.user.email,
+              subject: `New order #${finalOrder.id.slice(0, 8)} received on Drux`,
+              html: emailTemplates.newOrderForVendor({
+                vendorName: vendorRecord.storeName,
+                orderId: finalOrder.id,
+                customerName: finalOrder.user.name,
+                items: vendorItems,
+                total: vendorItems.reduce((s, i) => s + parseFloat(i.total), 0),
+                address: finalOrder.address,
+              }),
+            });
+          }
+        } catch (vendorEmailErr) {
+          logger.error(`[Email] Failed to send new order email to vendor ${vendorId}:`, vendorEmailErr);
+        }
+      }
+
       return finalOrder;
 
     } catch (error) {
