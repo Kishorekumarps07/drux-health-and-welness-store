@@ -304,14 +304,10 @@ export default function CartPage() {
                     {shipCost === 0 ? "FREE" : `₹${shipCost}`}
                   </span>
                 </div>
-                <div className="flex justify-between text-gray-800">
-                  <span>Secured Packaging Fee</span>
-                  <span>₹29</span>
-                </div>
                 <Separator />
                 <div className="flex justify-between font-bold text-lg text-gray-900 pt-2">
                   <span>Total Amount</span>
-                  <span>₹{(totalAmt + 29).toLocaleString("en-IN")}</span>
+                  <span>₹{totalAmt.toLocaleString("en-IN")}</span>
                 </div>
                 <Separator />
                 {discountAmt > 0 && (

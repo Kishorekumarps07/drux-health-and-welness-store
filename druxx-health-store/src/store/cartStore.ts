@@ -289,7 +289,7 @@ export const useCartStore = create<CartState>()(
       total: () => {
         const sub = get().subtotal();
         const discount = get().couponDiscountAmount();
-        return Math.round(sub - discount + get().shipping() + get().tax());
+        return Math.max(0, Math.round(sub - discount + get().shipping()));
       },
 
       fetchCart: async () => {
