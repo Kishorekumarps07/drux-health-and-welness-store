@@ -13,11 +13,15 @@ const createOrderIntent = asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const { couponCode } = req.body;
   const razorpayOrder = await paymentsService.createPaymentIntent(userId, { couponCode });
+  const { razorpay: razorpayConfig } = require('../../config/env');
 
   res.status(200).json({
     status: 'success',
     data: { 
-      razorpayOrder,
+      razorpayOrder: {
+        ...razorpayOrder,
+        key: razorpayConfig.keyId
+      },
       currency: 'INR'
     }
   });

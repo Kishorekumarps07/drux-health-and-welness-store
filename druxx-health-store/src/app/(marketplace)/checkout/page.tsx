@@ -189,7 +189,7 @@ export default function CheckoutPage() {
         });
 
         const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
+          key: razorpayOrder.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
           amount: razorpayOrder.amount,
           currency: razorpayOrder.currency,
           name: "Druxx Health Store",
