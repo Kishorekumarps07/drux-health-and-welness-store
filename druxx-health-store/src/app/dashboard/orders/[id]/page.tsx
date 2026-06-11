@@ -198,6 +198,47 @@ export default function OrderDetailsPage() {
           </div>
         )}
 
+        {/* Shipment Tracking Information */}
+        {order.shipments && order.shipments.length > 0 && order.shipments.some((s: any) => s.awbCode) && (
+          <div className="space-y-3 pt-2">
+            <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Shipment Tracking</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {order.shipments.map((shipment: any) => {
+                if (!shipment.awbCode) return null;
+                return (
+                  <div key={shipment.id} className="p-4 bg-gray-50 border border-gray-100 rounded-3xl flex items-start gap-3 text-left">
+                    <div className="w-10 h-10 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-[#A6D608] shrink-0 shadow-sm">
+                      <Truck size={18} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-black text-gray-900 uppercase tracking-tight">
+                        {shipment.courierName || "Courier Partner"}
+                      </p>
+                      <p className="text-[11px] text-gray-500 font-bold mt-0.5">
+                        AWB: <span className="font-mono text-gray-800">{shipment.awbCode}</span>
+                      </p>
+                      {shipment.trackingUrl ? (
+                        <a 
+                          href={shipment.trackingUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[10px] font-black text-[#A6D608] uppercase tracking-wider mt-2 hover:underline"
+                        >
+                          Track Shipment →
+                        </a>
+                      ) : (
+                        <span className="text-[10px] text-gray-400 font-bold block mt-2">
+                          Status: {shipment.status.replace(/_/g, ' ')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Items List */}
         <div className="space-y-4">
           <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Order Items</h3>

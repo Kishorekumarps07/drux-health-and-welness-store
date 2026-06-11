@@ -19,10 +19,7 @@ export const orderService = {
     throw new Error(response.data.message || "Failed to place order");
   },
 
-  /**
-   * Create a Razorpay Order ID on the backend.
-   */
-  async createPaymentIntent(data?: { couponCode?: string }) {
+  async createPaymentIntent(data?: { couponCode?: string; addressId?: string; notes?: string }) {
     const response = await api.post("/payments/create-intent", data);
     if (response.data.status === "success") {
       // The backend returns { data: { razorpayOrder: ... } }

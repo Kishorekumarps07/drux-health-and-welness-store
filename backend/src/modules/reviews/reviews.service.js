@@ -9,6 +9,20 @@ class ReviewsService {
     const existing = await prisma.review.findUnique({ where: { userId_productId: { userId, productId } } });
     if (existing) throw new AppError('You have already reviewed this product.', 409);
 
+    // Only allow reviews from customers who actually purchased & received the product
+    const verifiedPurchase = await prisma.orderItem.findFirst({
+      where: {
+        productId,
+        order: {
+          userId,
+          status: 'DELIVERED',
+        },
+      },
+    });
+    if (!verifiedPurchase) {
+      throw new AppError('You can only review products you have purchased and received.', 403);
+    }
+
     const review = await prisma.review.create({
       data: { ...data, userId, productId },
       include: { user: { select: { id: true, name: true, avatarUrl: true } } },

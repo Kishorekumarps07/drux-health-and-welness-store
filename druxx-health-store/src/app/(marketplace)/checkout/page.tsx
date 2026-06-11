@@ -206,6 +206,7 @@ export default function CheckoutPage() {
       } else {
         const { razorpayOrder } = await orderService.createPaymentIntent({
           couponCode: couponCode || undefined,
+          addressId,
         });
 
         const options = {

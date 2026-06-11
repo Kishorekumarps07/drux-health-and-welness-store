@@ -97,8 +97,15 @@ function VendorShipmentsPageContent() {
   const [showDetailsModal, setShowDetailsModal] = React.useState(false)
   const [showBookModal, setShowBookModal] = React.useState(false)
   const [showTrackingModal, setShowTrackingModal] = React.useState(false)
+  const [showManualShipModal, setShowManualShipModal] = React.useState(false)
   
   const [vendorProfile, setVendorProfile] = React.useState<any>(null)
+
+  // Manual Ship Form State
+  const [manualCourier, setManualCourier] = React.useState("")
+  const [manualAwb, setManualAwb] = React.useState("")
+  const [manualTrackingUrl, setManualTrackingUrl] = React.useState("")
+  const [manualShipLoading, setManualShipLoading] = React.useState(false)
   
   // Booking Form State
   const [weight, setWeight] = React.useState("0.5")
@@ -157,6 +164,41 @@ function VendorShipmentsPageContent() {
     setHeight("5")
     setPickupLocation(vendorProfile?.pickupLocation || "Primary")
     setShowBookModal(true)
+  }
+
+  const handleOpenManualShipModal = (shipment: ShipmentItem) => {
+    setSelectedShipment(shipment)
+    setManualCourier("")
+    setManualAwb("")
+    setManualTrackingUrl("")
+    setShowManualShipModal(true)
+  }
+
+  const handleManualShipment = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedShipment) return
+    if (!manualCourier.trim() || !manualAwb.trim()) {
+      toast.error("Courier Name and AWB Code are required.")
+      return
+    }
+
+    setManualShipLoading(true)
+    const toastId = toast.loading("Marking shipment as shipped...")
+
+    try {
+      await vendorService.manualShipment(selectedShipment.id, {
+        courierName: manualCourier.trim(),
+        awbCode: manualAwb.trim(),
+        trackingUrl: manualTrackingUrl.trim() || undefined
+      })
+      toast.success("Shipment marked as shipped successfully!", { id: toastId })
+      setShowManualShipModal(false)
+      fetchShipments()
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to mark shipment as shipped", { id: toastId })
+    } finally {
+      setManualShipLoading(false)
+    }
   }
 
   const handleBookShipment = async (e: React.FormEvent) => {
@@ -456,12 +498,20 @@ function VendorShipmentsPageContent() {
                                <DropdownMenuSeparator className="my-1 border-gray-50" />
 
                                {shipment.status === 'READY_TO_SHIP' && !shipment.shiprocketOrderId && (
-                                 <DropdownMenuItem 
-                                   onClick={() => handleOpenBookModal(shipment)}
-                                   className="flex items-center gap-2 px-3 py-2 text-xs font-black rounded-xl text-orange-500 hover:bg-orange-50 focus:bg-orange-50 cursor-pointer"
-                                 >
-                                   <Truck className="w-4 h-4" /> Book on Shiprocket
-                                 </DropdownMenuItem>
+                                 <>
+                                   <DropdownMenuItem 
+                                     onClick={() => handleOpenBookModal(shipment)}
+                                     className="flex items-center gap-2 px-3 py-2 text-xs font-black rounded-xl text-orange-500 hover:bg-orange-50 focus:bg-orange-50 cursor-pointer"
+                                   >
+                                     <Truck className="w-4 h-4" /> Book on Shiprocket
+                                   </DropdownMenuItem>
+                                   <DropdownMenuItem 
+                                     onClick={() => handleOpenManualShipModal(shipment)}
+                                     className="flex items-center gap-2 px-3 py-2 text-xs font-black rounded-xl text-[#A6D608] hover:bg-[#A6D608]/5 focus:bg-[#A6D608]/5 cursor-pointer"
+                                   >
+                                     <CheckCircle className="w-4 h-4" /> Ship Manually
+                                   </DropdownMenuItem>
+                                 </>
                                )}
 
                                {shipment.status === 'READY_TO_SHIP' && shipment.shiprocketOrderId && shipment.awbCode && (
@@ -628,15 +678,26 @@ function VendorShipmentsPageContent() {
 
                 <div className="px-8 py-4 border-t border-gray-100 flex justify-end bg-gray-50/50 gap-3">
                    {selectedShipment.status === 'READY_TO_SHIP' && !selectedShipment.shiprocketOrderId && (
-                     <Button 
-                       onClick={() => {
-                         setShowDetailsModal(false)
-                         handleOpenBookModal(selectedShipment)
-                       }}
-                       className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl px-6 font-black text-xs uppercase tracking-widest h-11"
-                     >
-                       Book Courier
-                     </Button>
+                     <>
+                       <Button 
+                         onClick={() => {
+                           setShowDetailsModal(false)
+                           handleOpenBookModal(selectedShipment)
+                         }}
+                         className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl px-6 font-black text-xs uppercase tracking-widest h-11"
+                       >
+                         Book Courier
+                       </Button>
+                       <Button 
+                         onClick={() => {
+                           setShowDetailsModal(false)
+                           handleOpenManualShipModal(selectedShipment)
+                         }}
+                         className="bg-[#A6D608] hover:bg-[#8ab506] text-white rounded-xl px-6 font-black text-xs uppercase tracking-widest h-11"
+                       >
+                         Ship Manually
+                       </Button>
+                     </>
                    )}
                    {selectedShipment.status === 'READY_TO_SHIP' && selectedShipment.shiprocketOrderId && selectedShipment.awbCode && (
                      <Button 
@@ -785,6 +846,98 @@ function VendorShipmentsPageContent() {
                        className="bg-[#A6D608] hover:bg-[#8ab506] text-white rounded-xl px-6 font-black text-xs uppercase tracking-widest h-11 shadow-lg shadow-[#A6D608]/20"
                      >
                         {bookingLoading ? "Booking..." : "Confirm Booking"}
+                     </Button>
+                  </div>
+                </form>
+             </div>
+          </div>
+        )}
+
+        {/* Modal: Manual Ship Form */}
+        {showManualShipModal && selectedShipment && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+             <div className="bg-white w-full max-w-md rounded-[32px] border border-gray-100 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                   <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-500">
+                         <Truck className="w-5 h-5" />
+                      </div>
+                      <div>
+                         <h3 className="text-lg font-black text-gray-900">Ship Manually</h3>
+                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                            Order: #{selectedShipment.orderId.slice(0, 8)}
+                         </p>
+                      </div>
+                   </div>
+                   <button 
+                     onClick={() => setShowManualShipModal(false)}
+                     className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors shadow-sm"
+                   >
+                      <X className="w-4 h-4" />
+                   </button>
+                </div>
+
+                <form onSubmit={handleManualShipment}>
+                  <div className="p-8 space-y-4 text-left">
+                     
+                     <div className="space-y-1.5">
+                        <label className="text-[10px] font-black uppercase tracking-wider text-gray-400">
+                          Courier / Carrier Name *
+                        </label>
+                        <input 
+                          type="text" 
+                          required
+                          value={manualCourier}
+                          onChange={(e) => setManualCourier(e.target.value)}
+                          placeholder="e.g. Blue Dart, Delhivery, DTDC"
+                          className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-sm font-black focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
+                        />
+                     </div>
+
+                     <div className="space-y-1.5">
+                        <label className="text-[10px] font-black uppercase tracking-wider text-gray-400">
+                          Tracking / AWB Number *
+                        </label>
+                        <input 
+                          type="text" 
+                          required
+                          value={manualAwb}
+                          onChange={(e) => setManualAwb(e.target.value)}
+                          placeholder="e.g. 1234567890"
+                          className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-sm font-black focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
+                        />
+                     </div>
+
+                     <div className="space-y-1.5">
+                        <label className="text-[10px] font-black uppercase tracking-wider text-gray-400">
+                          Tracking Link URL (Optional)
+                        </label>
+                        <input 
+                          type="url" 
+                          value={manualTrackingUrl}
+                          onChange={(e) => setManualTrackingUrl(e.target.value)}
+                          placeholder="e.g. https://www.bluedart.com/track?id=..."
+                          className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-sm font-black focus:ring-2 focus:ring-[#A6D608]/20 transition-all" 
+                        />
+                     </div>
+
+                  </div>
+
+                  <div className="px-8 py-4 border-t border-gray-100 flex justify-end bg-gray-50/50 gap-3">
+                     <Button 
+                       type="button"
+                       variant="ghost"
+                       onClick={() => setShowManualShipModal(false)}
+                       className="rounded-xl px-6 font-black text-xs uppercase tracking-widest h-11"
+                     >
+                        Cancel
+                     </Button>
+                     <Button 
+                       type="submit"
+                       disabled={manualShipLoading}
+                       className="bg-[#A6D608] hover:bg-[#8ab506] text-white rounded-xl px-6 font-black text-xs uppercase tracking-widest h-11 shadow-lg shadow-[#A6D608]/20"
+                     >
+                        {manualShipLoading ? "Submitting..." : "Mark as Shipped"}
                      </Button>
                   </div>
                 </form>

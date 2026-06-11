@@ -11,8 +11,8 @@ const AppError = require('../../lib/AppError');
  */
 const createOrderIntent = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const { couponCode } = req.body;
-  const razorpayOrder = await paymentsService.createPaymentIntent(userId, { couponCode });
+  const { couponCode, addressId, notes } = req.body;
+  const razorpayOrder = await paymentsService.createPaymentIntent(userId, { couponCode, addressId, notes });
   const { razorpay: razorpayConfig } = require('../../config/env');
 
   res.status(200).json({

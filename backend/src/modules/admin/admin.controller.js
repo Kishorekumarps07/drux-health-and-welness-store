@@ -54,6 +54,27 @@ const listInventory = asyncHandler(async (req, res) => {
   res.json({ status: 'success', ...result });
 });
 
+const listNewsletterSubscribers = asyncHandler(async (req, res) => {
+  const result = await adminService.listNewsletterSubscribers(req.query);
+  res.json({ status: 'success', ...result });
+});
+
+const exportNewsletterCSV = asyncHandler(async (req, res) => {
+  // Fetch all subscribers without pagination for export
+  const result = await adminService.listNewsletterSubscribers({ page: 1, limit: 100000, search: req.query.search });
+  const rows = result.subscribers.map(s => `${s.email},${new Date(s.createdAt).toISOString()}`);
+  const csv = ['email,subscribed_at', ...rows].join('\n');
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename="newsletter-subscribers.csv"');
+  res.send(csv);
+});
+
+const deleteNewsletterSubscriber = asyncHandler(async (req, res) => {
+  const { email } = req.params;
+  await adminService.deleteNewsletterSubscriber(decodeURIComponent(email));
+  res.json({ status: 'success', message: 'Subscriber removed.' });
+});
+
 module.exports = { 
   listVendors, 
   updateVendorStatus, 
@@ -64,5 +85,8 @@ module.exports = {
   listAllOrders, 
   updateOrderStatus,
   listUsers,
-  listInventory
+  listInventory,
+  listNewsletterSubscribers,
+  exportNewsletterCSV,
+  deleteNewsletterSubscriber,
 };

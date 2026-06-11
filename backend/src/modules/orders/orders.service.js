@@ -20,6 +20,7 @@ const ORDER_INCLUDE = {
   address: true,
   payment: true,
   user: { select: { id: true, name: true, email: true, phone: true } },
+  shipments: true,
 };
 
 class OrdersService {

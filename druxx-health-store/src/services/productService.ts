@@ -107,7 +107,18 @@ export const productService = {
   },
 
   async getBestSellers() {
-    return this.getAllProducts({ sort: 'best-seller', limit: 100 });
+    try {
+      const response = await api.get('/products/best-sellers', { params: { limit: 20 } });
+      const products = response.data.products || [];
+      return {
+        products: products.map(mapBackendProduct),
+        total: response.data.total || products.length,
+        pages: response.data.pages || 1,
+      };
+    } catch {
+      // Fallback to regular sort if endpoint fails
+      return this.getAllProducts({ sort: 'best-seller', limit: 20 });
+    }
   },
 
   async getNewArrivals() {

@@ -373,6 +373,33 @@ class AdminService {
       }
     };
   }
+  // ── Newsletter Subscriber Management ─────────────────────────────────────
+
+  async listNewsletterSubscribers({ page = 1, limit = 50, search }) {
+    const skip = (page - 1) * limit;
+    const where = {
+      ...(search && { email: { contains: search.toLowerCase().trim(), mode: 'insensitive' } }),
+    };
+
+    const [subscribers, total] = await Promise.all([
+      prisma.newsletterSubscription.findMany({
+        where, skip, take: +limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.newsletterSubscription.count({ where }),
+    ]);
+
+    return { subscribers, total, page: +page, pages: Math.ceil(total / limit) };
+  }
+
+  async deleteNewsletterSubscriber(email) {
+    const existing = await prisma.newsletterSubscription.findUnique({
+      where: { email: email.toLowerCase().trim() }
+    });
+    if (!existing) throw new AppError('Subscriber not found.', 404);
+    await prisma.newsletterSubscription.delete({ where: { email: email.toLowerCase().trim() } });
+    return { success: true };
+  }
 }
 
 module.exports = new AdminService();

@@ -25,6 +25,7 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [alreadyReviewed, setAlreadyReviewed] = useState(false);
+  const [notPurchased, setNotPurchased] = useState(false);
   const [errors, setErrors] = useState<{ rating?: string; comment?: string }>({});
 
   const validate = () => {
@@ -62,12 +63,14 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
         title: newReview.title || "",
         comment: newReview.comment || "",
         date: newReview.createdAt,
-        verified: false,
+        verified: true,
       };
       onSuccess(mapped);
     } catch (err: any) {
       if (err?.response?.status === 409) {
         setAlreadyReviewed(true);
+      } else if (err?.response?.status === 403) {
+        setNotPurchased(true);
       } else {
         toast.error(
           err?.response?.data?.message || "Failed to submit review. Please try again."
@@ -114,6 +117,23 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
         <p className="text-sm font-bold text-gray-700">
           You have already submitted a review for this product.
         </p>
+      </div>
+    );
+  }
+
+  // ── Not purchased ──────────────────────────────────────────────────────────
+  if (notPurchased) {
+    return (
+      <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5 flex items-start gap-3">
+        <span className="text-amber-500 text-lg leading-none shrink-0">🛒</span>
+        <div>
+          <p className="text-sm font-bold text-amber-800">
+            Purchase required to review
+          </p>
+          <p className="text-xs text-amber-700 mt-0.5">
+            Only customers who have purchased and received this product can write a review.
+          </p>
+        </div>
       </div>
     );
   }

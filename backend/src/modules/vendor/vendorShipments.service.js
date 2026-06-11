@@ -576,6 +576,80 @@ class VendorShipmentsService {
 
     return updatedShipment;
   }
+
+  /**
+   * Manually mark shipment as SHIPPED and set tracking details
+   */
+  async manualShipment(userId, shipmentId, { awbCode, courierName, trackingUrl }) {
+    const vendorId = await this.getVendorId(userId);
+
+    const shipment = await prisma.shipment.findFirst({
+      where: { id: shipmentId, vendorId }
+    });
+
+    if (!shipment) throw new AppError('Shipment not found.', 404);
+
+    // Update shipment details and set status to SHIPPED
+    const updatedShipment = await prisma.shipment.update({
+      where: { id: shipment.id },
+      data: {
+        awbCode,
+        courierName,
+        trackingUrl,
+        status: 'SHIPPED'
+      }
+    });
+
+    // Update matching order items status to SHIPPED and set shippedAt timestamp
+    try {
+      await prisma.orderItem.updateMany({
+        where: {
+          orderId: shipment.orderId,
+          vendorId,
+          status: { in: ['PENDING', 'PROCESSING'] }
+        },
+        data: {
+          status: 'SHIPPED',
+          shippedAt: new Date()
+        }
+      });
+    } catch (updateErr) {
+      console.error('Failed to update order item statuses to SHIPPED during manual ship:', updateErr);
+    }
+
+    // Sync parent order status if needed
+    try {
+      const vendorOrdersService = require('./vendorOrders.service');
+      await vendorOrdersService.syncParentOrderStatus(shipment.orderId);
+    } catch (syncErr) {
+      console.error('Failed to sync parent order status during manual ship:', syncErr);
+    }
+
+    // Send SHIPPED email to customer (fire-and-forget)
+    try {
+      const orderRecord = await prisma.order.findUnique({
+        where: { id: shipment.orderId },
+        include: { user: { select: { name: true, email: true } } },
+      });
+      if (orderRecord?.user?.email) {
+        sendEmail({
+          to: orderRecord.user.email,
+          subject: `Your Drux order #${shipment.orderId.slice(0, 8)} has been shipped! 🚚`,
+          html: emailTemplates.orderStatusUpdate({
+            customerName: orderRecord.user.name,
+            orderId: shipment.orderId,
+            status: 'SHIPPED',
+            awbCode,
+            courierName,
+          }),
+        });
+      }
+    } catch (emailErr) {
+      console.error('[Email] Failed to send shipped notification for manual shipment:', emailErr.message);
+    }
+
+    return updatedShipment;
+  }
 }
 
 module.exports = new VendorShipmentsService();

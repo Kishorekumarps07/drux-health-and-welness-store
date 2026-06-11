@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, Suspense, useEffect } from "react";
+import { useState, useMemo, Suspense, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   LayoutGrid,
@@ -172,6 +172,11 @@ function ProductsContent() {
                 <List size={16} />
               </button>
             </div>
+          </div>
+
+          {/* Mobile Inline Search Bar — persists as user scrolls */}
+          <div className="md:hidden mb-3">
+            <MobileSearchBar />
           </div>
 
           <div className="flex items-center gap-2 md:gap-3 sticky top-0 z-40 md:static bg-[#F7F7F7] py-2 -mx-4 px-4 md:p-0">
@@ -707,5 +712,83 @@ function FilterSidebar({
         Clear Filters
       </Button>
     </div>
+  );
+}
+
+/**
+ * Lightweight inline search bar for mobile — displayed above the sort/filter
+ * buttons on the products page so users don't have to scroll back to the top.
+ */
+function MobileSearchBar() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { searchQuery, setSearchQuery } = useMarketplaceStore();
+  const [localQuery, setLocalQuery] = useState(searchQuery);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Keep in sync when the store resets (e.g. clearFilters)
+  useEffect(() => {
+    setLocalQuery(searchQuery);
+  }, [searchQuery]);
+
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setSearchQuery(localQuery);
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    if (localQuery.trim()) {
+      params.set("q", localQuery.trim());
+    } else {
+      params.delete("q");
+    }
+    params.delete("page");
+    router.push(`/products?${params.toString()}`, { scroll: false });
+    inputRef.current?.blur();
+  };
+
+  return (
+    <form
+      onSubmit={handleSearch}
+      className="flex h-11 bg-white rounded-2xl border border-gray-200 focus-within:border-[#A6D608] focus-within:ring-2 focus-within:ring-[#A6D608]/20 transition-all overflow-hidden shadow-sm"
+    >
+      <div className="relative flex-1 h-full">
+        <Search
+          size={15}
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+        />
+        <input
+          ref={inputRef}
+          type="search"
+          value={localQuery}
+          onChange={(e) => setLocalQuery(e.target.value)}
+          placeholder="Search products…"
+          className="w-full h-full pl-10 pr-10 text-sm font-medium outline-none bg-transparent text-gray-900 placeholder:text-gray-400"
+          id="mobile-products-search-input"
+          autoComplete="off"
+        />
+        {localQuery && (
+          <button
+            type="button"
+            onClick={() => {
+              setLocalQuery("");
+              setSearchQuery("");
+              const params = new URLSearchParams(searchParams?.toString() || "");
+              params.delete("q");
+              router.push(`/products?${params.toString()}`, { scroll: false });
+            }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            aria-label="Clear search"
+          >
+            <X size={15} />
+          </button>
+        )}
+      </div>
+      <button
+        type="submit"
+        className="flex items-center justify-center w-11 shrink-0 bg-[#A6D608] hover:bg-[#8ab506] text-black transition-colors"
+        aria-label="Search"
+      >
+        <Search size={16} strokeWidth={3} />
+      </button>
+    </form>
   );
 }

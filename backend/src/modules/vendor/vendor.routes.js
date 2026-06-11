@@ -28,7 +28,8 @@ const {
   trackShipment,
   handoverShipment,
   cancelShipment,
-  generateAwb
+  generateAwb,
+  manualShipment
 } = require('./vendorShipments.controller');
 
 const router = express.Router();
@@ -123,6 +124,12 @@ router.post('/shipments/:id/cancel', cancelShipment);
  * @desc    Generate/Assign AWB for a booked shipment
  */
 router.post('/shipments/:id/awb', generateAwb);
+
+/**
+ * @route   POST /api/v1/vendor/shipments/:id/manual-ship
+ * @desc    Mark a shipment as shipped manually (with custom AWB and courier name)
+ */
+router.post('/shipments/:id/manual-ship', manualShipment);
 
 /**
  * @route   GET /api/v1/vendor/analytics

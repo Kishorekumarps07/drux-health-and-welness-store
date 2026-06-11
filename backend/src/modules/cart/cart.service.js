@@ -112,14 +112,42 @@ class CartService {
       });
 
       if (existing) {
-        await prisma.cartItem.update({
-          where: { id: existing.id },
-          data: { quantity: Math.max(existing.quantity, safeQty) }
-        });
+        try {
+          await prisma.cartItem.update({
+            where: { id: existing.id },
+            data: { quantity: Math.max(existing.quantity, safeQty) }
+          });
+        } catch (error) {
+          if (error.code !== 'P2025') {
+            throw error;
+          }
+        }
       } else {
-        await prisma.cartItem.create({
-          data: { cartId: cart.id, productId: item.productId, quantity: safeQty }
-        });
+        try {
+          await prisma.cartItem.create({
+            data: { cartId: cart.id, productId: item.productId, quantity: safeQty }
+          });
+        } catch (error) {
+          if (error.code === 'P2002') {
+            try {
+              const currentItem = await prisma.cartItem.findUnique({
+                where: { cartId_productId: { cartId: cart.id, productId: item.productId } }
+              });
+              if (currentItem) {
+                await prisma.cartItem.update({
+                  where: { id: currentItem.id },
+                  data: { quantity: Math.max(currentItem.quantity, safeQty) }
+                });
+              }
+            } catch (updateError) {
+              if (updateError.code !== 'P2025') {
+                throw updateError;
+              }
+            }
+          } else {
+            throw error;
+          }
+        }
       }
     }));
 

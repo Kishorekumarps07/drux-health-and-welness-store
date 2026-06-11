@@ -354,5 +354,13 @@ export const vendorService = {
   async generateAwb(id: string) {
     const response = await api.post(`/vendor/shipments/${id}/awb`);
     return response.data;
+  },
+
+  /**
+   * Manually mark a shipment as shipped (non-Shiprocket)
+   */
+  async manualShipment(id: string, data: { awbCode: string; courierName: string; trackingUrl?: string }) {
+    const response = await api.post(`/vendor/shipments/${id}/manual-ship`, data);
+    return response.data;
   }
 };

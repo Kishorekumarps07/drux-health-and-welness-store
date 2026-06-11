@@ -14,6 +14,7 @@ const paymentsRoutes   = require('../modules/payments/payments.routes');
 const cmsRoutes        = require('../modules/cms/cms.routes');
 const uploadRoutes     = require('../modules/upload/upload.routes');
 const couponsRoutes    = require('../modules/coupons/coupons.routes');
+const wishlistRoutes   = require('../modules/wishlist/wishlist.routes');
 
 const router = Router();
 
@@ -68,6 +69,7 @@ router.use('/products/:productId/reviews', reviewsRoutes);
 router.use('/categories',  categoriesRoutes);
 router.use('/products',    productsRoutes);
 router.use('/cart',        cartRoutes);
+router.use('/wishlist',    wishlistRoutes);
 router.use('/orders',      ordersRoutes);
 router.use('/payments',    paymentsRoutes);
 router.use('/admin',       adminRoutes);

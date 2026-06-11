@@ -113,5 +113,30 @@ export const adminService = {
       console.error("Failed to fetch inventory:", err);
       return { status: "error", products: [], total: 0, page: 1, pages: 1 };
     }
-  }
+  },
+
+  async listNewsletterSubscribers(params?: { page?: number; limit?: number; search?: string }) {
+    try {
+      const response = await api.get('/admin/newsletter/subscribers', { params });
+      return {
+        status: "success",
+        subscribers: response.data.subscribers || [],
+        total: response.data.total || 0,
+        page: response.data.page || 1,
+        pages: response.data.pages || 1,
+      };
+    } catch (err) {
+      console.error("Failed to fetch newsletter subscribers:", err);
+      return { status: "error", subscribers: [], total: 0, page: 1, pages: 1 };
+    }
+  },
+
+  async deleteNewsletterSubscriber(email: string) {
+    const response = await api.delete(`/admin/newsletter/subscribers/${encodeURIComponent(email)}`);
+    return response.data;
+  },
+
+  getNewsletterExportUrl(): string {
+    return `${api.defaults.baseURL}/admin/newsletter/subscribers/export`;
+  },
 };

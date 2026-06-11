@@ -111,6 +111,30 @@ const generateAwb = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Mark a shipment as shipped manually (with custom AWB and courier name)
+ * @route   POST /api/v1/vendor/shipments/:id/manual-ship
+ * @access  Private (Vendor)
+ */
+const manualShipment = asyncHandler(async (req, res) => {
+  const { awbCode, courierName, trackingUrl } = req.body;
+  if (!awbCode || !courierName) {
+    return res.status(400).json({ status: 'error', message: 'AWB Code and Courier Name are required for manual shipping.' });
+  }
+
+  const shipment = await vendorShipmentsService.manualShipment(req.user.id, req.params.id, {
+    awbCode,
+    courierName,
+    trackingUrl
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Shipment marked as shipped successfully.',
+    data: { shipment }
+  });
+});
+
 module.exports = {
   listShipments,
   getShipmentDetails,
@@ -119,6 +143,7 @@ module.exports = {
   trackShipment,
   handoverShipment,
   cancelShipment,
-  generateAwb
+  generateAwb,
+  manualShipment
 };
 

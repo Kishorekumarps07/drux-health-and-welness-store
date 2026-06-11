@@ -22,7 +22,8 @@ import {
   Monitor,
   LayoutGrid,
   Tag,
-  Truck
+  Truck,
+  Mail
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ const ADMIN_NAV: NavItem[] = [
   { name: 'CMS Management', href: '/dashboard/admin/cms', icon: Monitor },
   { name: 'Coupon Manager', href: '/dashboard/admin/coupons', icon: Tag },
   { name: 'Inventory Audit', href: '/dashboard/admin/inventory', icon: Package },
+  { name: 'Newsletter', href: '/dashboard/admin/newsletter', icon: Mail },
   { name: 'Audit Logs', href: '/dashboard/admin/audit-logs', icon: History },
 ];
 

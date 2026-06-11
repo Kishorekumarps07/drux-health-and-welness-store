@@ -78,4 +78,10 @@ const getVendorProducts = asyncHandler(async (req, res) => {
   res.json({ status: 'success', ...result });
 });
 
-module.exports = { list, getById, getBySlug, create, update, remove, getVendorProducts };
+const getBestSellers   = asyncHandler(async (req, res) => {
+  const limit = parseInt(req.query.limit) || 20;
+  const result = await productsService.getBestSellers(limit);
+  res.json({ status: 'success', ...result });
+});
+
+module.exports = { list, getById, getBySlug, create, update, remove, getVendorProducts, getBestSellers };

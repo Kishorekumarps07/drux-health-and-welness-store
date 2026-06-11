@@ -9,11 +9,11 @@ import { useAuthStore } from "./authStore";
 interface WishlistState {
   items: Product[];
   wishlists: { [userId: string]: Product[] };
-  addToWishlist: (product: Product) => void;
-  removeFromWishlist: (productId: string) => void;
+  addToWishlist: (product: Product) => Promise<void>;
+  removeFromWishlist: (productId: string) => Promise<void>;
   isInWishlist: (productId: string) => boolean;
   clearWishlist: () => void;
-  syncUserWishlist: (userId: string | null) => void;
+  syncUserWishlist: (userId: string | null) => Promise<void>;
 }
 
 export const useWishlistStore = create<WishlistState>()(
@@ -21,7 +21,7 @@ export const useWishlistStore = create<WishlistState>()(
     (set, get) => ({
       items: [],
       wishlists: {},
-      addToWishlist: (product) => {
+      addToWishlist: async (product) => {
         const userId = useAuthStore.getState().user?.id;
         if (!userId) return;
         const wishlists = get().wishlists || {};
@@ -38,11 +38,25 @@ export const useWishlistStore = create<WishlistState>()(
             items: updatedList,
           });
           toast.success(`${product.name} added to wishlist`);
+
+          try {
+            const { wishlistService } = await import("@/services/wishlistService");
+            const syncedItems = await wishlistService.addToWishlist(product.id);
+            set({
+              wishlists: {
+                ...wishlists,
+                [userId]: syncedItems,
+              },
+              items: syncedItems,
+            });
+          } catch (error) {
+            console.error("Failed to add to backend wishlist:", error);
+          }
         } else {
           toast.info(`${product.name} is already in your wishlist`);
         }
       },
-      removeFromWishlist: (productId) => {
+      removeFromWishlist: async (productId) => {
         const userId = useAuthStore.getState().user?.id;
         if (!userId) return;
         const wishlists = get().wishlists || {};
@@ -59,6 +73,20 @@ export const useWishlistStore = create<WishlistState>()(
             items: updatedList,
           });
           toast.success(`${itemToRemove.name} removed from wishlist`);
+
+          try {
+            const { wishlistService } = await import("@/services/wishlistService");
+            const syncedItems = await wishlistService.removeFromWishlist(productId);
+            set({
+              wishlists: {
+                ...wishlists,
+                [userId]: syncedItems,
+              },
+              items: syncedItems,
+            });
+          } catch (error) {
+            console.error("Failed to remove from backend wishlist:", error);
+          }
         }
       },
       isInWishlist: (productId) => {
@@ -80,14 +108,33 @@ export const useWishlistStore = create<WishlistState>()(
           items: [],
         });
       },
-      syncUserWishlist: (userId) => {
+      syncUserWishlist: async (userId) => {
         if (!userId) {
           set({ items: [] });
           return;
         }
-        const wishlists = get().wishlists || {};
-        const userWishlist = wishlists[userId] || [];
-        set({ items: userWishlist });
+
+        try {
+          const wishlists = get().wishlists || {};
+          const localItems = wishlists[userId] || [];
+          const localProductIds = localItems.map(item => item.id);
+
+          const { wishlistService } = await import("@/services/wishlistService");
+          const syncedItems = await wishlistService.syncWishlist(localProductIds);
+          set({
+            wishlists: {
+              ...wishlists,
+              [userId]: syncedItems,
+            },
+            items: syncedItems,
+          });
+        } catch (error) {
+          console.error("Wishlist sync failed:", error);
+          // Fallback to local items on failure
+          const wishlists = get().wishlists || {};
+          const userWishlist = wishlists[userId] || [];
+          set({ items: userWishlist });
+        }
       },
     }),
     {

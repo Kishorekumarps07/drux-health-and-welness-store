@@ -216,6 +216,64 @@ class ProductsService {
 
     return { products, ...getPagingData(total, page, limit) };
   }
+
+  /**
+   * Get best-selling products ranked by real sales volume (quantity sold on DELIVERED orders).
+   * Falls back to isBestSeller flag if no order data is available.
+   */
+  async getBestSellers(limit = 20) {
+    // Aggregate total quantity sold per product from DELIVERED order items
+    const salesData = await prisma.orderItem.groupBy({
+      by: ['productId'],
+      where: {
+        order: { status: 'DELIVERED' }
+      },
+      _sum: { quantity: true },
+      orderBy: { _sum: { quantity: 'desc' } },
+      take: limit * 2, // Fetch extra to account for inactive products
+    });
+
+    if (salesData.length === 0) {
+      // Fallback: no sales data yet — return by isBestSeller flag or latest products
+      const products = await prisma.product.findMany({
+        where: { status: 'ACTIVE', vendor: { approvalStatus: { in: ['APPROVED', 'ACTIVE'] } } },
+        include: PRODUCT_INCLUDE,
+        orderBy: [{ isBestSeller: 'desc' }, { averageRating: 'desc' }],
+        take: limit,
+      });
+      return { products, total: products.length, pages: 1 };
+    }
+
+    const productIds = salesData.map(s => s.productId);
+
+    // Fetch the actual products in one query
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: productIds },
+        status: 'ACTIVE',
+        vendor: { approvalStatus: { in: ['APPROVED', 'ACTIVE'] } },
+      },
+      include: PRODUCT_INCLUDE,
+    });
+
+    // Map sales quantities for enrichment
+    const salesMap = Object.fromEntries(salesData.map(s => [s.productId, s._sum.quantity || 0]));
+
+    // Sort products by actual sales volume (matching the groupBy order)
+    const sorted = products
+      .map(p => ({ ...p, _salesQty: salesMap[p.id] || 0 }))
+      .sort((a, b) => b._salesQty - a._salesQty)
+      .slice(0, limit);
+
+    // Background: update isBestSeller flag for top sellers (fire-and-forget)
+    const topIds = new Set(sorted.slice(0, 10).map(p => p.id));
+    prisma.$transaction([
+      prisma.product.updateMany({ where: { id: { in: [...topIds] } }, data: { isBestSeller: true } }),
+      prisma.product.updateMany({ where: { id: { notIn: [...topIds] }, isBestSeller: true }, data: { isBestSeller: false } }),
+    ]).catch(() => {});
+
+    return { products: sorted, total: sorted.length, pages: 1 };
+  }
 }
 
 module.exports = new ProductsService();
