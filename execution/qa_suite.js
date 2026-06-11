@@ -1,6 +1,9 @@
 const fs = require('fs');
 const path = require('path');
-// Using native fetch
+
+// Ensure we can resolve dependencies from the backend node_modules
+module.paths.push(path.resolve(__dirname, '../backend/node_modules'));
+module.paths.push(path.resolve(__dirname, '../node_modules'));
 
 const BASE_URL = 'http://localhost:5001/api/v1';
 
@@ -73,6 +76,36 @@ async function assertTest(name, condition, onFail) {
 
 async function runTests() {
   console.log('--- STARTING DRUXX QA END-TO-END SUITE ---\n');
+
+  // Prepare database E2E test accounts to avoid password mismatch from seeds
+  try {
+    const path = require('path');
+    require('dotenv').config({ path: path.resolve(__dirname, '../backend/.env') });
+    const { PrismaClient } = require('@prisma/client');
+    const bcrypt = require('bcryptjs');
+    
+    const prisma = new PrismaClient();
+    console.log('Resetting E2E test account credentials in database...');
+    const hash = await bcrypt.hash('password123', 12);
+    
+    for (const key of Object.keys(CREDENTIALS)) {
+      const cred = CREDENTIALS[key];
+      await prisma.user.upsert({
+        where: { email: cred.email },
+        update: { passwordHash: hash, roles: cred.role === 'ADMIN' ? ['ADMIN', 'CUSTOMER'] : [cred.role] },
+        create: {
+          name: cred.name,
+          email: cred.email,
+          passwordHash: hash,
+          roles: cred.role === 'ADMIN' ? ['ADMIN', 'CUSTOMER'] : [cred.role]
+        }
+      });
+    }
+    await prisma.$disconnect();
+    console.log('✅ E2E test accounts prepared successfully.\n');
+  } catch (dbErr) {
+    console.warn('⚠️ Warning: Database preparation step failed, falling back to API registration:', dbErr.message);
+  }
 
   // 1. Clean previous data if any (via direct login and delete if possible, or just re-register and ignore 409s)
   // Actually, we'll try to register. If it returns 409, we just login.
@@ -177,7 +210,7 @@ async function runTests() {
       const addrRes = await apiCall('POST', '/users/addresses', {
         label: 'Home',
         fullName: 'Test User',
-        phone: '1234567890',
+        phone: '9876543210',
         street: '123 Test St',
         city: 'Testville',
         state: 'TestState',
