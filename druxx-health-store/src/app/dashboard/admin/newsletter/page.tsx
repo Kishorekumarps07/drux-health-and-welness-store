@@ -304,14 +304,26 @@ export default function NewsletterAdminPage() {
   };
 
   const previewHtml = `
-    <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
-      <div style="background:#1E1E1E;padding:24px 32px;text-align:center;">
-        <p style="margin:0;font-size:20px;font-weight:900;color:#A6D608;">DRUX HEALTH STORE</p>
-        <p style="margin:4px 0 0;font-size:10px;color:#9CA3AF;text-transform:uppercase;letter-spacing:2px;">Health &amp; Wellness</p>
+    <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #dddddd;">
+      <div style="background-color:#A6D608;height:4px;font-size:1px;line-height:1px;">&nbsp;</div>
+      <div style="padding:20px 32px;border-bottom:1px solid #eeeeee;background-color:#ffffff;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="left" style="vertical-align:middle;">
+              <img src="https://drux.in/druxlogo.png" alt="Drux Health Store" style="height:35px;width:auto;display:block;border:0;" />
+            </td>
+            <td align="right" style="vertical-align:middle;color:#666666;font-size:12px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">
+              Newsletter
+            </td>
+          </tr>
+        </table>
       </div>
-      <div style="padding:32px;">${body || '<p style="color:#9CA3AF;">Your content will appear here…</p>'}</div>
-      <div style="background:#F9FAFB;padding:20px 32px;border-top:1px solid #E5E7EB;text-align:center;">
-        <p style="margin:0;font-size:12px;color:#9CA3AF;">You're receiving this because you subscribed to Drux Health Store newsletters.</p>
+      <div style="padding:32px 32px 24px;background-color:#ffffff;color:#111111;font-size:14px;line-height:1.5;">${body || '<p style="color:#9CA3AF;">Your content will appear here…</p>'}</div>
+      <div style="background:#F9FAFB;padding:24px 32px;border-top:1px solid #E5E7EB;text-align:center;">
+        <p style="margin:0;font-size:12px;color:#9CA3AF;line-height:1.5;">
+          You're receiving this because you subscribed to Drux Health Store newsletters.<br/>
+          <a href="https://drux.in" style="color:#A6D608;text-decoration:none;font-weight:bold;margin-top:6px;display:inline-block;">Visit our store</a>
+        </p>
       </div>
     </div>`;
 

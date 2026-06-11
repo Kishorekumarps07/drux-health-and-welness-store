@@ -433,26 +433,38 @@ class AdminService {
 <body style="margin:0;padding:0;background:#f4f4f4;font-family:'Helvetica Neue',Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:32px 0;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;max-width:600px;width:100%;">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #dddddd;border-radius:8px;overflow:hidden;max-width:600px;width:100%;">
+        <!-- Top Highlight Bar -->
+        <tr>
+          <td style="background-color:#A6D608;height:4px;font-size:1px;line-height:1px;">&nbsp;</td>
+        </tr>
         <!-- Header -->
         <tr>
-          <td style="background:#1E1E1E;padding:28px 40px;text-align:center;">
-            <p style="margin:0;font-size:22px;font-weight:900;color:#A6D608;letter-spacing:-0.5px;">DRUX HEALTH STORE</p>
-            <p style="margin:4px 0 0;font-size:11px;color:#9CA3AF;text-transform:uppercase;letter-spacing:2px;">Health &amp; Wellness</p>
+          <td style="padding:20px 32px;border-bottom:1px solid #eeeeee;background-color:#ffffff;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td align="left" style="vertical-align:middle;">
+                  <img src="https://drux.in/druxlogo.png" alt="Drux Health Store" style="height:35px;width:auto;display:block;border:0;" />
+                </td>
+                <td align="right" style="vertical-align:middle;color:#666666;font-size:12px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                  Newsletter
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
         <!-- Body -->
         <tr>
-          <td style="padding:40px 40px 32px;">
+          <td style="padding:32px 32px 24px;background-color:#ffffff;color:#111111;font-size:14px;line-height:1.5;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
             ${body}
           </td>
         </tr>
         <!-- Footer -->
         <tr>
-          <td style="background:#F9FAFB;padding:24px 40px;border-top:1px solid #E5E7EB;text-align:center;">
-            <p style="margin:0;font-size:12px;color:#9CA3AF;">
+          <td style="background:#F9FAFB;padding:24px 32px;border-top:1px solid #E5E7EB;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#9CA3AF;line-height:1.5;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
               You're receiving this because you subscribed to Drux Health Store newsletters.<br/>
-              <a href="https://drux.in" style="color:#A6D608;text-decoration:none;">Visit our store</a>
+              <a href="https://drux.in" style="color:#A6D608;text-decoration:none;font-weight:bold;margin-top:6px;display:inline-block;">Visit our store</a>
             </p>
           </td>
         </tr>
