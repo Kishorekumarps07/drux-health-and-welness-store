@@ -400,6 +400,93 @@ class AdminService {
     await prisma.newsletterSubscription.delete({ where: { email: email.toLowerCase().trim() } });
     return { success: true };
   }
+
+  /**
+   * Send a newsletter email blast to all subscribers.
+   * Sends in batches of 50 to avoid SMTP rate limits.
+   * @param {string} subject  - Email subject line
+   * @param {string} body     - Admin-composed HTML/text body
+   * @returns {Promise<{sent: number, failed: number}>}
+   */
+  async sendNewsletter(subject, body) {
+    const { sendEmail } = require('../../lib/email');
+
+    // Fetch ALL subscribers (no limit)
+    const subscribers = await prisma.newsletterSubscription.findMany({
+      select: { email: true },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    if (subscribers.length === 0) {
+      return { sent: 0, failed: 0, total: 0 };
+    }
+
+    // Wrap body in a branded HTML shell
+    const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${subject}</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:32px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;max-width:600px;width:100%;">
+        <!-- Header -->
+        <tr>
+          <td style="background:#1E1E1E;padding:28px 40px;text-align:center;">
+            <p style="margin:0;font-size:22px;font-weight:900;color:#A6D608;letter-spacing:-0.5px;">DRUX HEALTH STORE</p>
+            <p style="margin:4px 0 0;font-size:11px;color:#9CA3AF;text-transform:uppercase;letter-spacing:2px;">Health &amp; Wellness</p>
+          </td>
+        </tr>
+        <!-- Body -->
+        <tr>
+          <td style="padding:40px 40px 32px;">
+            ${body}
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background:#F9FAFB;padding:24px 40px;border-top:1px solid #E5E7EB;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#9CA3AF;">
+              You're receiving this because you subscribed to Drux Health Store newsletters.<br/>
+              <a href="https://drux.in" style="color:#A6D608;text-decoration:none;">Visit our store</a>
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+    const BATCH_SIZE = 50;
+    let sent = 0;
+    let failed = 0;
+
+    for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
+      const batch = subscribers.slice(i, i + BATCH_SIZE);
+      await Promise.allSettled(
+        batch.map(async (sub) => {
+          try {
+            await sendEmail({ to: sub.email, subject, html });
+            sent++;
+          } catch {
+            failed++;
+          }
+        })
+      );
+      // Small delay between batches to be kind to SMTP server
+      if (i + BATCH_SIZE < subscribers.length) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+
+    console.log(`[NEWSLETTER] Blast sent: ${sent} delivered, ${failed} failed, ${subscribers.length} total`);
+    return { sent, failed, total: subscribers.length };
+  }
 }
 
 module.exports = new AdminService();

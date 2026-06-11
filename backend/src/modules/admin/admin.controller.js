@@ -75,6 +75,15 @@ const deleteNewsletterSubscriber = asyncHandler(async (req, res) => {
   res.json({ status: 'success', message: 'Subscriber removed.' });
 });
 
+const sendNewsletterBlast = asyncHandler(async (req, res) => {
+  const { subject, body } = req.body;
+  if (!subject || !body) {
+    return res.status(400).json({ status: 'error', message: 'Subject and body are required.' });
+  }
+  const result = await adminService.sendNewsletter(subject, body);
+  res.json({ status: 'success', data: result });
+});
+
 module.exports = { 
   listVendors, 
   updateVendorStatus, 
@@ -89,4 +98,5 @@ module.exports = {
   listNewsletterSubscribers,
   exportNewsletterCSV,
   deleteNewsletterSubscriber,
+  sendNewsletterBlast,
 };

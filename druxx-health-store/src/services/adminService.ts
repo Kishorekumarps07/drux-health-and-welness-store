@@ -139,4 +139,9 @@ export const adminService = {
   getNewsletterExportUrl(): string {
     return `${api.defaults.baseURL}/admin/newsletter/subscribers/export`;
   },
+
+  async sendNewsletterBlast(subject: string, body: string) {
+    const response = await api.post('/admin/newsletter/send', { subject, body });
+    return response.data.data as { sent: number; failed: number; total: number };
+  },
 };

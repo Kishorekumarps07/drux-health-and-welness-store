@@ -13,6 +13,7 @@ const {
   listNewsletterSubscribers,
   exportNewsletterCSV,
   deleteNewsletterSubscriber,
+  sendNewsletterBlast,
 } = require('./admin.controller');
 const { protect, restrictTo } = require('../../middleware/auth');
 const validate = require('../../middleware/validate');
@@ -37,8 +38,9 @@ router.put('/orders/:id/status',     updateOrderStatus);
 router.get('/inventory',             listInventory);
 
 // Newsletter subscriber management
-router.get('/newsletter/subscribers',       listNewsletterSubscribers);
+router.get('/newsletter/subscribers',        listNewsletterSubscribers);
 router.get('/newsletter/subscribers/export', exportNewsletterCSV);
 router.delete('/newsletter/subscribers/:email', deleteNewsletterSubscriber);
+router.post('/newsletter/send',              sendNewsletterBlast);
 
 module.exports = router;
