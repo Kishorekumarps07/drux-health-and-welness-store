@@ -1,5 +1,7 @@
 'use strict';
 
+const { frontendUrl } = require('../config/env');
+
 // ─────────────────────────────────────────────────────────────
 // Shared layout wrapper — wraps any content in an Amazon-style shell
 // ─────────────────────────────────────────────────────────────
@@ -179,7 +181,7 @@ function orderPlaced({ customerName, orderId, items = [], total, shippingCharge,
       </tr>
     </table>
 
-    ${ctaButton('View or Manage Your Order', `${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/orders/${orderId}`)}
+    ${ctaButton('View or Manage Your Order', `${frontendUrl}/dashboard/orders/${orderId}`)}
 
     <p style="margin:24px 0 0;color:#666666;font-size:12px;">We'll send you an email confirmation when your items are shipped.</p>
   `;
@@ -202,7 +204,7 @@ function orderConfirmed({ customerName, orderId, total }) {
       </table>
     </div>
 
-    ${ctaButton('Track Your Order', `${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/orders/${orderId}`)}
+    ${ctaButton('Track Your Order', `${frontendUrl}/dashboard/orders/${orderId}`)}
   `;
   return layout('Order Confirmed — Drux Health Store', body);
 }
@@ -246,7 +248,7 @@ function orderStatusUpdate({ customerName, orderId, status, awbCode, courierName
     ${trackingBlock}
     ${trackingNote ? `<p style="color:#666666;font-size:12px;line-height:1.5;">${trackingNote}</p>` : ''}
 
-    ${ctaButton('View Order Details', `${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/orders/${orderId}`)}
+    ${ctaButton('View Order Details', `${frontendUrl}/dashboard/orders/${orderId}`)}
   `;
   return layout(`Order Update — Drux Health Store`, body);
 }
@@ -269,7 +271,7 @@ function orderCancelled({ customerName, orderId, total }) {
 
     <p style="color:#555555;font-size:13px;line-height:1.5;margin:16px 0;">If you paid online, your refund will be processed to your original payment method within 5–7 business days.</p>
 
-    ${ctaButton('Continue Shopping', `${process.env.FRONTEND_URL || 'http://localhost:3000'}/shop`)}
+    ${ctaButton('Continue Shopping', `${frontendUrl}/shop`)}
   `;
   return layout('Order Cancelled — Drux Health Store', body);
 }
@@ -308,7 +310,7 @@ function newOrderForVendor({ vendorName, orderId, customerName, items = [], tota
       <p style="margin:0;color:#555555;line-height:1.5;">${addressStr}</p>
     </div>
 
-    ${ctaButton('Go to Vendor Dashboard', `${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/vendor/orders`)}
+    ${ctaButton('Go to Vendor Dashboard', `${frontendUrl}/dashboard/vendor/orders`)}
   `;
   return layout('New Order — Drux Vendor Portal', body);
 }
@@ -334,7 +336,7 @@ function itemCancelledForVendor({ vendorName, orderId, customerName, items = [] 
       <p style="margin:0;color:#c62828;line-height:1.5;font-weight:bold;">Please halt processing or shipping for the above items immediately.</p>
     </div>
 
-    ${ctaButton('Go to Vendor Dashboard', `${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/vendor/orders`)}
+    ${ctaButton('Go to Vendor Dashboard', `${frontendUrl}/dashboard/vendor/orders`)}
   `;
   return layout('Order Cancellation — Drux Vendor Portal', body);
 }

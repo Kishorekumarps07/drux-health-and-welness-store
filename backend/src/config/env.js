@@ -6,7 +6,9 @@ const { z } = require('zod');
 const envSchema = z.object({
   PORT: z.string().optional().default('5001'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  FRONTEND_URL: z.string().url().default('http://localhost:3000'),
+  FRONTEND_URL: z.string().url().default(
+    process.env.NODE_ENV === 'production' ? 'https://drux.in' : 'http://localhost:3000'
+  ),
 
   DATABASE_URL: z.string().url(),
   
