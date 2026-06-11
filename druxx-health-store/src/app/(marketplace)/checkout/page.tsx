@@ -59,6 +59,13 @@ export default function CheckoutPage() {
   } = useCartStore();
   const { user, isAuthenticated } = useAuthStore();
 
+  const hasOutOfStockItems = items.some(
+    (item) => {
+      const stock = item.product?.stock ?? 0;
+      return stock === 0 || stock < item.quantity;
+    }
+  );
+
   const [couponInput, setCouponInput] = useState("");
   const [couponError, setCouponError] = useState("");
   const [couponSuccess, setCouponSuccess] = useState("");
@@ -169,6 +176,19 @@ export default function CheckoutPage() {
     if (!addressId) {
       toast.error("Please select a delivery address");
       setCurrentStep(1);
+      return;
+    }
+
+    const freshItems = useCartStore.getState().items;
+    const hasOOS = freshItems.some(
+      (item) => {
+        const stock = item.product?.stock ?? 0;
+        return stock === 0 || stock < item.quantity;
+      }
+    );
+    if (hasOOS) {
+      toast.error("Some items in your cart are out of stock. Please adjust your cart before placing the order.");
+      setIsPlacingOrder(false);
       return;
     }
 
@@ -519,6 +539,10 @@ export default function CheckoutPage() {
                         const originalPrice = hasDiscount ? product.originalPrice : Math.round(Number(product.price) * 1.25);
                         const discountPercent = hasDiscount ? product.discount : 20;
                         
+                        const stock = product.stock ?? 0;
+                        const isOutOfStock = stock === 0;
+                        const isLowStock = !isOutOfStock && stock < item.quantity;
+
                         return (
                           <div key={item.id} className="flex gap-4 sm:gap-6 py-5 border-b border-gray-100 last:border-b-0 group">
                             {/* Left Side: Product Image & Quantity Controls */}
@@ -549,7 +573,7 @@ export default function CheckoutPage() {
                                 <button
                                   type="button"
                                   onClick={() => updateQuantity(product.id, item.quantity + 1)}
-                                  disabled={item.quantity >= 10}
+                                  disabled={item.quantity >= 10 || item.quantity >= stock}
                                   className="w-6 h-6 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-gray-100 disabled:opacity-30 transition-colors active:scale-95 cursor-pointer"
                                 >
                                   <Plus size={10} strokeWidth={3} />
@@ -575,6 +599,18 @@ export default function CheckoutPage() {
                                   )}
                                 </div>
 
+                                {/* Stock Warnings */}
+                                {isOutOfStock && (
+                                  <div className="mt-2 text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1 inline-block">
+                                    Out of Stock
+                                  </div>
+                                )}
+                                {isLowStock && (
+                                  <div className="mt-2 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded px-2 py-1 inline-block">
+                                    Only {stock} unit{stock > 1 ? "s" : ""} left (Requested: {item.quantity})
+                                  </div>
+                                )}
+
                                 <div className="mt-3 text-[10px] sm:text-xs font-medium text-gray-800">
                                   Delivery by {getDeliveryDateString()} | <span className="text-[#388E3C] font-semibold">Free Delivery</span>
                                 </div>
@@ -597,12 +633,21 @@ export default function CheckoutPage() {
                     </div>
 
                     <div className="flex justify-end pt-4 border-t border-gray-100">
-                      <Button 
-                        onClick={() => setCurrentStep(4)}
-                        className="bg-[#FB641B] hover:bg-[#e05310] text-white font-bold px-10 h-11 rounded-sm text-xs uppercase tracking-wider shadow-md"
-                      >
-                        Continue to Payment
-                      </Button>
+                      {hasOutOfStockItems ? (
+                        <Button 
+                          disabled
+                          className="bg-gray-300 text-gray-500 font-bold px-8 h-11 rounded-sm text-xs uppercase tracking-wider cursor-not-allowed"
+                        >
+                          Remove Out of Stock Items to Proceed
+                        </Button>
+                      ) : (
+                        <Button 
+                          onClick={() => setCurrentStep(4)}
+                          className="bg-[#FB641B] hover:bg-[#e05310] text-white font-bold px-10 h-11 rounded-sm text-xs uppercase tracking-wider shadow-md"
+                        >
+                          Continue to Payment
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -668,13 +713,27 @@ export default function CheckoutPage() {
 
                           {paymentMethod === method.id && (
                             <div className="mt-4">
-                              <Button 
-                                disabled={isPlacingOrder}
-                                onClick={handlePlaceOrder}
-                                className="bg-[#FB641B] hover:bg-[#e05310] text-white font-bold px-10 h-12 rounded-sm text-xs uppercase tracking-wider shadow-lg"
-                              >
-                                {isPlacingOrder ? "Placing Order..." : paymentMethod === "COD" ? "Confirm Order (COD)" : "Pay & Place Order"}
-                              </Button>
+                              {hasOutOfStockItems ? (
+                                <div className="space-y-3">
+                                  <p className="text-xs text-red-600 font-bold">
+                                    Some items in your cart are out of stock. Please return to the cart page to adjust your items.
+                                  </p>
+                                  <Button 
+                                    disabled
+                                    className="bg-gray-300 text-gray-500 font-bold px-10 h-12 rounded-sm text-xs uppercase tracking-wider cursor-not-allowed"
+                                  >
+                                    Cannot Place Order (Out of Stock Items)
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button 
+                                  disabled={isPlacingOrder}
+                                  onClick={handlePlaceOrder}
+                                  className="bg-[#FB641B] hover:bg-[#e05310] text-white font-bold px-10 h-12 rounded-sm text-xs uppercase tracking-wider shadow-lg"
+                                >
+                                  {isPlacingOrder ? "Placing Order..." : paymentMethod === "COD" ? "Confirm Order (COD)" : "Pay & Place Order"}
+                                </Button>
+                              )}
                             </div>
                           )}
                         </div>
@@ -699,6 +758,17 @@ export default function CheckoutPage() {
 
           {/* Right Column: Flipkart-Style Price Details (1/3 width) */}
           <aside className="w-full lg:w-80 space-y-4 sticky top-20">
+            {hasOutOfStockItems && (
+              <div className="bg-red-50 border border-red-200 rounded-sm p-4 text-xs font-semibold text-red-700 flex items-start gap-2 shadow-sm">
+                <span className="text-red-500 font-bold text-base leading-none">⚠️</span>
+                <div>
+                  <p className="font-bold text-red-800">Items Out of Stock</p>
+                  <p className="mt-0.5 text-gray-600">Please return to the cart page to remove or adjust out of stock items.</p>
+                  <Link href="/cart" className="text-blue-600 underline font-bold mt-1.5 block">Go to Cart</Link>
+                </div>
+              </div>
+            )}
+
             {/* Coupon Card */}
             <div className="bg-white rounded-sm border border-gray-200 shadow-sm p-6 space-y-4">
               {couponCode ? (

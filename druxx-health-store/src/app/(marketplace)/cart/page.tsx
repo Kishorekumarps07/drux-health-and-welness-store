@@ -42,6 +42,13 @@ export default function CartPage() {
   const totalAmt = total();
   const discountAmt = couponDiscountAmount();
 
+  const hasOutOfStockItems = items.some(
+    (item) => {
+      const stock = item.product?.stock ?? 0;
+      return stock === 0 || stock < item.quantity;
+    }
+  );
+
   // MRP = sum of originalPrice (if available) else price
   const mrpTotal = items.reduce(
     (acc, { product, quantity }) =>
@@ -113,6 +120,14 @@ export default function CartPage() {
                 </button>
               </div>
 
+              {/* Warning banner */}
+              {hasOutOfStockItems && (
+                <div className="bg-red-50 border-b border-red-100 px-6 py-3 text-xs sm:text-sm font-semibold text-red-700 flex items-center gap-2">
+                  <span className="text-red-500 font-bold text-base">⚠️</span>
+                  <span>Please remove out-of-stock items or adjust quantities to proceed with your order.</span>
+                </div>
+              )}
+
               {/* Items */}
               <div className="divide-y divide-gray-100">
                 {items.map(({ product, quantity }) => (
@@ -142,7 +157,7 @@ export default function CartPage() {
                           </span>
                           <button
                             onClick={() => updateQuantity(product.id, quantity + 1)}
-                            disabled={quantity >= 10}
+                            disabled={quantity >= 10 || quantity >= (product.stock ?? 0)}
                             className="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 active:scale-95 disabled:opacity-30"
                           >
                             <Plus size={12} strokeWidth={3} />
@@ -169,6 +184,17 @@ export default function CartPage() {
                               </div>
                             )}
                           </div>
+
+                          {/* Stock Warnings */}
+                          {(product.stock ?? 0) === 0 ? (
+                            <div className="mt-2 text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1 inline-block">
+                              Out of Stock
+                            </div>
+                          ) : (product.stock ?? 0) < quantity ? (
+                            <div className="mt-2 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded px-2 py-1 inline-block">
+                              Only {product.stock} left in stock (Requested: {quantity})
+                            </div>
+                          ) : null}
 
                           <div className="mt-2 text-[10px] sm:text-xs font-medium text-gray-800">
                              Delivery by {new Date(Date.now() + 86400000 * 3).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} | <span className="text-[#388E3C]">Free</span>
@@ -214,22 +240,40 @@ export default function CartPage() {
                     View Price Details <ChevronUp size={12} />
                   </button>
                 </div>
-                <Button
-                  asChild
-                  className="bg-[#FB641B] hover:bg-[#e85a15] text-white font-bold rounded-sm h-12 px-8 text-sm shadow-md"
-                >
-                  <Link href="/checkout">Place Order</Link>
-                </Button>
+                {hasOutOfStockItems ? (
+                  <Button
+                    disabled
+                    className="bg-gray-300 text-gray-500 font-bold rounded-sm h-12 px-4 text-xs shadow-none cursor-not-allowed"
+                  >
+                    Remove sold out items
+                  </Button>
+                ) : (
+                  <Button
+                    asChild
+                    className="bg-[#FB641B] hover:bg-[#e85a15] text-white font-bold rounded-sm h-12 px-8 text-sm shadow-md"
+                  >
+                    <Link href="/checkout">Place Order</Link>
+                  </Button>
+                )}
               </div>
 
               {/* Place Order Link (Desktop only) */}
               <div className="hidden lg:flex justify-end p-5 bg-white border-t border-gray-100 sticky bottom-0 z-10 shadow-[0_-2px_10px_rgba(0,0,0,0.02)]">
-                <Button
-                  asChild
-                  className="bg-[#FB641B] hover:bg-[#e85a15] text-white font-bold rounded-sm h-14 px-16 text-sm shadow-md"
-                >
-                  <Link href="/checkout">Place Order</Link>
-                </Button>
+                {hasOutOfStockItems ? (
+                  <Button
+                    disabled
+                    className="bg-gray-300 text-gray-500 font-bold rounded-sm h-14 px-12 text-sm shadow-none cursor-not-allowed"
+                  >
+                    Remove Out of Stock Items to Proceed
+                  </Button>
+                ) : (
+                  <Button
+                    asChild
+                    className="bg-[#FB641B] hover:bg-[#e85a15] text-white font-bold rounded-sm h-14 px-16 text-sm shadow-md"
+                  >
+                    <Link href="/checkout">Place Order</Link>
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -463,14 +507,23 @@ export default function CartPage() {
 
             {/* Bottom CTA */}
             <div className="px-5 py-4 border-t border-gray-100 bg-white">
-              <Button
-                asChild
-                className="w-full bg-[#FB641B] hover:bg-[#e85a15] text-white font-bold rounded-sm h-12 text-sm shadow-md"
-              >
-                <Link href="/checkout" onClick={() => setShowPriceDrawer(false)}>
-                  Place Order · ₹{totalAmt.toLocaleString("en-IN")}
-                </Link>
-              </Button>
+              {hasOutOfStockItems ? (
+                <Button
+                  disabled
+                  className="w-full bg-gray-300 text-gray-500 font-bold rounded-sm h-12 text-xs shadow-none cursor-not-allowed"
+                >
+                  Remove Out of Stock Items to Proceed
+                </Button>
+              ) : (
+                <Button
+                  asChild
+                  className="w-full bg-[#FB641B] hover:bg-[#e85a15] text-white font-bold rounded-sm h-12 text-sm shadow-md"
+                >
+                  <Link href="/checkout" onClick={() => setShowPriceDrawer(false)}>
+                    Place Order · ₹{totalAmt.toLocaleString("en-IN")}
+                  </Link>
+                </Button>
+              )}
             </div>
           </Drawer.Content>
         </Drawer.Portal>

@@ -11,7 +11,6 @@
 *None detected*
 
 ## Performance Observations
-- Endpoint POST /auth/login took 1017ms
-- Endpoint POST /products took 1599ms
-- Endpoint POST /cart/items took 2772ms
-- Endpoint POST /orders took 2917ms
+- Endpoint POST /products took 1587ms
+- Endpoint POST /cart/items took 2684ms
+- Endpoint POST /orders took 3137ms

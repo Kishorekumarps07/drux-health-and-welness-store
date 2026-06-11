@@ -35,6 +35,13 @@ export function CartDrawer() {
   const [couponError, setCouponError] = useState("");
   const [couponSuccess, setCouponSuccess] = useState("");
 
+  const hasOutOfStockItems = items.some(
+    (item) => {
+      const stock = item.product?.stock ?? 0;
+      return stock === 0 || stock < item.quantity;
+    }
+  );
+
   const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;
     const success = await applyCoupon(couponInput.trim());
@@ -118,6 +125,17 @@ export function CartDrawer() {
                       </Link>
                       <p className="text-xs text-gray-400 mt-0.5">{product.vendor.name}</p>
 
+                      {/* Stock Warnings */}
+                      {(product.stock ?? 0) === 0 ? (
+                        <span className="inline-block mt-1 text-[10px] font-bold text-red-600 bg-red-50 border border-red-100 rounded px-1.5 py-0.5">
+                          Out of Stock
+                        </span>
+                      ) : (product.stock ?? 0) < quantity ? (
+                        <span className="inline-block mt-1 text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-100 rounded px-1.5 py-0.5">
+                          Only {product.stock} left
+                        </span>
+                      ) : null}
+
                       <div className="flex items-center justify-between mt-2">
                         {/* Price */}
                         <div>
@@ -145,7 +163,7 @@ export function CartDrawer() {
                           </span>
                           <button
                             onClick={() => updateQuantity(product.id, quantity + 1)}
-                            disabled={quantity >= 10}
+                            disabled={quantity >= 10 || quantity >= (product.stock ?? 0)}
                             className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center hover:border-[#A6D608] hover:text-[#A6D608] transition-colors disabled:opacity-40"
                             aria-label="Increase quantity"
                           >
@@ -261,17 +279,27 @@ export function CartDrawer() {
                 </p>
               )}
 
-              <Button
-                asChild
-                onClick={closeCart}
-                className="w-full mt-3 bg-[#FF7A00] hover:bg-[#d96600] text-white font-bold h-12 text-base rounded-xl"
-                id="proceed-checkout-btn"
-              >
-                <Link href="/checkout" className="flex items-center justify-center gap-2">
-                  Proceed to Checkout
-                  <ArrowRight size={18} />
-                </Link>
-              </Button>
+              {hasOutOfStockItems ? (
+                <Button
+                  disabled
+                  className="w-full mt-3 bg-gray-300 text-gray-500 font-bold h-12 text-sm rounded-xl cursor-not-allowed"
+                  id="proceed-checkout-btn"
+                >
+                  Remove Out of Stock Items to Proceed
+                </Button>
+              ) : (
+                <Button
+                  asChild
+                  onClick={closeCart}
+                  className="w-full mt-3 bg-[#FF7A00] hover:bg-[#d96600] text-white font-bold h-12 text-base rounded-xl"
+                  id="proceed-checkout-btn"
+                >
+                  <Link href="/checkout" className="flex items-center justify-center gap-2">
+                    Proceed to Checkout
+                    <ArrowRight size={18} />
+                  </Link>
+                </Button>
+              )}
             </div>
           </>
         )}
