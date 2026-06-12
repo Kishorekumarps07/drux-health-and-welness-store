@@ -65,23 +65,29 @@ export function AdvantageCarousel({ advantages }: AdvantageCarouselProps) {
           </div>
         </div>
 
-        <div className="relative min-h-[500px] md:min-h-[550px]">
+        <div className="relative transition-all duration-500">
           {advantages.map((item, i) => (
             <div
               key={item.id}
-              className={`absolute inset-0 transition-all duration-1000 flex flex-col md:flex-row items-center gap-6 md:gap-10 ${
-                i === current ? "opacity-100 translate-x-0 z-10 scale-100" : "opacity-0 translate-x-12 z-0 scale-95"
+              className={`transition-all duration-1000 flex flex-col md:flex-row items-center gap-6 md:gap-10 ${
+                i === current 
+                  ? "relative opacity-100 translate-x-0 z-10 scale-100" 
+                  : "absolute inset-0 opacity-0 translate-x-12 z-0 scale-95 pointer-events-none"
               }`}
             >
-              <div className="w-full md:w-2/3 h-[400px] md:h-[550px] rounded-[2rem] md:rounded-[3rem] border border-white/5 relative overflow-hidden group shadow-2xl">
+              <div className="w-full md:w-2/3 h-auto md:h-[550px] rounded-2xl md:rounded-[3rem] border border-white/5 relative overflow-hidden group shadow-2xl">
                  {item.image ? (
-                   <Image src={item.image} alt={item.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 66vw" />
+                   <img 
+                     src={item.image} 
+                     alt={item.title} 
+                     className="w-full h-auto md:h-full object-cover transition-transform duration-700 group-hover:scale-105 block" 
+                   />
                  ) : (
-                   <div className="absolute inset-0 bg-gray-900 flex items-center justify-center text-white/10 italic">No Image</div>
+                   <div className="absolute inset-0 bg-gray-900 flex items-center justify-center text-white/10 italic min-h-[300px]">No Image</div>
                  )}
-                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent" />
-                 <div className="absolute inset-0 p-6 md:p-16 flex flex-col justify-end">
+                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
+                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent z-10" />
+                 <div className="absolute inset-0 p-6 md:p-16 flex flex-col justify-end z-20">
                     <div className="mb-4 md:mb-6 p-3 md:p-4 w-fit rounded-xl md:rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
                        {iconMap[item.iconType] || <ShieldCheck size={24} className="text-[#A6D608] md:w-8 md:h-8" />}
                     </div>
@@ -89,7 +95,7 @@ export function AdvantageCarousel({ advantages }: AdvantageCarouselProps) {
                     <p className="text-white/70 text-sm md:text-xl font-medium leading-relaxed max-w-xl line-clamp-3 md:line-clamp-none">{item.desc}</p>
                  </div>
               </div>
-
+ 
               <div className="hidden md:flex flex-col gap-6 w-1/3">
                  <p className="text-[#A6D608] font-black text-xs uppercase tracking-widest opacity-50">Up Next</p>
                  {advantages.filter((_, idx) => idx !== current).slice(0, 2).map((other) => (
