@@ -2,9 +2,13 @@
 
 import { Suspense } from "react";
 import { usePathname } from "next/navigation";
-import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import dynamic from "next/dynamic";
+
+const Navbar = dynamic(
+  () => import("@/components/layout/Navbar").then((m) => m.Navbar),
+  { ssr: false }
+);
 
 const CartDrawer = dynamic(
   () => import("@/components/layout/CartDrawer").then((m) => m.CartDrawer),
