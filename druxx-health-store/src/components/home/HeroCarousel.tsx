@@ -52,13 +52,13 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
 
   return (
     <div
-      className="relative w-full overflow-hidden rounded-none border-none shadow-none transition-all duration-500 ease-in-out"
+      className="relative w-full overflow-hidden rounded-none border-none shadow-none transition-all duration-500 ease-in-out md:h-[420px]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       id="hero-carousel"
     >
       {/* ── Dynamic Height Reference ── */}
-      {/* This invisible image determines the carousel container height based on the active image's aspect ratio */}
+      {/* This invisible image determines the carousel container height on mobile based on the active image's aspect ratio */}
       {currentSlide.image && !isVideo(currentSlide.image) ? (
         <img
           src={currentSlide.image}
@@ -68,16 +68,11 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
             const aspect = img.naturalWidth / img.naturalHeight;
             setImageAspects(prev => ({ ...prev, [currentSlide.id]: aspect }));
           }}
-          className={`w-full h-auto opacity-0 pointer-events-none select-none block ${isPortrait ? "md:hidden" : ""}`}
+          className="w-full h-auto opacity-0 pointer-events-none select-none block md:hidden"
         />
       ) : (
-        // Video fallback height (16:9 on mobile, 21:8 on desktop)
-        <div className={`w-full aspect-[16/9] md:aspect-[21/8] opacity-0 pointer-events-none ${isPortrait ? "md:hidden" : ""}`} />
-      )}
-
-      {/* If it's portrait on desktop, render a dummy height spacer to hold a constrained small height */}
-      {isPortrait && (
-        <div className="hidden md:block w-full h-[450px] opacity-0 pointer-events-none" />
+        // Video fallback height (16:9 on mobile)
+        <div className="w-full aspect-[16/9] opacity-0 pointer-events-none md:hidden" />
       )}
 
       {/* ── Slide Content ── */}
@@ -117,7 +112,7 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
                       const aspect = img.naturalWidth / img.naturalHeight;
                       setImageAspects(prev => ({ ...prev, [currentSlide.id]: aspect }));
                     }}
-                    className={`w-full h-full object-cover ${isPortrait ? "md:h-full md:w-auto md:mx-auto md:object-contain" : ""}`} 
+                    className="w-full h-full object-cover md:object-contain" 
                   />
                 )
               )}
