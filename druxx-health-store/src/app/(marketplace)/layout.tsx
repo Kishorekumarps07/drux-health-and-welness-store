@@ -31,7 +31,7 @@ export default function MarketplaceLayout({
   return (
     <>
       {!isMinimalPage && <Navbar />}
-      <main className={`flex-1 ${!isMinimalPage ? 'pt-[215px] md:pt-[160px]' : ''} pb-16 lg:pb-0`}>
+      <main className={`flex-1 ${!isMinimalPage ? 'pt-[185px] md:pt-[160px]' : ''} pb-16 lg:pb-0`}>
         {children}
       </main>
       {!isMinimalPage && <Footer />}
