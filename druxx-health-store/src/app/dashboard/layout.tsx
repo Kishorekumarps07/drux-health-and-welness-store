@@ -35,7 +35,7 @@ export default function DashboardLayout({
   return (
     <ProtectedRoute>
       <Navbar />
-      <div className="min-h-screen bg-[#F7F7F7] pt-[185px] md:pt-[160px] pb-16 lg:pb-0">
+      <div className="min-h-screen bg-[#F7F7F7] pt-[215px] md:pt-[160px] pb-16 lg:pb-0">
         <div className="max-w-7xl mx-auto px-4 py-8">
           {children}
         </div>
