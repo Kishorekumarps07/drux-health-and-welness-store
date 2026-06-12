@@ -83,7 +83,18 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className="absolute inset-0 z-10"
+          className="absolute inset-0 z-10 cursor-grab active:cursor-grabbing"
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.2}
+          onDragEnd={(e, { offset }) => {
+            const swipeThreshold = 50;
+            if (offset.x < -swipeThreshold) {
+              next();
+            } else if (offset.x > swipeThreshold) {
+              prev();
+            }
+          }}
         >
           <div className="relative w-full h-full bg-[#F9F9F9] overflow-hidden">
             {/* Background cover effect */}
@@ -130,12 +141,12 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
       </AnimatePresence>
 
       {/* ── Navigation Controls ── */}
-      <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 z-30 hidden md:flex justify-between pointer-events-none">
-        <button onClick={prev} className="pointer-events-auto w-14 h-14 rounded-full border border-gray-200 bg-white/70 backdrop-blur-xl flex items-center justify-center text-[#1A1A1A] hover:bg-[#A6D608] hover:border-[#A6D608] transition-all group shadow-lg">
-          <ChevronLeft size={24} />
+      <div className="absolute inset-x-2 md:inset-x-6 top-1/2 -translate-y-1/2 z-30 flex justify-between pointer-events-none">
+        <button onClick={prev} className="pointer-events-auto w-8 h-8 md:w-14 md:h-14 rounded-full border border-gray-200 bg-white/70 backdrop-blur-xl flex items-center justify-center text-[#1A1A1A] hover:bg-[#A6D608] hover:border-[#A6D608] transition-all group shadow-lg">
+          <ChevronLeft className="w-4 h-4 md:w-6 md:h-6" />
         </button>
-        <button onClick={next} className="pointer-events-auto w-14 h-14 rounded-full border border-gray-200 bg-white/70 backdrop-blur-xl flex items-center justify-center text-[#1A1A1A] hover:bg-[#A6D608] hover:border-[#A6D608] transition-all group shadow-lg">
-          <ChevronRight size={24} />
+        <button onClick={next} className="pointer-events-auto w-8 h-8 md:w-14 md:h-14 rounded-full border border-gray-200 bg-white/70 backdrop-blur-xl flex items-center justify-center text-[#1A1A1A] hover:bg-[#A6D608] hover:border-[#A6D608] transition-all group shadow-lg">
+          <ChevronRight className="w-4 h-4 md:w-6 md:h-6" />
         </button>
       </div>
 
