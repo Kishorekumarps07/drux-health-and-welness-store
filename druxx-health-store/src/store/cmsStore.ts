@@ -7,6 +7,7 @@ export interface HeroSlide {
   subtitle?: string;
   image: string;
   bgColor: string;
+  redirectUrl?: string;
 }
 
 export interface AdvantageItem {
@@ -15,6 +16,7 @@ export interface AdvantageItem {
   desc?: string;
   image?: string;
   iconType?: string;
+  redirectUrl?: string;
 }
 
 interface CMSState {
@@ -56,7 +58,8 @@ export const useCMSStore = create<CMSState>((set, get) => ({
           title: a.title,
           desc: a.description,
           image: a.image,
-          iconType: a.icon_type
+          iconType: a.icon_type,
+          redirectUrl: a.redirectUrl
         }))
       });
     } catch (error) {
@@ -128,7 +131,8 @@ export const useCMSStore = create<CMSState>((set, get) => ({
         title: item.title,
         description: item.desc,
         image: item.image,
-        icon_type: item.iconType
+        icon_type: item.iconType,
+        redirectUrl: item.redirectUrl
       };
     }
     
@@ -143,7 +147,8 @@ export const useCMSStore = create<CMSState>((set, get) => ({
         title: data.data.title,
         desc: data.data.description,
         image: data.data.image,
-        iconType: data.data.icon_type
+        iconType: data.data.icon_type,
+        redirectUrl: data.data.redirectUrl
       }]
     }));
   },
@@ -157,7 +162,8 @@ export const useCMSStore = create<CMSState>((set, get) => ({
         title: updatedItem.title,
         description: updatedItem.desc,
         image: updatedItem.image,
-        icon_type: updatedItem.iconType
+        icon_type: updatedItem.iconType,
+        redirectUrl: updatedItem.redirectUrl
       };
     }
 
@@ -172,7 +178,8 @@ export const useCMSStore = create<CMSState>((set, get) => ({
         title: data.data.title,
         desc: data.data.description,
         image: data.data.image,
-        iconType: data.data.icon_type
+        iconType: data.data.icon_type,
+        redirectUrl: data.data.redirectUrl
       } : a)
     }));
   },

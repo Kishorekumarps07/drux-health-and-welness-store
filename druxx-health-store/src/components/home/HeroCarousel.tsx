@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { HeroSlide } from "@/store/cmsStore";
 
 const isVideo = (url: string) => /\.(mp4|webm|mov|ogg)$/i.test(url) || url.includes('/video/upload/');
@@ -112,19 +113,38 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
             {/* Slide Container */}
             <div className="relative z-10 w-full h-full flex items-center justify-center">
               {currentSlide.image && (
-                isVideo(currentSlide.image) ? (
-                  <video src={currentSlide.image} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                currentSlide.redirectUrl ? (
+                  <Link href={currentSlide.redirectUrl} className="w-full h-full flex items-center justify-center cursor-pointer">
+                    {isVideo(currentSlide.image) ? (
+                      <video src={currentSlide.image} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                    ) : (
+                      <img 
+                        src={currentSlide.image} 
+                        alt={currentSlide.title || "Hero banner"} 
+                        onLoad={(e) => {
+                          const img = e.currentTarget;
+                          const aspect = img.naturalWidth / img.naturalHeight;
+                          setImageAspects(prev => ({ ...prev, [currentSlide.id]: aspect }));
+                        }}
+                        className="w-full h-full object-cover md:object-contain" 
+                      />
+                    )}
+                  </Link>
                 ) : (
-                  <img 
-                    src={currentSlide.image} 
-                    alt={currentSlide.title || "Hero banner"} 
-                    onLoad={(e) => {
-                      const img = e.currentTarget;
-                      const aspect = img.naturalWidth / img.naturalHeight;
-                      setImageAspects(prev => ({ ...prev, [currentSlide.id]: aspect }));
-                    }}
-                    className="w-full h-full object-cover md:object-contain" 
-                  />
+                  isVideo(currentSlide.image) ? (
+                    <video src={currentSlide.image} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                  ) : (
+                    <img 
+                      src={currentSlide.image} 
+                      alt={currentSlide.title || "Hero banner"} 
+                      onLoad={(e) => {
+                        const img = e.currentTarget;
+                        const aspect = img.naturalWidth / img.naturalHeight;
+                        setImageAspects(prev => ({ ...prev, [currentSlide.id]: aspect }));
+                      }}
+                      className="w-full h-full object-cover md:object-contain" 
+                    />
+                  )
                 )
               )}
 

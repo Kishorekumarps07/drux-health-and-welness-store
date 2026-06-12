@@ -18,7 +18,8 @@ import {
   Target,
   Heart,
   Upload,
-  X
+  X,
+  Link as LinkIcon
 } from "lucide-react";
 import { useCMSStore } from "@/store/cmsStore";
 import { Button } from "@/components/ui/button";
@@ -79,10 +80,12 @@ export default function AdminCMSPage() {
       payload.append("title", formData.title);
       payload.append("subtitle", formData.subtitle || "");
       payload.append("bgColor", formData.bgColor || "");
+      payload.append("redirectUrl", formData.redirectUrl || "");
     } else {
       payload.append("title", formData.title);
       payload.append("description", formData.desc || "");
       payload.append("icon_type", formData.iconType || "shield");
+      payload.append("redirectUrl", formData.redirectUrl || "");
     }
     
     // Prioritize the file if uploaded, otherwise use the existing URL/string
@@ -198,7 +201,7 @@ export default function AdminCMSPage() {
             <Button 
               onClick={() => {
                 setEditingId("new");
-                setFormData(activeTab === "hero" ? { title: "", subtitle: "", image: "", bgColor: "from-[#1E1E1E] to-[#2a2a2a]" } : { title: "", desc: "", image: "", iconType: "shield" });
+                setFormData(activeTab === "hero" ? { title: "", subtitle: "", image: "", bgColor: "from-[#1E1E1E] to-[#2a2a2a]", redirectUrl: "" } : { title: "", desc: "", image: "", iconType: "shield", redirectUrl: "" });
                 setImageFile(null);
                 setImagePreview(null);
               }}
@@ -410,6 +413,19 @@ export default function AdminCMSPage() {
                         </div>
                       </div>
                     )}
+
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest flex items-center gap-2">
+                         <LinkIcon size={12} /> Redirect URL
+                       </label>
+                       <input 
+                         type="text" 
+                         placeholder="/products or /categories/wellness or https://..."
+                         value={formData.redirectUrl || ""} 
+                         onChange={(e) => setFormData({...formData, redirectUrl: e.target.value})}
+                         className="w-full bg-[#0B0F14] border border-[#1F2937] rounded-xl px-4 py-3 text-white text-sm focus:border-[#10B981] outline-none transition-all"
+                       />
+                    </div>
                  </div>
 
                  <div className="pt-6 flex gap-3">

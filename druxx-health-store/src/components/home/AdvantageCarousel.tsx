@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ShieldCheck, Smartphone, Zap, ChevronLeft, ChevronRight, Target, Heart } from "lucide-react";
+import Link from "next/link";
 import { AdvantageItem } from "@/store/cmsStore";
 
 const iconMap: Record<string, any> = {
@@ -77,11 +78,21 @@ export function AdvantageCarousel({ advantages }: AdvantageCarouselProps) {
             >
               <div className="w-full md:w-2/3 h-auto md:h-[550px] rounded-2xl md:rounded-[3rem] border border-white/5 relative overflow-hidden group shadow-2xl">
                  {item.image ? (
-                   <img 
-                     src={item.image} 
-                     alt={item.title || "Advantage banner"} 
-                     className="w-full h-auto md:h-full object-cover transition-transform duration-700 group-hover:scale-105 block" 
-                   />
+                   item.redirectUrl ? (
+                     <Link href={item.redirectUrl} className="w-full h-full block cursor-pointer">
+                       <img 
+                         src={item.image} 
+                         alt={item.title || "Advantage banner"} 
+                         className="w-full h-auto md:h-full object-cover transition-transform duration-700 group-hover:scale-105 block" 
+                       />
+                     </Link>
+                   ) : (
+                     <img 
+                       src={item.image} 
+                       alt={item.title || "Advantage banner"} 
+                       className="w-full h-auto md:h-full object-cover transition-transform duration-700 group-hover:scale-105 block" 
+                     />
+                   )
                  ) : (
                    <div className="absolute inset-0 bg-gray-900 flex items-center justify-center text-white/10 italic min-h-[300px]">No Image</div>
                  )}

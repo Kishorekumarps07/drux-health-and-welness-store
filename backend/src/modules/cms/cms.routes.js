@@ -43,7 +43,8 @@ router.post('/hero', cmsUpload.single('image'), asyncHandler(async (req, res) =>
       title: req.body.title,
       subtitle: req.body.subtitle,
       image,
-      bgColor: req.body.bgColor || "from-[#1E1E1E] to-[#2CA7A0]"
+      bgColor: req.body.bgColor || "from-[#1E1E1E] to-[#2CA7A0]",
+      redirectUrl: req.body.redirectUrl || null
     }
   });
 
@@ -59,7 +60,8 @@ router.post('/advantages', cmsUpload.single('image'), asyncHandler(async (req, r
       title: req.body.title,
       description: req.body.description,
       image,
-      iconType: req.body.icon_type
+      iconType: req.body.icon_type,
+      redirectUrl: req.body.redirectUrl || null
     }
   });
 
@@ -87,7 +89,8 @@ router.put('/hero/:id', cmsUpload.single('image'), asyncHandler(async (req, res)
       subtitle: req.body.subtitle,
       image: image || undefined,
       bgColor: req.body.bgColor,
-      isActive: req.body.isActive !== undefined ? req.body.isActive === 'true' : undefined
+      isActive: req.body.isActive !== undefined ? req.body.isActive === 'true' : undefined,
+      redirectUrl: req.body.redirectUrl !== undefined ? (req.body.redirectUrl === 'null' || req.body.redirectUrl === '' ? null : req.body.redirectUrl) : undefined
     }
   });
 
@@ -115,7 +118,8 @@ router.put('/advantages/:id', cmsUpload.single('image'), asyncHandler(async (req
       description: req.body.description,
       image: image || undefined,
       iconType: req.body.icon_type,
-      isActive: req.body.isActive !== undefined ? req.body.isActive === 'true' : undefined
+      isActive: req.body.isActive !== undefined ? req.body.isActive === 'true' : undefined,
+      redirectUrl: req.body.redirectUrl !== undefined ? (req.body.redirectUrl === 'null' || req.body.redirectUrl === '' ? null : req.body.redirectUrl) : undefined
     }
   });
 

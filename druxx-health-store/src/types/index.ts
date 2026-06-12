@@ -173,6 +173,7 @@ export interface HeroSlide {
   image: string;
   bgColor: string;
   badge?: string;
+  redirectUrl?: string;
 }
 
 export interface OrderSummary {
