@@ -54,13 +54,11 @@ export default async function HomePage() {
 
   return (
     <>
-      <div className="w-full mx-auto max-w-7xl px-0 md:px-6 md:pt-6">
-        <HeroCarousel heroSlides={heroSlides} />
-      </div>
+      <HeroCarousel heroSlides={heroSlides} />
       
       <HomeAnimations>
         {/* Featured dynamic products */}
-        <div className="relative z-20 mx-auto max-w-7xl px-4 md:px-6 py-8 md:-mt-12 lg:-mt-16">
+        <div className="relative z-20 mx-auto max-w-7xl px-4 md:px-6 py-8 md:-mt-20 lg:-mt-28">
           <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-gray-200/50 overflow-hidden border border-gray-100">
              <FeaturedProducts 
                featured={fRes.products}

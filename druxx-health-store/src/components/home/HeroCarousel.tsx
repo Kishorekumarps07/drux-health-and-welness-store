@@ -49,7 +49,7 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
 
   return (
     <div
-      className="relative w-full overflow-hidden rounded-none md:rounded-[3rem] shadow-none md:shadow-xl border-none md:border md:border-gray-100 transition-all duration-500 ease-in-out max-h-[60vh] md:max-h-[calc(100vh-220px)]"
+      className="relative w-full overflow-hidden rounded-none border-none shadow-none transition-all duration-500 ease-in-out max-h-[60vh] md:max-h-[calc(100vh-220px)]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       id="hero-carousel"
