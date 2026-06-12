@@ -49,7 +49,7 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
 
   return (
     <div
-      className="relative w-full overflow-hidden aspect-[3/4] md:aspect-[21/8] lg:aspect-[21/7] rounded-[2rem] md:rounded-[3rem] shadow-xl border border-gray-100"
+      className="relative w-full overflow-hidden aspect-[16/9] md:aspect-[21/8] lg:aspect-[21/7] rounded-none md:rounded-[3rem] shadow-none md:shadow-xl border-none md:border md:border-gray-100"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       id="hero-carousel"
@@ -64,6 +64,7 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
           className="absolute inset-0 z-10"
         >
           <div className="relative w-full h-full bg-[#F9F9F9] overflow-hidden">
+            {/* Background cover effect */}
             <div className="absolute inset-0 z-0">
               <div className="absolute inset-0 bg-gradient-to-br from-white via-[#F3F4F6] to-[#E5E7EB]" />
               {currentSlide.image && (
@@ -75,28 +76,32 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
               )}
             </div>
 
-            <div className="relative z-10 w-full h-full max-w-[1400px] mx-auto flex flex-col md:flex-row items-center px-4 md:px-16 pt-10 md:pt-0">
-              <div className="w-full md:w-1/2 flex flex-col justify-center text-center md:text-left shrink-0 md:shrink">
-                <span className="inline-block px-3 py-1 rounded-full bg-black/5 text-black/40 text-[9px] font-bold tracking-[0.2em] mb-4 md:mb-6 uppercase border border-black/5 w-fit mx-auto md:mx-0">Premium Quality</span>
-                <h1 className={`font-black text-[#1A1A1A] leading-[0.9] mb-4 md:mb-6 tracking-tight uppercase break-words ${currentSlide.title.length > 20 ? "text-3xl md:text-5xl lg:text-7xl" : "text-4xl md:text-6xl lg:text-8xl"}`}>
+            {/* Mobile: Full-bleed image layout with bottom text overlay; Desktop: side-by-side splits */}
+            <div className="relative z-10 w-full h-full max-w-[1400px] mx-auto flex flex-col md:flex-row items-center">
+              
+              {/* Text Area */}
+              <div className="absolute bottom-0 inset-x-0 z-20 md:relative md:bottom-auto md:inset-x-auto w-full md:w-1/2 flex flex-col justify-end md:justify-center p-4 pt-12 md:p-0 md:pl-16 text-left bg-gradient-to-t from-black/85 via-black/40 to-transparent md:from-transparent md:via-transparent md:to-transparent text-white md:text-[#1A1A1A]">
+                <h1 className={`font-black leading-[1.1] md:leading-[0.9] mb-1 md:mb-6 tracking-tight uppercase break-words text-lg md:text-6xl lg:text-8xl`}>
                   {currentSlide.title}
                 </h1>
-                <p className="text-[#4A4A4A] mb-2 md:mb-10 leading-relaxed max-w-[280px] md:max-w-md font-medium tracking-wide text-sm md:text-xl line-clamp-3 mx-auto md:mx-0">
+                <p className="text-gray-200 md:text-[#4A4A4A] mb-0 md:mb-10 leading-relaxed max-w-[280px] md:max-w-md font-medium tracking-wide text-[10px] md:text-xl line-clamp-1 md:line-clamp-3">
                   {currentSlide.subtitle}
                 </p>
               </div>
 
-              <div className="w-full md:w-1/2 flex-1 md:h-[80%] min-h-[220px] relative flex items-center justify-center shrink-0 mt-2 md:mt-0 pb-6 md:pb-0">
+              {/* Image Area */}
+              <div className="absolute inset-0 md:relative w-full md:w-1/2 h-full md:h-[80%] flex items-center justify-center z-10 md:z-20">
                 <div className="relative w-full h-full p-0 md:p-8">
                   {currentSlide.image && (
                     isVideo(currentSlide.image) ? (
-                      <video src={currentSlide.image} autoPlay muted loop playsInline className="w-full h-full object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.12)]" />
+                      <video src={currentSlide.image} autoPlay muted loop playsInline className="w-full h-full object-cover md:object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.08)]" />
                     ) : (
-                      <Image src={currentSlide.image} alt={currentSlide.title} fill className="object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.12)]" priority sizes="(max-width: 768px) 100vw, 50vw" />
+                      <Image src={currentSlide.image} alt={currentSlide.title} fill className="object-cover md:object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.08)]" priority sizes="(max-width: 768px) 100vw, 50vw" />
                     )
                   )}
                 </div>
               </div>
+
             </div>
           </div>
         </motion.div>
@@ -111,9 +116,9 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
         </button>
       </div>
 
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 flex items-center gap-4">
+      <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
         {heroSlides.map((_, i) => (
-          <button key={i} onClick={() => setCurrent(i)} className={`h-1.5 rounded-full transition-all duration-700 ${i === current ? "w-16 bg-[#A6D608]" : "w-4 bg-black/10 hover:bg-black/20"}`} />
+          <button key={i} onClick={() => setCurrent(i)} className={`h-1 rounded-full transition-all duration-700 ${i === current ? "w-8 bg-[#A6D608]" : "w-2 bg-black/10 md:bg-white/40 hover:bg-black/20"}`} />
         ))}
       </div>
     </div>
