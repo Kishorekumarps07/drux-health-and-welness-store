@@ -16,6 +16,7 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [imageAspects, setImageAspects] = useState<Record<string, number>>({});
 
   useEffect(() => {
     setMounted(true);
@@ -46,6 +47,8 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
   }
 
   const currentSlide = heroSlides[current];
+  const activeAspect = imageAspects[currentSlide.id];
+  const isPortrait = activeAspect ? activeAspect < 1.2 : false;
 
   return (
     <div
@@ -60,11 +63,21 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
         <img
           src={currentSlide.image}
           alt=""
-          className="w-full h-auto opacity-0 pointer-events-none select-none block"
+          onLoad={(e) => {
+            const img = e.currentTarget;
+            const aspect = img.naturalWidth / img.naturalHeight;
+            setImageAspects(prev => ({ ...prev, [currentSlide.id]: aspect }));
+          }}
+          className={`w-full h-auto opacity-0 pointer-events-none select-none block ${isPortrait ? "md:hidden" : ""}`}
         />
       ) : (
         // Video fallback height (16:9 on mobile, 21:8 on desktop)
-        <div className="w-full aspect-[16/9] md:aspect-[21/8] opacity-0 pointer-events-none" />
+        <div className={`w-full aspect-[16/9] md:aspect-[21/8] opacity-0 pointer-events-none ${isPortrait ? "md:hidden" : ""}`} />
+      )}
+
+      {/* If it's portrait on desktop, render a dummy height spacer to hold a constrained small height */}
+      {isPortrait && (
+        <div className="hidden md:block w-full h-[450px] opacity-0 pointer-events-none" />
       )}
 
       {/* ── Slide Content ── */}
@@ -96,7 +109,16 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
                 isVideo(currentSlide.image) ? (
                   <video src={currentSlide.image} autoPlay muted loop playsInline className="w-full h-full object-cover" />
                 ) : (
-                  <img src={currentSlide.image} alt={currentSlide.title} className="w-full h-full object-cover" />
+                  <img 
+                    src={currentSlide.image} 
+                    alt={currentSlide.title || "Hero banner"} 
+                    onLoad={(e) => {
+                      const img = e.currentTarget;
+                      const aspect = img.naturalWidth / img.naturalHeight;
+                      setImageAspects(prev => ({ ...prev, [currentSlide.id]: aspect }));
+                    }}
+                    className={`w-full h-full object-cover ${isPortrait ? "md:h-full md:w-auto md:mx-auto md:object-contain" : ""}`} 
+                  />
                 )
               )}
 
