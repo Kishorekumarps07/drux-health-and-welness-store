@@ -166,10 +166,10 @@ export interface VendorAnalytics {
 
 export interface HeroSlide {
   id: string;
-  title: string;
-  subtitle: string;
-  cta: string;
-  ctaLink: string;
+  title?: string;
+  subtitle?: string;
+  cta?: string;
+  ctaLink?: string;
   image: string;
   bgColor: string;
   badge?: string;

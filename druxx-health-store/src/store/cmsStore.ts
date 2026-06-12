@@ -3,18 +3,18 @@ import api from "@/lib/api";
 
 export interface HeroSlide {
   id: string;
-  title: string;
-  subtitle: string;
+  title?: string;
+  subtitle?: string;
   image: string;
   bgColor: string;
 }
 
 export interface AdvantageItem {
   id: string;
-  title: string;
-  desc: string;
-  image: string;
-  iconType: string;
+  title?: string;
+  desc?: string;
+  image?: string;
+  iconType?: string;
 }
 
 interface CMSState {

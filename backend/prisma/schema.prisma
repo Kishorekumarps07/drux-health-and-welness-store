@@ -493,7 +493,7 @@ model WebhookEvent {
 
 model HeroSlide {
   id        String   @id @default(uuid())
-  title     String
+  title     String?
   subtitle  String?
   image     String
   bgColor   String   @default("from-green-100 to-green-200") @map("bg_color")
@@ -507,7 +507,7 @@ model HeroSlide {
 
 model AdvantageItem {
   id          String   @id @default(uuid())
-  title       String
+  title       String?
   description String?
   image       String?
   iconType    String?  @map("icon_type")

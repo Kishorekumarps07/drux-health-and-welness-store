@@ -62,8 +62,13 @@ export default function AdminCMSPage() {
   }, [fetchCMSData]);
 
   const handleSave = async () => {
-    if (!formData.title || (!formData.image && !imageFile)) {
-      toast.error("Title and Image are required");
+    if (activeTab === "hero" && !formData.image && !imageFile) {
+      toast.error("Image is required for Hero Slide");
+      return;
+    }
+
+    if (activeTab === "advantage" && !formData.title && !formData.desc && !formData.image && !imageFile && !formData.iconType) {
+      toast.error("At least one field (Title, Description, Image, or Icon) is required");
       return;
     }
 
@@ -216,7 +221,7 @@ export default function AdminCMSPage() {
                   {(item.image && !brokenImages.has(item.id)) ? (
                     <img 
                       src={item.image} 
-                      alt={item.title} 
+                      alt={item.title || "CMS Item"} 
                       className="w-full h-full object-cover opacity-60" 
                       onError={() => handleImageError(item.id)}
                     />
@@ -225,8 +230,12 @@ export default function AdminCMSPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-white font-bold truncate">{item.title}</h4>
-                  <p className="text-[#9CA3AF] text-xs line-clamp-1 mt-1">{(item as any).subtitle || (item as any).desc}</p>
+                  <h4 className="text-white font-bold truncate">
+                    {item.title || <span className="italic text-gray-500">Untitled Item</span>}
+                  </h4>
+                  <p className="text-[#9CA3AF] text-xs line-clamp-1 mt-1">
+                    {(item as any).subtitle || (item as any).desc || <span className="italic text-gray-600">No description</span>}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 

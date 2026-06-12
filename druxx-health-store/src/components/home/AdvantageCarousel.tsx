@@ -79,15 +79,15 @@ export function AdvantageCarousel({ advantages }: AdvantageCarouselProps) {
                  {item.image ? (
                    <img 
                      src={item.image} 
-                     alt={item.title} 
+                     alt={item.title || "Advantage banner"} 
                      className="w-full h-auto md:h-full object-cover transition-transform duration-700 group-hover:scale-105 block" 
                    />
                  ) : (
                    <div className="absolute inset-0 bg-gray-900 flex items-center justify-center text-white/10 italic min-h-[300px]">No Image</div>
                  )}
                  <div className="sr-only">
-                    <h3>{item.title}</h3>
-                    <p>{item.desc}</p>
+                    {item.title && <h3>{item.title}</h3>}
+                    {item.desc && <p>{item.desc}</p>}
                  </div>
               </div>
  
@@ -96,11 +96,11 @@ export function AdvantageCarousel({ advantages }: AdvantageCarouselProps) {
                  {advantages.filter((_, idx) => idx !== current).slice(0, 2).map((other) => (
                    <div key={other.id} className="p-8 rounded-[2.5rem] bg-white/5 border border-white/5 flex items-center gap-6 group hover:bg-white/10 transition-all cursor-pointer" onClick={() => setCurrent(advantages.indexOf(other))}>
                       <div className="w-16 h-16 rounded-2xl overflow-hidden relative shrink-0">
-                         {other.image ? <Image src={other.image} alt={other.title} fill className="object-cover opacity-60 group-hover:opacity-100 transition-opacity" sizes="64px" /> : <div className="absolute inset-0 bg-gray-800" />}
+                         {other.image ? <Image src={other.image} alt={other.title || "Advantage preview"} fill className="object-cover opacity-60 group-hover:opacity-100 transition-opacity" sizes="64px" /> : <div className="absolute inset-0 bg-gray-800" />}
                       </div>
                       <div>
-                        <h4 className="text-white font-black uppercase text-sm tracking-tight mb-1">{other.title}</h4>
-                        <p className="text-gray-500 text-[11px] line-clamp-1">{other.desc}</p>
+                        {other.title && <h4 className="text-white font-black uppercase text-sm tracking-tight mb-1">{other.title}</h4>}
+                        {other.desc && <p className="text-gray-500 text-[11px] line-clamp-1">{other.desc}</p>}
                       </div>
                    </div>
                  ))}
