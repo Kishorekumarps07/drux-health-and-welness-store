@@ -100,15 +100,11 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
                 )
               )}
 
-              {/* Text Overlay (Bottom gradient wrapper) */}
+              {/* Accessibility/SEO Text (Visually hidden to prevent obscuring custom banner graphics) */}
               {(currentSlide.title || currentSlide.subtitle) && (
-                <div className="absolute bottom-0 inset-x-0 z-20 p-4 md:p-10 pt-16 md:pt-24 bg-gradient-to-t from-black/85 via-black/40 to-transparent text-white text-left">
-                  <h1 className="font-black leading-tight tracking-tight uppercase break-words text-base md:text-3xl lg:text-4xl max-w-2xl">
-                    {currentSlide.title}
-                  </h1>
-                  <p className="text-gray-200 mb-2 md:mb-0 leading-normal max-w-2xl font-medium tracking-wide text-[10px] md:text-base line-clamp-1 md:line-clamp-2 mt-1">
-                    {currentSlide.subtitle}
-                  </p>
+                <div className="sr-only">
+                  <h1>{currentSlide.title}</h1>
+                  <p>{currentSlide.subtitle}</p>
                 </div>
               )}
             </div>

@@ -85,11 +85,9 @@ export function AdvantageCarousel({ advantages }: AdvantageCarouselProps) {
                  ) : (
                    <div className="absolute inset-0 bg-gray-900 flex items-center justify-center text-white/10 italic min-h-[300px]">No Image</div>
                  )}
-                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
-                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent z-10" />
-                 <div className="absolute inset-0 p-6 md:p-16 flex flex-col justify-end z-20">
-                    <h3 className="text-2xl md:text-5xl font-black text-white mb-3 md:mb-4 uppercase tracking-tighter leading-none">{item.title}</h3>
-                    <p className="text-white/70 text-sm md:text-xl font-medium leading-relaxed max-w-xl line-clamp-3 md:line-clamp-none">{item.desc}</p>
+                 <div className="sr-only">
+                    <h3>{item.title}</h3>
+                    <p>{item.desc}</p>
                  </div>
               </div>
  
