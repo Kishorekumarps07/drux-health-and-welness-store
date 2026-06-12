@@ -58,7 +58,7 @@ export default async function HomePage() {
       
       <HomeAnimations>
         {/* Featured dynamic products */}
-        <div className="relative z-20 mx-auto max-w-7xl px-4 md:px-6 py-8 md:-mt-20 lg:-mt-28">
+        <div className="relative z-20 mx-auto max-w-7xl px-4 md:px-6 py-8">
           <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-gray-200/50 overflow-hidden border border-gray-100">
              <FeaturedProducts 
                featured={fRes.products}

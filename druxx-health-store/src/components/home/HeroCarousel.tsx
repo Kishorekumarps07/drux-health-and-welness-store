@@ -49,7 +49,7 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
 
   return (
     <div
-      className="relative w-full overflow-hidden rounded-none border-none shadow-none transition-all duration-500 ease-in-out max-h-[60vh] md:max-h-[calc(100vh-220px)]"
+      className="relative w-full overflow-hidden rounded-none border-none shadow-none transition-all duration-500 ease-in-out"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       id="hero-carousel"
@@ -122,8 +122,7 @@ export function HeroCarousel({ heroSlides }: HeroCarouselProps) {
         </button>
       </div>
 
-      {/* ── Bottom Gradient Fade (Amazon/Flipkart style to blend with content below) ── */}
-      <div className="absolute bottom-0 inset-x-0 h-16 md:h-32 bg-gradient-to-t from-white via-white/40 to-transparent z-20 pointer-events-none" />
+
 
       {/* ── Slide Indicators ── */}
       <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
