@@ -35,13 +35,32 @@ class VendorCouponsService {
   async createCoupon(userId, data) {
     const vendor = await this.getVendorByUserId(userId);
     const code = data.code.toUpperCase().trim();
-    const discountPercent = parseInt(data.discountPercent, 10);
+    const discountType = data.discountType || 'PERCENTAGE';
+    if (discountType !== 'PERCENTAGE' && discountType !== 'FIXED') {
+      throw new AppError('Discount type must be either PERCENTAGE or FIXED.', 400);
+    }
+
+    let discountValue = data.discountValue !== undefined ? parseInt(data.discountValue, 10) : undefined;
+    let discountPercent = data.discountPercent !== undefined ? parseInt(data.discountPercent, 10) : undefined;
+
+    if (discountValue === undefined && discountPercent !== undefined) {
+      discountValue = discountPercent;
+    }
 
     if (!code) {
       throw new AppError('Coupon code is required.', 400);
     }
-    if (isNaN(discountPercent) || discountPercent < 1 || discountPercent > 100) {
-      throw new AppError('Discount percentage must be between 1 and 100.', 400);
+    if (discountValue === undefined || isNaN(discountValue) || discountValue < 1) {
+      throw new AppError('Discount value must be at least 1.', 400);
+    }
+
+    if (discountType === 'PERCENTAGE') {
+      if (discountValue > 100) {
+        throw new AppError('Discount percentage must be between 1 and 100.', 400);
+      }
+      discountPercent = discountValue;
+    } else {
+      discountPercent = 0;
     }
 
     // Check code uniqueness globally
@@ -65,6 +84,8 @@ class VendorCouponsService {
       data: {
         code,
         discountPercent,
+        discountType,
+        discountValue,
         isActive: data.isActive !== undefined ? !!data.isActive : true,
         productId: data.productId || null,
         vendorId: vendor.id, // Enforce vendor scoping
@@ -104,12 +125,39 @@ class VendorCouponsService {
       }
     }
 
-    if (data.discountPercent !== undefined) {
-      const discountPercent = parseInt(data.discountPercent, 10);
-      if (isNaN(discountPercent) || discountPercent < 1 || discountPercent > 100) {
-        throw new AppError('Discount percentage must be between 1 and 100.', 400);
+    const discountType = data.discountType !== undefined ? data.discountType : coupon.discountType;
+    if (discountType !== 'PERCENTAGE' && discountType !== 'FIXED') {
+      throw new AppError('Discount type must be either PERCENTAGE or FIXED.', 400);
+    }
+
+    let discountValue = data.discountValue !== undefined ? parseInt(data.discountValue, 10) : undefined;
+    let discountPercent = data.discountPercent !== undefined ? parseInt(data.discountPercent, 10) : undefined;
+
+    if (data.discountType !== undefined || data.discountValue !== undefined || data.discountPercent !== undefined) {
+      const type = discountType;
+      let val = discountValue !== undefined ? discountValue : coupon.discountValue;
+
+      if (data.discountPercent !== undefined && data.discountValue === undefined) {
+        val = discountPercent;
       }
-      updateData.discountPercent = discountPercent;
+
+      if (isNaN(val) || val < 1) {
+        throw new AppError('Discount value must be at least 1.', 400);
+      }
+
+      let pct = 0;
+      if (type === 'PERCENTAGE') {
+        if (val > 100) {
+          throw new AppError('Discount percentage must be between 1 and 100.', 400);
+        }
+        pct = val;
+      } else {
+        pct = 0;
+      }
+
+      updateData.discountType = type;
+      updateData.discountValue = val;
+      updateData.discountPercent = pct;
     }
 
     if (data.isActive !== undefined) {

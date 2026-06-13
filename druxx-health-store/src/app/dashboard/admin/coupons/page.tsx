@@ -29,6 +29,8 @@ export default function AdminCouponsPage() {
   const [formData, setFormData] = useState<{ 
     code: string; 
     discountPercent: number; 
+    discountType: "PERCENTAGE" | "FIXED";
+    discountValue: number;
     isActive: boolean;
     applicabilityType: "ALL" | "PRODUCT" | "VENDOR";
     productId: string | null;
@@ -36,6 +38,8 @@ export default function AdminCouponsPage() {
   }>({ 
     code: "", 
     discountPercent: 10, 
+    discountType: "PERCENTAGE",
+    discountValue: 10,
     isActive: true,
     applicabilityType: "ALL",
     productId: null,
@@ -78,16 +82,23 @@ export default function AdminCouponsPage() {
   }, []);
 
   const handleSave = async () => {
-    if (!formData.code || !formData.discountPercent) {
-      toast.error("Code and Discount Percentage are required");
+    if (!formData.code || !formData.discountValue) {
+      toast.error("Code and Discount Value are required");
       return;
     }
 
-    const pct = Number(formData.discountPercent);
-    if (isNaN(pct) || pct < 1 || pct > 100) {
+    const val = Number(formData.discountValue);
+    if (isNaN(val) || val < 1) {
+      toast.error("Discount value must be at least 1");
+      return;
+    }
+
+    if (formData.discountType === "PERCENTAGE" && val > 100) {
       toast.error("Discount percentage must be between 1 and 100");
       return;
     }
+
+    const pct = formData.discountType === "PERCENTAGE" ? val : 0;
 
     const productId = formData.applicabilityType === "PRODUCT" ? formData.productId : null;
     const vendorId = formData.applicabilityType === "VENDOR" ? formData.vendorId : null;
@@ -107,6 +118,8 @@ export default function AdminCouponsPage() {
         await couponService.createCoupon({
           code: formData.code.toUpperCase().trim(),
           discountPercent: pct,
+          discountType: formData.discountType,
+          discountValue: val,
           isActive: formData.isActive,
           productId,
           vendorId
@@ -116,6 +129,8 @@ export default function AdminCouponsPage() {
         await couponService.updateCoupon(editingId!, {
           code: formData.code.toUpperCase().trim(),
           discountPercent: pct,
+          discountType: formData.discountType,
+          discountValue: val,
           isActive: formData.isActive,
           productId,
           vendorId
@@ -164,6 +179,8 @@ export default function AdminCouponsPage() {
             setFormData({ 
               code: "", 
               discountPercent: 10, 
+              discountType: "PERCENTAGE",
+              discountValue: 10,
               isActive: true,
               applicabilityType: "ALL",
               productId: null,
@@ -217,7 +234,9 @@ export default function AdminCouponsPage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-3 mt-1">
-                    <p className="text-xs font-bold text-[#10B981]">{c.discountPercent}% Discount</p>
+                    <p className="text-xs font-bold text-[#10B981]">
+                      {c.discountType === "FIXED" ? `₹${c.discountValue || 0} Flat Discount` : `${c.discountPercent}% Discount`}
+                    </p>
                     <span className="w-1 h-1 rounded-full bg-gray-700" />
                     <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
                       Added {new Date(c.createdAt).toLocaleDateString()}
@@ -246,6 +265,8 @@ export default function AdminCouponsPage() {
                       setFormData({ 
                         code: c.code, 
                         discountPercent: c.discountPercent, 
+                        discountType: c.discountType || "PERCENTAGE",
+                        discountValue: c.discountValue || c.discountPercent || 0,
                         isActive: c.isActive,
                         applicabilityType: c.productId ? "PRODUCT" : c.vendorId ? "VENDOR" : "ALL",
                         productId: c.productId || null,
@@ -310,20 +331,57 @@ export default function AdminCouponsPage() {
                         />
                      </div>
 
-                     <div className="space-y-2">
+                      <div className="space-y-2">
                         <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest flex items-center gap-2 px-1">
-                          Discount Percentage
+                          Discount Type
                         </label>
-                        <input 
-                          type="number" 
-                          value={formData.discountPercent} 
-                          placeholder="15"
-                          min="1"
-                          max="100"
-                          onChange={(e) => setFormData({...formData, discountPercent: Number(e.target.value)})}
-                          className="w-full bg-[#0B0F14] border border-[#1F2937] rounded-xl px-4 py-3.5 text-white text-sm focus:border-[#10B981] outline-none transition-all placeholder:text-[#374151]"
-                        />
-                     </div>
+                        <div className="grid grid-cols-2 gap-2 bg-[#0B0F14] p-1.5 rounded-xl border border-[#1F2937]">
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, discountType: "PERCENTAGE" })}
+                            className={cn(
+                              "py-2 px-3 rounded-lg text-xs font-bold transition-all",
+                              formData.discountType === "PERCENTAGE"
+                                ? "bg-[#10B981] text-white shadow"
+                                : "text-gray-400 hover:text-white"
+                            )}
+                          >
+                            Percentage (%)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, discountType: "FIXED" })}
+                            className={cn(
+                              "py-2 px-3 rounded-lg text-xs font-bold transition-all",
+                              formData.discountType === "FIXED"
+                                ? "bg-[#10B981] text-white shadow"
+                                : "text-gray-400 hover:text-white"
+                            )}
+                          >
+                            Flat Rupees (₹)
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest flex items-center gap-2 px-1">
+                          {formData.discountType === "PERCENTAGE" ? "Discount Percentage" : "Discount Amount (₹)"}
+                        </label>
+                        <div className="relative">
+                          <input 
+                            type="number" 
+                            value={formData.discountValue} 
+                            placeholder={formData.discountType === "PERCENTAGE" ? "15" : "150"}
+                            min="1"
+                            max={formData.discountType === "PERCENTAGE" ? 100 : undefined}
+                            onChange={(e) => setFormData({...formData, discountValue: Number(e.target.value)})}
+                            className="w-full bg-[#0B0F14] border border-[#1F2937] rounded-xl pl-4 pr-10 py-3.5 text-white text-sm focus:border-[#10B981] outline-none transition-all placeholder:text-[#374151]"
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500">
+                            {formData.discountType === "PERCENTAGE" ? "%" : "₹"}
+                          </span>
+                        </div>
+                      </div>
 
                      <div className="space-y-2">
                         <label className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest flex items-center gap-2 px-1">

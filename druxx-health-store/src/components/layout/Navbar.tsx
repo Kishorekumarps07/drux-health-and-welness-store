@@ -342,7 +342,7 @@ export function Navbar() {
                 <div className="relative group">
                   <div className="bg-orange-50 border border-orange-100 hover:bg-orange-100/80 transition-all text-[#FF7A00] text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1.5 cursor-pointer shadow-sm shadow-orange-500/5 select-none">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#FF7A00] animate-ping" />
-                    <span>Use Code: <strong className="underline tracking-wider">{activeCoupons[0].code}</strong> (Save {activeCoupons[0].discountPercent}%)</span>
+                    <span>Use Code: <strong className="underline tracking-wider">{activeCoupons[0].code}</strong> ({activeCoupons[0].discountType === "FIXED" ? `Save ₹${activeCoupons[0].discountValue}` : `Save ${activeCoupons[0].discountPercent}%`})</span>
                   </div>
                   
                   <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-gray-100 rounded-2xl shadow-xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
@@ -358,7 +358,9 @@ export function Navbar() {
                           className="flex items-center justify-between p-2 rounded-xl bg-gray-50/50 hover:bg-[#A6D608]/5 border border-transparent hover:border-[#A6D608]/20 transition-all cursor-pointer group/item"
                         >
                           <span className="text-[10px] font-black text-gray-800 tracking-wider font-mono">{coupon.code}</span>
-                          <span className="text-[10px] font-black text-[#A6D608]">-{coupon.discountPercent}%</span>
+                          <span className="text-[10px] font-black text-[#A6D608]">
+                            {coupon.discountType === "FIXED" ? `-₹${coupon.discountValue}` : `-${coupon.discountPercent}%`}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -424,7 +426,7 @@ export function Navbar() {
                         <span className="text-[9px] font-bold text-gray-400 mt-0.5">Click to copy</span>
                       </div>
                       <div className="bg-orange-50 text-[#FF7A00] font-black text-xs px-2.5 py-1 rounded-lg">
-                        -{coupon.discountPercent}%
+                        {coupon.discountType === "FIXED" ? `-₹${coupon.discountValue}` : `-${coupon.discountPercent}%`}
                       </div>
                     </div>
                   ))}

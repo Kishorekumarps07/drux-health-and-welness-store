@@ -35,7 +35,11 @@ class PaymentsService {
             .filter(i => i.vendorId === coupon.vendorId)
             .reduce((acc, i) => acc + parseFloat(i.price) * i.quantity, 0);
         }
-        discount = Math.round((applicableSubtotal * coupon.discountPercent) / 100);
+        if (coupon.discountType === 'FIXED') {
+          discount = Math.min(applicableSubtotal, coupon.discountValue);
+        } else {
+          discount = Math.round((applicableSubtotal * coupon.discountPercent) / 100);
+        }
       } catch (err) {
         throw new AppError('Invalid or expired coupon code.', 400);
       }
@@ -191,7 +195,11 @@ class PaymentsService {
               .filter(i => i.vendorId === coupon.vendorId)
               .reduce((acc, i) => acc + parseFloat(i.price) * i.quantity, 0);
           }
-          discount = Math.round((applicableSubtotal * coupon.discountPercent) / 100);
+          if (coupon.discountType === 'FIXED') {
+            discount = Math.min(applicableSubtotal, coupon.discountValue);
+          } else {
+            discount = Math.round((applicableSubtotal * coupon.discountPercent) / 100);
+          }
         } catch (err) {
           throw new AppError('Invalid or expired coupon code.', 400);
         }

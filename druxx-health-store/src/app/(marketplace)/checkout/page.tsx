@@ -50,6 +50,7 @@ export default function CheckoutPage() {
     couponCode,
     couponDiscount, 
     couponDiscountAmount,
+    couponDetails,
     applyCoupon,
     removeCoupon,
     clearCart, 
@@ -777,7 +778,7 @@ export default function CheckoutPage() {
                   <div className="flex items-center gap-2">
                     <Tag size={14} className="text-green-600" />
                     <span className="text-sm font-bold text-green-700">
-                      {couponCode} — {couponDiscount}% OFF
+                      {couponCode} — {couponDetails?.discountType === "FIXED" ? `₹${couponDetails.discountValue} OFF` : `${couponDiscount}% OFF`}
                     </span>
                   </div>
                   <button
@@ -836,7 +837,9 @@ export default function CheckoutPage() {
                             className="flex items-center justify-between p-1.5 border border-dashed border-gray-200 hover:border-[#A6D608] hover:bg-[#A6D608]/5 rounded-sm cursor-pointer transition-colors"
                           >
                             <span className="font-mono text-xs font-bold text-gray-800 bg-gray-50 px-1 py-0.5 rounded border border-gray-100">{coupon.code}</span>
-                            <span className="text-[11px] font-bold text-green-600">{coupon.discountPercent}% OFF</span>
+                            <span className="text-[11px] font-bold text-green-600">
+                              {coupon.discountType === "FIXED" ? `₹${coupon.discountValue} OFF` : `${coupon.discountPercent}% OFF`}
+                            </span>
                           </div>
                         ))}
                       </div>

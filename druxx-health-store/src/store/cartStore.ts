@@ -283,6 +283,10 @@ export const useCartStore = create<CartState>()(
           0
         );
 
+        if (coupon.discountType === 'FIXED') {
+          return Math.min(applicableSubtotal, coupon.discountValue || 0);
+        }
+
         return Math.round((applicableSubtotal * coupon.discountPercent) / 100);
       },
 

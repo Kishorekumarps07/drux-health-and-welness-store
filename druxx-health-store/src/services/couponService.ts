@@ -4,6 +4,8 @@ export interface Coupon {
   id: string;
   code: string;
   discountPercent: number;
+  discountType?: "PERCENTAGE" | "FIXED";
+  discountValue?: number;
   isActive: boolean;
   productId?: string | null;
   vendorId?: string | null;
@@ -36,6 +38,8 @@ export const couponService = {
   async createCoupon(data: { 
     code: string; 
     discountPercent: number; 
+    discountType?: "PERCENTAGE" | "FIXED";
+    discountValue?: number;
     isActive?: boolean;
     productId?: string | null;
     vendorId?: string | null;
@@ -52,6 +56,8 @@ export const couponService = {
     updates: Partial<{ 
       code: string; 
       discountPercent: number; 
+      discountType: "PERCENTAGE" | "FIXED";
+      discountValue: number;
       isActive: boolean;
       productId: string | null;
       vendorId: string | null;

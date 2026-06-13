@@ -81,7 +81,11 @@ class OrdersService {
           .filter(i => i.product.vendorId === coupon.vendorId)
           .reduce((acc, i) => acc + parseFloat(i.product.price) * i.quantity, 0);
       }
-      discount = Math.round((applicableSubtotal * coupon.discountPercent) / 100);
+      if (coupon.discountType === 'FIXED') {
+        discount = Math.min(applicableSubtotal, coupon.discountValue);
+      } else {
+        discount = Math.round((applicableSubtotal * coupon.discountPercent) / 100);
+      }
     }
 
     const shippingCharge = subtotal >= 499 ? 0 : 49;
