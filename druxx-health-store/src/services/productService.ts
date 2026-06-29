@@ -169,4 +169,23 @@ export const productService = {
       return [];
     }
   },
+
+  async getPersonalizedProducts(guestCategories?: string[]) {
+    try {
+      const params: any = {};
+      if (guestCategories && guestCategories.length > 0) {
+        params.categories = guestCategories.join(",");
+      }
+      const response = await api.get('/products/personalized', { params });
+      const products = response.data.products || [];
+      return {
+        products: products.map(mapBackendProduct),
+        total: response.data.total || products.length,
+        pages: response.data.pages || 1,
+      };
+    } catch (err: any) {
+      console.error("Personalized Products Fetch Error:", err);
+      return { products: [], total: 0, pages: 1 };
+    }
+  },
 };

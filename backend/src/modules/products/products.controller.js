@@ -84,4 +84,15 @@ const getBestSellers   = asyncHandler(async (req, res) => {
   res.json({ status: 'success', ...result });
 });
 
-module.exports = { list, getById, getBySlug, create, update, remove, getVendorProducts, getBestSellers };
+const getPersonalized   = asyncHandler(async (req, res) => {
+  const limit = parseInt(req.query.limit) || 16;
+  const userId = req.user ? req.user.id : null;
+  let guestCategories = [];
+  if (req.query.categories) {
+    guestCategories = req.query.categories.split(',').map(s => s.trim()).filter(Boolean);
+  }
+  const result = await productsService.getPersonalizedProducts(userId, guestCategories, limit);
+  res.json({ status: 'success', ...result });
+});
+
+module.exports = { list, getById, getBySlug, create, update, remove, getVendorProducts, getBestSellers, getPersonalized };

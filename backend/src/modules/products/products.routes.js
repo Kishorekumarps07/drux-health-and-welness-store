@@ -1,7 +1,7 @@
 const { Router } = require('express');
-const { list, getById, getBySlug, create, update, remove, getVendorProducts, getBestSellers } = require('./products.controller');
+const { list, getById, getBySlug, create, update, remove, getVendorProducts, getBestSellers, getPersonalized } = require('./products.controller');
 const { productUpload } = require('../../middleware/upload');
-const { protect, restrictTo } = require('../../middleware/auth');
+const { protect, restrictTo, optionalProtect } = require('../../middleware/auth');
 const validate = require('../../middleware/validate');
 const { cacheResponse } = require('../../middleware/cache');
 const { productSchema, updateProductSchema } = require('./products.validation');
@@ -11,6 +11,7 @@ const router = Router();
 // Public (Cache disabled temporarily for real-time testing)
 router.get('/',                list);
 router.get('/best-sellers',    cacheResponse(60), getBestSellers);   // Real sales-ranked best sellers
+router.get('/personalized',    optionalProtect, getPersonalized);     // Personalized recommendations
 router.get('/slug/:slug',      cacheResponse(300), getBySlug);
 router.get('/:id',             cacheResponse(300), getById);
 

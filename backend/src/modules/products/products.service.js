@@ -274,6 +274,119 @@ class ProductsService {
 
     return { products: sorted, total: sorted.length, pages: 1 };
   }
+
+  async getPersonalizedProducts(userId, guestCategories, limit = 16) {
+    let personalizedProducts = [];
+    const purchasedProductIds = new Set();
+
+    if (userId) {
+      // 1. Fetch user's orders to identify purchased categories
+      const orders = await prisma.order.findMany({
+        where: { userId },
+        include: { items: { include: { product: true } } }
+      });
+      const orderedCategoryIds = [];
+      orders.forEach(o => {
+        o.items.forEach(i => {
+          if (i.product) {
+            purchasedProductIds.add(i.product.id);
+            if (i.product.categoryId) {
+              orderedCategoryIds.push(i.product.categoryId);
+            }
+          }
+        });
+      });
+
+      // 2. Fetch user's wishlist categories
+      const wishlist = await prisma.wishlistItem.findMany({
+        where: { userId },
+        include: { product: true }
+      });
+      const wishlistedCategoryIds = [];
+      wishlist.forEach(w => {
+        if (w.product && w.product.categoryId) {
+          wishlistedCategoryIds.push(w.product.categoryId);
+        }
+      });
+
+      // 3. Fetch user's active cart categories
+      const cart = await prisma.cart.findFirst({
+        where: { userId },
+        include: { items: { include: { product: true } } }
+      });
+      const cartCategoryIds = [];
+      if (cart) {
+        cart.items.forEach(cItem => {
+          if (cItem.product && cItem.product.categoryId) {
+            cartCategoryIds.push(cItem.product.categoryId);
+          }
+        });
+      }
+
+      // 4. Calculate category preference weights (Ordered: 3, Cart: 2, Wishlist: 1)
+      const weights = {};
+      orderedCategoryIds.forEach(cid => { weights[cid] = (weights[cid] || 0) + 3; });
+      cartCategoryIds.forEach(cid => { weights[cid] = (weights[cid] || 0) + 2; });
+      wishlistedCategoryIds.forEach(cid => { weights[cid] = (weights[cid] || 0) + 1; });
+
+      const sortedCategoryIds = Object.keys(weights).sort((a, b) => weights[b] - weights[a]);
+
+      if (sortedCategoryIds.length > 0) {
+        personalizedProducts = await prisma.product.findMany({
+          where: {
+            categoryId: { in: sortedCategoryIds },
+            status: 'ACTIVE',
+            vendor: { approvalStatus: { in: ['APPROVED', 'ACTIVE'] } },
+            id: { notIn: Array.from(purchasedProductIds) } // Exclude already purchased products for variety
+          },
+          include: PRODUCT_INCLUDE,
+          take: limit
+        });
+
+        // Sort by computed category weight descending
+        personalizedProducts.sort((a, b) => {
+          const wA = weights[a.categoryId] || 0;
+          const wB = weights[b.categoryId] || 0;
+          return wB - wA;
+        });
+      }
+    } else if (guestCategories && guestCategories.length > 0) {
+      // Guest recommendations based on viewed categories passed from frontend
+      personalizedProducts = await prisma.product.findMany({
+        where: {
+          category: {
+            slug: { in: guestCategories }
+          },
+          status: 'ACTIVE',
+          vendor: { approvalStatus: { in: ['APPROVED', 'ACTIVE'] } }
+        },
+        include: PRODUCT_INCLUDE,
+        take: limit
+      });
+    }
+
+    // 5. Fallback/padding to ensure catalog is never empty
+    const currentCount = personalizedProducts.length;
+    if (currentCount < limit) {
+      const existingIds = new Set(personalizedProducts.map(p => p.id));
+      const padLimit = limit - currentCount;
+
+      const fallbackProducts = await prisma.product.findMany({
+        where: {
+          id: { notIn: [...Array.from(existingIds), ...Array.from(purchasedProductIds)] },
+          status: 'ACTIVE',
+          vendor: { approvalStatus: { in: ['APPROVED', 'ACTIVE'] } }
+        },
+        include: PRODUCT_INCLUDE,
+        orderBy: [{ isBestSeller: 'desc' }, { averageRating: 'desc' }],
+        take: padLimit
+      });
+
+      personalizedProducts = [...personalizedProducts, ...fallbackProducts];
+    }
+
+    return { products: personalizedProducts.slice(0, limit), total: Math.min(limit, personalizedProducts.length), pages: 1 };
+  }
 }
 
 module.exports = new ProductsService();

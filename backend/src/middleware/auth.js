@@ -265,4 +265,46 @@ const restrictTo = (...roles) => (req, res, next) => {
   next();
 };
 
-module.exports = { protect, restrictTo, clearAuthUserCache };
+const optionalProtect = asyncHandler(async (req, res, next) => {
+  let token;
+  if (req.headers.authorization?.startsWith('Bearer ')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) {
+    return next();
+  }
+
+  let userPayload = null;
+  let isSupabaseToken = false;
+
+  try {
+    userPayload = jwt.verify(token, jwtConfig.secret);
+  } catch (err) {
+    userPayload = null;
+  }
+
+  if (!userPayload) {
+    try {
+      userPayload = await verifySupabaseTokenCached(token);
+      isSupabaseToken = true;
+    } catch (err) {
+      userPayload = null;
+    }
+  }
+
+  if (userPayload) {
+    try {
+      const userId = isSupabaseToken ? userPayload.id : (userPayload.id || userPayload.sub);
+      const email = isSupabaseToken ? userPayload.email : userPayload.email;
+      const user = await resolveUserCached(token, userId, email, isSupabaseToken, userPayload);
+      req.user = user;
+    } catch (err) {
+      // Ignored
+    }
+  }
+
+  next();
+});
+
+module.exports = { protect, restrictTo, clearAuthUserCache, optionalProtect };

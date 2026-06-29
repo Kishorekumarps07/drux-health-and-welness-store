@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -87,6 +87,20 @@ export function ProductView({ product, related, reviews }: ProductViewProps) {
   const [addedToCart, setAddedToCart] = useState(false);
   // Local copy of reviews so new submissions appear instantly without a full page reload
   const [localReviews, setLocalReviews] = useState<any[]>(reviews);
+
+  // Log viewed category to localStorage for guest personalization
+  useEffect(() => {
+    if (typeof window !== "undefined" && product.categorySlug) {
+      try {
+        const stored = localStorage.getItem("druxx_viewed_categories");
+        let list: string[] = stored ? JSON.parse(stored) : [];
+        list = [product.categorySlug, ...list.filter(s => s !== product.categorySlug)];
+        localStorage.setItem("druxx_viewed_categories", JSON.stringify(list.slice(0, 4)));
+      } catch (err) {
+        console.error("Failed to log viewed category", err);
+      }
+    }
+  }, [product.categorySlug]);
 
   const handleReviewSuccess = (newReview: any) => {
     setLocalReviews((prev) => [newReview, ...prev]);

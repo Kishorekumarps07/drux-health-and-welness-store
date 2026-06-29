@@ -5,8 +5,8 @@ import { ArrowRight } from "lucide-react";
 import { ProductCard } from "@/components/products/ProductCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Product } from "@/types";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { productService } from "@/services/productService";
 
 interface ProductGridProps {
   products: Product[];
@@ -24,11 +24,17 @@ function ProductGrid({ products }: ProductGridProps) {
 
   return (
     <div className="flex flex-col items-center w-full">
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6 w-full">
-        {visibleProducts.map((product) => (
-          <ProductCard key={product.id} product={product as any} />
-        ))}
-      </div>
+      {visibleProducts.length === 0 ? (
+        <div className="text-center py-12 text-gray-500 text-sm font-semibold">
+          No products found.
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6 w-full">
+          {visibleProducts.map((product) => (
+            <ProductCard key={product.id} product={product as any} />
+          ))}
+        </div>
+      )}
       {hasMore && (
         <button 
           onClick={handleLoadMore}
@@ -48,6 +54,30 @@ interface FeaturedProductsProps {
 }
 
 export function FeaturedProducts({ featured, bestSellers, newArrivals }: FeaturedProductsProps) {
+  const [personalized, setPersonalized] = useState<Product[]>([]);
+  const [loadingPersonalized, setLoadingPersonalized] = useState(true);
+
+  useEffect(() => {
+    async function loadPersonalized() {
+      try {
+        let guestCats: string[] = [];
+        if (typeof window !== "undefined") {
+          const stored = localStorage.getItem("druxx_viewed_categories");
+          if (stored) {
+            guestCats = JSON.parse(stored);
+          }
+        }
+        const res = await productService.getPersonalizedProducts(guestCats);
+        setPersonalized(res.products || []);
+      } catch (err) {
+        console.error("Failed to load personalized recommendations", err);
+      } finally {
+        setLoadingPersonalized(false);
+      }
+    }
+    loadPersonalized();
+  }, []);
+
   return (
     <section className="py-10 sm:py-12 px-1 sm:px-10">
       <div className="w-full">
@@ -89,19 +119,36 @@ export function FeaturedProducts({ featured, bestSellers, newArrivals }: Feature
               >
                 ✨ New Arrivals
               </TabsTrigger>
+              <TabsTrigger
+                value="personalized"
+                className="rounded-xl px-6 sm:px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-[10px] sm:text-[12px] uppercase tracking-widest whitespace-nowrap"
+              >
+                ✨ For You
+              </TabsTrigger>
             </TabsList>
           </div>
 
           <TabsContent value="featured" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-             <ProductGrid products={featured} />
-           </TabsContent>
-           <TabsContent value="bestsellers" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-             <ProductGrid products={bestSellers} />
-           </TabsContent>
-           <TabsContent value="new" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-             <ProductGrid products={newArrivals} />
-           </TabsContent>
-         </Tabs>
+            <ProductGrid products={featured} />
+          </TabsContent>
+          <TabsContent value="bestsellers" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <ProductGrid products={bestSellers} />
+          </TabsContent>
+          <TabsContent value="new" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <ProductGrid products={newArrivals} />
+          </TabsContent>
+          <TabsContent value="personalized" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {loadingPersonalized ? (
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6 w-full animate-pulse">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="bg-gray-100 rounded-3xl h-80 w-full" />
+                ))}
+              </div>
+            ) : (
+              <ProductGrid products={personalized} />
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </section>
   );
