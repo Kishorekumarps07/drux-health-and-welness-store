@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Lexend } from "next/font/google";
 import "./globals.css";
 import { SessionManager } from "@/components/auth/SessionManager";
+import { AuthHashHandler } from "@/components/auth/AuthHashHandler";
 import { Toaster } from "sonner";
 import { WelcomeScreen } from "@/components/layout/WelcomeScreen";
 
@@ -52,6 +53,7 @@ export default function RootLayout({
           <ScrollToTop />
           <main className="flex-1">{children}</main>
           <SessionManager />
+          <AuthHashHandler />
           <Toaster position="top-center" richColors />
         </Suspense>
       </body>

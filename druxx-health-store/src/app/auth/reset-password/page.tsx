@@ -7,70 +7,65 @@ import { toast } from "sonner";
 import { Loader2, KeyRound, CheckCircle, ShieldAlert, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { userService } from "@/services/userService";
-import api from "@/lib/api";
+import Link from "next/link";
+
+type PageState = "loading" | "invalid" | "form" | "success";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const [pageState, setPageState] = useState<PageState>("loading");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
-  const [sessionValid, setSessionValid] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [resolvedRole, setResolvedRole] = useState<string>("CUSTOMER");
+  const [redirectTo, setRedirectTo] = useState("/login");
 
   useEffect(() => {
-    async function checkSession() {
-      try {
-        // Retrieve the current session to ensure the recovery link flow was initiated properly.
-        // Supabase auto-exchanges the recovery hash for a session when this page loads.
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error || !session) {
-          setSessionValid(false);
-        } else {
-          setSessionValid(true);
-          
-          // Try to proactively fetch user profile to resolve which portal to redirect to later
-          try {
-            if (session.access_token) {
-              api.defaults.headers.common["Authorization"] = `Bearer ${session.access_token}`;
-            }
-            const profileData = await userService.getProfile();
-            if (profileData && profileData.user) {
-              const roles = profileData.user.roles ?? [];
-              if (roles.includes("ADMIN")) {
-                setResolvedRole("ADMIN");
-              } else if (roles.includes("VENDOR")) {
-                setResolvedRole("VENDOR");
-              } else {
-                setResolvedRole("CUSTOMER");
-              }
-            }
-          } catch (profileErr) {
-            console.error("Failed to pre-resolve user role:", profileErr);
-          }
-        }
-      } catch (err) {
-        console.error("Reset password session check failed:", err);
-        setSessionValid(false);
-      } finally {
-        setCheckingSession(false);
-      }
-    }
+    // Supabase fires PASSWORD_RECOVERY when the user clicks the reset link.
+    // We MUST listen for this specific event — getSession() alone cannot
+    // distinguish a recovery session from a normal signed-in session.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === "PASSWORD_RECOVERY") {
+          // Recovery link is valid — show the new password form
+          const roles: string[] =
+            session?.user?.app_metadata?.roles ??
+            session?.user?.user_metadata?.roles ??
+            [];
 
-    checkSession();
+          if (roles.includes("ADMIN")) setRedirectTo("/admin/login");
+          else if (roles.includes("VENDOR")) setRedirectTo("/vendor/login");
+          else setRedirectTo("/login");
+
+          setPageState("form");
+        }
+        // Note: SIGNED_IN during recovery is blocked at authStore level.
+        // No need to sign out here — recovery flow is handled cleanly.
+      }
+    );
+
+    // Fallback: if no auth event fires within 4 seconds, the link is bad.
+    const timeout = setTimeout(() => {
+      setPageState((current) => {
+        if (current === "loading") return "invalid";
+        return current;
+      });
+    }, 4000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters long.");
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters.");
       return;
     }
-
     if (password !== confirmPassword) {
       toast.error("Passwords do not match.");
       return;
@@ -78,166 +73,180 @@ export default function ResetPasswordPage() {
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: password,
-      });
-
+      const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
 
-      // Sign the user out of the recovery session so they can perform a fresh log in
+      // Sign out the recovery session — user must do a fresh login
       await supabase.auth.signOut();
-
-      setSuccess(true);
-      toast.success("Password updated successfully.");
+      setPageState("success");
     } catch (err: any) {
-      toast.error(err.message || "Failed to update password.");
+      toast.error(err.message || "Failed to update password. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const getPortalRedirect = () => {
-    if (resolvedRole === "ADMIN") return "/admin/login";
-    if (resolvedRole === "VENDOR") return "/vendor/login";
-    return "/login";
-  };
-
-  const getPortalLabel = () => {
-    if (resolvedRole === "ADMIN") return "Admin Portal";
-    if (resolvedRole === "VENDOR") return "Merchant Portal";
-    return "Sign In";
-  };
-
-  if (checkingSession) {
+  /* ── Loading ── */
+  if (pageState === "loading") {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans">
-        <Loader2 className="w-10 h-10 text-[#A6D608] animate-spin mb-4" />
-        <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest">Validating recovery session...</p>
+      <div className="min-h-screen bg-[#FAFBF8] flex items-center justify-center font-sans">
+        <div className="text-center space-y-3">
+          <Loader2 className="w-8 h-8 text-[#A6D608] animate-spin mx-auto" />
+          <p className="text-sm text-zinc-500 font-medium">Verifying reset link…</p>
+        </div>
       </div>
     );
   }
 
-  if (!sessionValid) {
+  /* ── Invalid / Expired ── */
+  if (pageState === "invalid") {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans">
-        <div className="w-full max-w-md bg-white border border-gray-100 rounded-[2.5rem] p-10 shadow-2xl text-center space-y-6">
-          <div className="w-16 h-16 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center mx-auto">
-            <ShieldAlert size={32} />
+      <div className="min-h-screen bg-[#FAFBF8] flex items-center justify-center p-4 font-sans">
+        <div className="w-full max-w-sm bg-white border border-zinc-100 rounded-2xl shadow-sm p-8 text-center space-y-5">
+          <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto">
+            <ShieldAlert className="w-7 h-7 text-red-500" />
           </div>
-          <div className="space-y-2">
-            <h1 className="text-xl font-black text-gray-900 uppercase">Session Invalid</h1>
-            <p className="text-sm text-gray-500 leading-relaxed">
-              Your recovery link is invalid, expired, or has already been used. Please request a new password recovery link from your login portal.
+          <div className="space-y-1.5">
+            <h1 className="text-lg font-bold text-zinc-900">Link expired or invalid</h1>
+            <p className="text-sm text-zinc-500 leading-relaxed">
+              This reset link is no longer valid. Links expire after 1 hour or once used. Please request a new one.
             </p>
           </div>
-          <div className="pt-4 flex flex-col gap-3">
-            <Button onClick={() => router.push("/login")} className="h-12 w-full rounded-xl bg-gray-900 hover:bg-black font-black uppercase text-xs tracking-widest text-white">
-              Customer Portal
-            </Button>
-            <Button onClick={() => router.push("/vendor/login")} variant="outline" className="h-12 w-full rounded-xl border-gray-200 hover:bg-gray-50 font-black uppercase text-xs tracking-widest text-gray-700">
-              Merchant Portal
-            </Button>
+          <div className="space-y-2 pt-1">
+            <Link
+              href="/vendor/forgot-password"
+              className="block w-full h-11 rounded-xl bg-zinc-900 hover:bg-black text-white text-sm font-semibold transition-colors flex items-center justify-center"
+            >
+              Request a new link
+            </Link>
+            <Link
+              href="/vendor/login"
+              className="block w-full h-11 rounded-xl border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-sm font-semibold transition-colors flex items-center justify-center"
+            >
+              Back to Login
+            </Link>
           </div>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-tr from-emerald-50/20 via-white to-lime-50/20 flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
-      {/* Decorative Circles */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
-        <div className="absolute -top-[10%] -left-[10%] w-[45%] h-[45%] rounded-full bg-[#A6D608]/5 blur-3xl" />
-        <div className="absolute -bottom-[10%] -right-[10%] w-[45%] h-[45%] rounded-full bg-[#2CA7A0]/5 blur-3xl" />
-      </div>
-
-      <div className="w-full max-w-[460px] bg-white border border-gray-100 rounded-[2.5rem] p-10 shadow-[0_24px_80px_rgba(0,0,0,0.03)]">
-        {success ? (
-          <div className="text-center py-6 space-y-6">
-            <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mx-auto">
-              <CheckCircle size={32} />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-black text-gray-900 uppercase">Key Set Successfully</h2>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                Your new password has been established. You can now securely log in to your portal using your new credentials.
-              </p>
-            </div>
-            <div className="pt-4">
-              <Button 
-                onClick={() => router.push(getPortalRedirect())} 
-                className="h-12 px-8 rounded-xl bg-gray-900 hover:bg-black font-black uppercase text-xs tracking-widest text-white"
-              >
-                Go to {getPortalLabel()}
-              </Button>
-            </div>
+  /* ── Success ── */
+  if (pageState === "success") {
+    return (
+      <div className="min-h-screen bg-[#FAFBF8] flex items-center justify-center p-4 font-sans">
+        <div className="w-full max-w-sm bg-white border border-zinc-100 rounded-2xl shadow-sm p-8 text-center space-y-5">
+          <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto">
+            <CheckCircle className="w-7 h-7 text-emerald-500" />
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="text-center mb-6">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#2CA7A0] bg-[#2CA7A0]/10 px-4 py-2 rounded-full mb-3 inline-block">
-                Secure Session Active
-              </span>
-              <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tight">
-                Update Password
-              </h1>
-              <p className="text-gray-500 text-sm font-medium mt-1">
-                Establish your new authentication password credentials
-              </p>
+          <div className="space-y-1.5">
+            <h1 className="text-lg font-bold text-zinc-900">Password updated!</h1>
+            <p className="text-sm text-zinc-500 leading-relaxed">
+              Your password has been changed. Sign in with your new credentials.
+            </p>
+          </div>
+          <Button
+            onClick={() => router.push(redirectTo)}
+            className="w-full h-11 rounded-xl bg-zinc-900 hover:bg-black text-white text-sm font-semibold transition-colors"
+          >
+            Go to Login
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── New Password Form ── */
+  return (
+    <div className="min-h-screen bg-[#FAFBF8] flex items-center justify-center p-4 font-sans">
+      <div className="w-full max-w-md">
+
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center gap-2 text-zinc-900 hover:opacity-75 transition-opacity">
+            <span className="text-2xl font-black tracking-tight">
+              drux<span className="text-[#A6D608]">.</span>
+            </span>
+          </Link>
+        </div>
+
+        <div className="bg-white border border-zinc-100 rounded-2xl shadow-sm p-8">
+          <div className="mb-6 space-y-1">
+            <h1 className="text-xl font-bold text-zinc-900">Set a new password</h1>
+            <p className="text-sm text-zinc-500">
+              Choose a strong password — at least 8 characters.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* New Password */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-500" htmlFor="password">
+                New Password
+              </label>
+              <div className="relative">
+                <KeyRound size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Min. 8 characters"
+                  required
+                  autoFocus
+                  className="pl-10 pr-10 h-11 rounded-xl border-zinc-200 bg-zinc-50 focus:bg-white text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-1">
-                  New Password
-                </label>
-                <div className="relative">
-                  <KeyRound size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
-                  <Input
-                    required
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="pl-11 pr-12 h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white text-sm font-bold animate-all"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500"
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
+            {/* Confirm Password */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-zinc-500" htmlFor="confirmPassword">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <KeyRound size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+                <Input
+                  id="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter password"
+                  required
+                  className="pl-10 h-11 rounded-xl border-zinc-200 bg-zinc-50 focus:bg-white text-sm"
+                />
               </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-1">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <KeyRound size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
-                  <Input
-                    required
-                    type={showPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="pl-11 pr-12 h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white text-sm font-bold animate-all"
-                  />
-                </div>
-              </div>
+              {confirmPassword && (
+                <p className={`text-xs font-medium ${password === confirmPassword ? "text-emerald-500" : "text-red-400"}`}>
+                  {password === confirmPassword ? "✓ Passwords match" : "Passwords do not match"}
+                </p>
+              )}
             </div>
 
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-14 rounded-2xl bg-gray-900 text-white hover:bg-black font-black uppercase tracking-widest text-xs gap-2 transition-all"
+              className="w-full h-11 rounded-xl bg-zinc-900 hover:bg-black text-white text-sm font-semibold transition-colors mt-2"
             >
-              {loading ? <Loader2 className="animate-spin mr-2" /> : "Save New Password"}
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 size={15} className="animate-spin" />
+                  Updating…
+                </span>
+              ) : (
+                "Update Password"
+              )}
             </Button>
           </form>
-        )}
+        </div>
       </div>
     </div>
   );

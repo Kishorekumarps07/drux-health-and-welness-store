@@ -59,6 +59,9 @@ interface AuthState {
 
 // Guard so initialize() is truly idempotent across React StrictMode double-invocations
 let _initStarted = false;
+// Guard: skip SIGNED_IN processing when a PASSWORD_RECOVERY event is active
+let _isRecoveryFlow = false;
+
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -290,6 +293,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return;
       }
 
+      // PASSWORD_RECOVERY: user clicked a reset-password email link.
+      // Set a flag so the subsequent SIGNED_IN event doesn't silently
+      // log the user in. AuthHashHandler will redirect to /auth/reset-password.
+      if (event === "PASSWORD_RECOVERY") {
+        _isRecoveryFlow = true;
+        return;
+      }
+
       if (!session || !session.user) {
         // Only clear storage if this is a definitive SIGNED_OUT event
         // or if we don't have a token in localStorage to begin with.
@@ -309,6 +320,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        // Skip SIGNED_IN if this is part of the PASSWORD_RECOVERY flow.
+        // The user must set a new password first before being logged in.
+        if (event === "SIGNED_IN" && _isRecoveryFlow) {
+          return;
+        }
+
         const state = await _buildUserFromSession(session.user, session);
 
         // Pre-emptively check for role mismatch on login pages to prevent redirect races
